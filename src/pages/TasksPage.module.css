@@ -1113,6 +1113,7 @@
   animation: warningFlashAnim 1s infinite alternate;
 }
 
+
 @keyframes warningPulse {
   0%, 100% { border-color: rgba(239, 68, 68, 0.45); box-shadow: 0 0 10px rgba(239, 68, 68, 0.05); }
   50% { border-color: rgba(239, 68, 68, 0.75); box-shadow: 0 0 15px rgba(239, 68, 68, 0.15); }
@@ -1123,4 +1124,309 @@
   to { opacity: 1; transform: scale(1.1); }
 }
 
+/* ── Roadmap Edit Toolbar ──────────────────────────────────────────────────── */
+.roadmapEditBar {
+  display: flex;
+  gap: 0.55rem;
+  padding: 0.5rem 0 0.4rem;
+  flex-wrap: wrap;
+}
 
+.addItemBtn,
+.addWeekBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.18s ease;
+  background: transparent;
+}
+
+.addItemBtn {
+  color: #a78bfa;
+  border-color: rgba(167, 139, 250, 0.35);
+}
+
+.addItemBtn:hover {
+  background: rgba(167, 139, 250, 0.1);
+  border-color: rgba(167, 139, 250, 0.65);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.15);
+}
+
+.addWeekBtn {
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.addWeekBtn:hover {
+  background: rgba(52, 211, 153, 0.08);
+  border-color: rgba(52, 211, 153, 0.6);
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.12);
+}
+
+/* ── Custom Item Badges ────────────────────────────────────────────────────── */
+.customTag {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 5px;
+  padding: 0.15rem 0.45rem;
+  letter-spacing: 0.03em;
+}
+
+.deleteRoadmapBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 0.3rem;
+}
+
+.deleteRoadmapBtn:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* ── Modal Overlay ────────────────────────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeInOverlay 0.18s ease;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalCard {
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 1.8rem;
+  width: 100%;
+  max-width: 580px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(167, 139, 250, 0.06);
+  animation: slideUpModal 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUpModal {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.4rem;
+}
+
+.modalTitle {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.modalClose {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalClose:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modalField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.modalRow {
+  display: flex;
+  gap: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .modalRow { flex-direction: column; }
+}
+
+.modalLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.optionalTag {
+  font-weight: 400;
+  text-transform: none;
+  opacity: 0.6;
+  letter-spacing: 0;
+  font-size: 0.68rem;
+}
+
+.modalInput {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.83rem;
+  color: #fff;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modalInput::placeholder { color: rgba(255,255,255,0.25); }
+.modalInput:focus {
+  outline: none;
+  border-color: rgba(167, 139, 250, 0.5);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.08);
+}
+
+.modalSelect {
+  background: #1a1f2e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.83rem;
+  color: #fff;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modalSelect:focus {
+  outline: none;
+  border-color: rgba(167, 139, 250, 0.5);
+}
+
+.modalSelect option { background: #1a1f2e; color: #fff; }
+
+.modalActions {
+  display: flex;
+  gap: 0.7rem;
+  justify-content: flex-end;
+  padding-top: 0.4rem;
+}
+
+.modalCancelBtn {
+  padding: 0.55rem 1.1rem;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.modalCancelBtn:hover {
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+}
+
+.modalSubmitBtn {
+  padding: 0.55rem 1.3rem;
+  border-radius: 9px;
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  background: rgba(167, 139, 250, 0.15);
+  color: #a78bfa;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  letter-spacing: 0.03em;
+}
+
+.modalSubmitBtn:hover {
+  background: rgba(167, 139, 250, 0.28);
+  border-color: rgba(167, 139, 250, 0.7);
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.2);
+  color: #c4b5fd;
+}
+
+.modalError {
+  color: #f87171;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 7px;
+  padding: 0.45rem 0.8rem;
+  margin: 0;
+}
+
+/* ── Reference link icon in task cards ─────────────────────────────────────── */
+.refLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.7rem;
+  line-height: 1;
+  transition: all 0.15s ease;
+  margin-left: 0.3rem;
+}
+
+.refLink:hover {
+  background: rgba(167, 139, 250, 0.15);
+  border-color: rgba(167, 139, 250, 0.4);
+  color: #a78bfa;
+}

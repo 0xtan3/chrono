@@ -28,10 +28,11 @@ function ensureConfig() {
 
 export function getVerifyUrl() {
   const envUrl = import.meta.env.VITE_APP_URL;
-  if (envUrl && envUrl.includes('chrono.tenazity.com')) {
+  if (envUrl) {
     return `${envUrl.replace(/\/$/, '')}/verify`;
   }
-  return 'https://chrono.tenazity.com/verify';
+  // Fallback: local dev
+  return `${window.location.origin}/verify`;
 }
 
 /**

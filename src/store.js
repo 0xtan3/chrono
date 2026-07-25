@@ -569,7 +569,8 @@ export const useStore = create((set, get) => ({
       .map(item => ({
         id: 'task_roadmap_' + item.id + '_' + Date.now(),
         title: item.label,
-        description: `Source: ${item.src} | Week: ${item.week}${item.url ? ` | Link: ${item.url}` : ''}`,
+        description: '',
+        referenceUrl: item.url || item.ytUrl || '',
         category: item.cat,
         sessionsCompleted: 0,
         completed: false,
@@ -597,7 +598,8 @@ export const useStore = create((set, get) => ({
     const newTask = {
       id: 'task_roadmap_' + item.id + '_' + Date.now(),
       title: item.label,
-      description: `Source: ${item.src} | Week: ${item.week}${item.url ? ` | Link: ${item.url}` : ''}`,
+      description: '',
+      referenceUrl: item.url || item.ytUrl || '',
       category: item.cat,
       sessionsCompleted: 0,
       completed: false,
@@ -631,5 +633,75 @@ export const useStore = create((set, get) => ({
       ...s,
       customRoadmap: null
     });
+  },
+
+  // Add a new item to the active roadmap (creates custom roadmap from defaults if none yet)
+  addRoadmapItem(item) {
+    const s = get();
+    // Bootstrap from defaults if no custom roadmap yet
+    const base = s.customRoadmap || {
+      categories: { ...s.categories },
+      items: [],
+      weeks: [],
+    };
+    // Avoid collisions – import default items/weeks lazily
+    const updatedItems = [
+      ...(base.items || []),
+      {
+        id: 'custom_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        cat: item.cat,
+        label: item.label,
+        src: item.src || 'web',
+        url: item.url || '',
+        week: item.week,
+      }
+    ];
+    const customRoadmap = { ...base, items: updatedItems };
+    set({ customRoadmap });
+    persist({ ...s, customRoadmap });
+    s.syncCloudStats();
+  },
+
+  // Add a new week to the active roadmap
+  addRoadmapWeek(weekKey, weekLabel) {
+    const s = get();
+    const base = s.customRoadmap || {
+      categories: { ...s.categories },
+      items: [],
+      weeks: [],
+    };
+    // Prevent duplicate week keys
+    if ((base.weeks || []).some(w => w.key === weekKey)) return;
+    const updatedWeeks = [...(base.weeks || []), { key: weekKey, label: weekLabel }];
+    const customRoadmap = { ...base, weeks: updatedWeeks };
+    set({ customRoadmap });
+    persist({ ...s, customRoadmap });
+    s.syncCloudStats();
+  },
+
+  // Add a custom category to the active roadmap
+  addRoadmapCategory(key, label, color) {
+    const s = get();
+    const base = s.customRoadmap || {
+      categories: {},
+      items: [],
+      weeks: [],
+    };
+    const updatedCats = { ...(base.categories || {}), [key]: { label, color } };
+    const customRoadmap = { ...base, categories: updatedCats };
+    set({ customRoadmap });
+    persist({ ...s, customRoadmap });
+    s.syncCloudStats();
+  },
+
+  // Remove a roadmap item by id
+  deleteRoadmapItem(itemId) {
+    const s = get();
+    if (!s.customRoadmap) return;
+    const updatedItems = (s.customRoadmap.items || []).filter(i => i.id !== itemId);
+    const customRoadmap = { ...s.customRoadmap, items: updatedItems };
+    set({ customRoadmap });
+    persist({ ...s, customRoadmap });
+    s.syncCloudStats();
   },
 }));

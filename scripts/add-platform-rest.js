@@ -1,9 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
+// Read .env manually (never hardcode real values here)
 const envPath = path.resolve(process.cwd(), '.env');
 let apiKey = '';
-let projectId = '6a5f884b00007bf633ff';
+let projectId = '';
 let endpoint = 'https://fra.cloud.appwrite.io/v1';
 
 if (fs.existsSync(envPath)) {
@@ -13,6 +14,11 @@ if (fs.existsSync(envPath)) {
     if (line.startsWith('VITE_APPWRITE_PROJECT_ID=')) projectId = line.replace('VITE_APPWRITE_PROJECT_ID=', '').trim();
     if (line.startsWith('VITE_APPWRITE_ENDPOINT=')) endpoint = line.replace('VITE_APPWRITE_ENDPOINT=', '').trim();
   }
+}
+
+if (!projectId || !apiKey) {
+  console.error('❌ Missing VITE_APPWRITE_PROJECT_ID or APPWRITE_API_KEY in .env');
+  process.exit(1);
 }
 
 async function addWebPlatform() {
