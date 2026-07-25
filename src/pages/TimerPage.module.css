@@ -451,3 +451,152 @@
     align-items: center;
   }
 }
+
+.activeTaskBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(16, 20, 32, 0.65);
+  border: 1px solid hsla(var(--ah), var(--as), var(--al), 0.2);
+  border-radius: 12px;
+  padding: 0.5rem 1.2rem;
+  max-width: 320px;
+  margin-bottom: 0.4rem;
+  box-shadow: 0 0 15px hsla(var(--ah), var(--as), var(--al), 0.05);
+  animation: floatTask 4s ease-in-out infinite;
+}
+
+.activeTaskLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.activeTaskTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.activeTaskCounter {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.selectTaskPrompt {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  background: rgba(16, 20, 32, 0.35);
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.4rem;
+  transition: all 0.2s ease;
+  letter-spacing: -0.01em;
+}
+
+.selectTaskPrompt:hover {
+  border-color: var(--accent);
+  color: #fff;
+  background: rgba(16, 20, 32, 0.6);
+  box-shadow: 0 0 12px hsla(var(--ah), var(--as), var(--al), 0.08);
+}
+
+@keyframes floatTask {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.miniStreakWarning {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  font-size: 0.9rem;
+  animation: miniWarnBlink 1s infinite alternate;
+  margin-left: 0.4rem;
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6));
+}
+
+@keyframes miniWarnBlink {
+  from { opacity: 0.5; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1.15); }
+}
+
+.taskSelectorContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(16, 20, 32, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.8rem;
+  max-width: 480px;
+  width: 90%;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+.taskSelectorContainer:focus-within,
+.taskSelectorContainer:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 15px hsla(var(--ah), var(--as), var(--al), 0.12);
+}
+
+.selectorLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.taskDropdown {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  max-width: 250px;
+  text-overflow: ellipsis;
+  padding-right: 0.5rem;
+}
+
+.taskDropdown option {
+  background: #0d0f19;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.activeTaskPomoCount {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: var(--accent);
+  font-weight: 600;
+  white-space: nowrap;
+}
+

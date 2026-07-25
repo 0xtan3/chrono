@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero to Hero · 20+ LPA · DevSecOps Master Roadmap v6</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080f;--card:#0d0f1c;--s2:#12152a;--s3:#1a1e35;
+  --b0:rgba(255,255,255,.04);--b1:rgba(255,255,255,.09);--b2:rgba(255,255,255,.16);
+  --txt:#e8e9f3;--muted:#6b6d8a;--dim:#363855;
+  --v:#7c3aed;--vl:rgba(124,58,237,.12);--vb:rgba(124,58,237,.28);
+  --g:#059669;--gl:rgba(5,150,105,.1);--gb:rgba(5,150,105,.25);
+  --a:#d97706;--al:rgba(217,119,6,.1);--ab:rgba(217,119,6,.25);
+  --b:#0891b2;--bl:rgba(8,145,178,.1);--bb:rgba(8,145,178,.25);
+  --r:#dc2626;--rl:rgba(220,38,38,.1);--rb:rgba(220,38,38,.3);
+  --ud:#a435f0;--udl:rgba(164,53,240,.1);--udb:rgba(164,53,240,.3);
+  --ll:#0a66c2;--lll:rgba(10,102,194,.1);--llb:rgba(10,102,194,.3);
+  --yt:#ff0000;--ytl:rgba(255,0,0,.08);--ytb:rgba(255,0,0,.25);
+  --nc:#f97316;--ncl:rgba(249,115,22,.1);--ncb:rgba(249,115,22,.3);
+  --az:#0078d4;--azl:rgba(0,120,212,.1);--azb:rgba(0,120,212,.3);
+  --aws:#ff9900;--awsl:rgba(255,153,0,.1);--awsb:rgba(255,153,0,.3);
+  --fh:#f87171;--fm:#fbbf24;--fl:#6ee7b7;
+  --core-c:#34d399;--adv-c:#a78bfa;--exp-c:#f87171;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.page{max-width:1160px;margin:0 auto;padding:2.5rem 1.75rem 6rem}
+
+/* HERO */
+.hero{padding-bottom:1.75rem;border-bottom:1px solid var(--b0)}
+.eyebrow{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem}
+h1{font-family:'Fraunces',serif;font-size:clamp(2rem,5vw,3.4rem);font-weight:900;line-height:1.05;letter-spacing:-.03em;margin-bottom:.4rem}
+h1 em{font-style:italic;color:transparent;-webkit-text-stroke:1.5px rgba(124,58,237,.7)}
+.hero-sub{color:var(--muted);font-size:13.5px;max-width:580px;line-height:1.75;margin-bottom:1.1rem}
+.hero-grid{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;min-width:195px}
+.kpi{background:var(--card);border:1px solid var(--b1);border-radius:8px;padding:.55rem .75rem}
+.kpi-v{font-family:'Fraunces',serif;font-size:20px;font-weight:700;line-height:1}
+.kpi-l{font-family:'Fira Code',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+
+/* LEVEL SYSTEM */
+.lv{font-family:'Fira Code',monospace;font-size:9px;padding:2px 7px;border-radius:3px;border:1px solid;letter-spacing:.07em;display:inline-flex;align-items:center;gap:4px;flex-shrink:0}
+.lv-core{background:rgba(52,211,153,.1);color:var(--core-c);border-color:rgba(52,211,153,.3)}
+.lv-adv{background:rgba(167,139,250,.1);color:var(--adv-c);border-color:rgba(167,139,250,.3)}
+.lv-exp{background:rgba(248,113,113,.1);color:var(--exp-c);border-color:rgba(248,113,113,.3)}
+
+/* TIME INDICATOR */
+.ti{display:flex;align-items:center;gap:5px;font-family:'Fira Code',monospace;font-size:10px}
+.ti-dot{width:8px;height:8px;border-radius:50%}
+.ti-max{color:var(--fh)}.ti-max .ti-dot{background:var(--fh);box-shadow:0 0 6px var(--fh)}
+.ti-high{color:var(--fm)}.ti-high .ti-dot{background:var(--fm);box-shadow:0 0 6px var(--fm)}
+.ti-med{color:var(--fl)}.ti-med .ti-dot{background:var(--fl)}
+.time-bar{height:4px;border-radius:2px;margin-top:3px}
+.tb-max{background:linear-gradient(90deg,#f87171,#fb923c)}
+.tb-high{background:linear-gradient(90deg,#fbbf24,#86efac)}
+.tb-med{background:linear-gradient(90deg,#6ee7b7,#38bdf8)}
+
+/* TABS */
+.tabs-wrap{position:sticky;top:0;z-index:50;background:rgba(7,8,15,.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--b0);margin:0 -1.75rem;padding:0 1.75rem}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding:8px 0}
+.tabs::-webkit-scrollbar{display:none}
+.tab{font-family:'Fira Code',monospace;font-size:11px;padding:6px 13px;border-radius:5px;background:transparent;border:none;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;letter-spacing:.04em}
+.tab:hover{color:var(--txt);background:var(--b0)}
+.tab.active{background:var(--s2);color:var(--txt);border:1px solid var(--b1)}
+
+.section{display:none;padding-top:1.75rem}.section.active{display:block}
+
+/* BOXES */
+.outcome{background:linear-gradient(135deg,rgba(124,58,237,.07),rgba(8,145,178,.05));border:1px solid rgba(124,58,237,.18);border-radius:10px;padding:.85rem 1.1rem;margin-bottom:1.75rem;font-size:13px;line-height:1.7}
+.outcome strong{color:#a78bfa}
+.warn{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.5rem;font-size:13px;line-height:1.7}
+.warn strong{color:#fca5a5}
+.info{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.5rem;font-size:13px;line-height:1.7}
+.info strong{color:#7dd3fc}
+
+/* CERT CARDS */
+.cert-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin-bottom:1.75rem}
+.cert-card{background:var(--card);border:1px solid var(--b1);border-radius:12px;overflow:hidden;position:relative}
+.cert-card.priority{border-color:rgba(52,211,153,.3);box-shadow:0 0 20px rgba(52,211,153,.05)}
+.cert-card.secondary{border-color:rgba(167,139,250,.25)}
+.cert-card.optional{border-color:var(--b0);opacity:.9}
+.cert-head{padding:.8rem 1rem;border-bottom:1px solid var(--b0);display:flex;align-items:center;gap:10px}
+.cert-logo{font-size:22px;flex-shrink:0}
+.cert-name{font-family:'Fraunces',serif;font-size:14px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+.cert-code{font-family:'Fira Code',monospace;font-size:10px;color:var(--muted);margin-top:2px}
+.cert-body{padding:.85rem 1rem}
+.cert-price-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem}
+.cert-price{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--core-c)}
+.cert-price-note{font-family:'Fira Code',monospace;font-size:9.5px;color:var(--muted)}
+.cert-meta{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.65rem}
+.cm{font-family:'Fira Code',monospace;font-size:9.5px;padding:2px 8px;border-radius:3px;border:1px solid var(--b1);color:var(--muted)}
+.cert-why{font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:.65rem}
+.cert-hr-score{display:flex;align-items:center;gap:8px;margin-bottom:.6rem}
+.cert-hr-label{font-family:'Fira Code',monospace;font-size:9.5px;color:var(--muted);width:80px;flex-shrink:0}
+.hr-stars{display:flex;gap:2px}
+.star{width:10px;height:10px;border-radius:2px}
+.star.on{background:var(--fm)}
+.star.off{background:var(--dim)}
+.cert-tip{font-size:11.5px;color:#34d399;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);border-radius:5px;padding:.4rem .6rem;margin-top:.5rem}
+.cert-when{position:absolute;top:10px;right:10px;font-family:'Fira Code',monospace;font-size:9px;padding:2px 8px;border-radius:3px;border:1px solid var(--b1);color:var(--dim)}
+
+/* PHASE / WEEK */
+.phase{margin-bottom:2.25rem}
+.phase-hdr{display:flex;align-items:center;gap:8px;margin-bottom:.9rem;padding-bottom:.5rem;border-bottom:1px solid var(--b0)}
+.phase-tag{font-family:'Fira Code',monospace;font-size:10px;padding:3px 10px;border-radius:4px;border:1px solid;letter-spacing:.08em}
+.phase-name{font-family:'Fraunces',serif;font-size:15px;font-weight:700}
+.phase-meta{font-family:'Fira Code',monospace;font-size:10px;color:var(--dim);margin-left:auto}
+.ph-m1 .phase-tag{background:rgba(124,58,237,.1);color:#a78bfa;border-color:rgba(124,58,237,.25)}
+.ph-m2 .phase-tag{background:rgba(5,150,105,.1);color:#34d399;border-color:rgba(5,150,105,.25)}
+.ph-m3 .phase-tag{background:rgba(217,119,6,.1);color:#fbbf24;border-color:rgba(217,119,6,.25)}
+.ph-adv .phase-tag{background:rgba(248,113,113,.1);color:#f87171;border-color:rgba(248,113,113,.25)}
+
+.week-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:11px}
+.wcard{background:var(--card);border:1px solid var(--b0);border-radius:10px;overflow:hidden;transition:border-color .2s}
+.wcard:hover{border-color:var(--b1)}
+.wcard-head{padding:.6rem 1rem;border-bottom:1px solid var(--b0);display:flex;align-items:center;gap:8px}
+.wnum{font-family:'Fira Code',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em}
+.wtitle{font-family:'Fraunces',serif;font-size:13px;font-weight:700;letter-spacing:-.01em;flex:1}
+.whrs{font-family:'Fira Code',monospace;font-size:10px;color:var(--dim)}
+.wcard-body{padding:.75rem 1rem;display:flex;flex-direction:column;gap:.7rem}
+
+.trow{display:flex;flex-direction:column;gap:3px}
+.trow-hdr{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tn{font-family:'Fira Code',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}
+.topic-list{list-style:none;padding-left:13px;display:flex;flex-direction:column;gap:2px}
+.titem{font-size:11.5px;color:var(--muted);line-height:1.5;display:flex;flex-wrap:wrap;align-items:flex-start;gap:3px}
+.titem b{color:var(--txt);font-weight:500}
+.titem a{color:var(--txt);font-weight:500;text-decoration:none}
+.titem a:hover{color:#a78bfa}
+.freq{font-family:'Fira Code',monospace;font-size:9px;padding:1px 5px;border-radius:3px;flex-shrink:0}
+.fh{background:rgba(248,113,113,.12);color:var(--fh);border:1px solid rgba(248,113,113,.2)}
+.fm{background:rgba(251,191,36,.1);color:var(--fm);border:1px solid rgba(251,191,36,.2)}
+.fl{background:rgba(110,231,183,.08);color:var(--fl);border:1px solid rgba(110,231,183,.15)}
+.src{font-family:'Fira Code',monospace;font-size:9px;padding:1px 6px;border-radius:3px;border:1px solid;flex-shrink:0}
+.s-ll{background:var(--lll);color:#60a5fa;border-color:var(--llb)}
+.s-yt{background:var(--ytl);color:#ff6b6b;border-color:var(--ytb)}
+.s-ud{background:var(--udl);color:#c084fc;border-color:var(--udb)}
+.s-nc{background:var(--ncl);color:#fb923c;border-color:var(--ncb)}
+.s-fr{background:rgba(52,211,153,.08);color:#34d399;border-color:rgba(52,211,153,.25)}
+.pf-row{padding-left:13px;display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.pf{font-family:'Fira Code',monospace;font-size:9.5px;padding:2px 8px;border-radius:4px;border:1px solid;text-decoration:none;transition:all .15s;color:#34d399;border-color:rgba(52,211,153,.25)}
+.pf:hover{border-color:rgba(52,211,153,.5)}
+hr.rd{border:none;border-top:1px solid var(--b0);margin:0}
+
+/* ADVANCED TOPIC CARDS */
+.adv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:11px;margin-bottom:1.75rem}
+.adv-card{background:var(--card);border:1px solid rgba(248,113,113,.18);border-radius:10px;padding:1rem 1.1rem;transition:border-color .15s}
+.adv-card:hover{border-color:rgba(248,113,113,.35)}
+.adv-card-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700;margin-bottom:.4rem;color:var(--txt)}
+.adv-card-why{font-size:11.5px;color:var(--muted);line-height:1.65;margin-bottom:.65rem}
+.adv-topics{list-style:none;display:flex;flex-direction:column;gap:3px;margin-bottom:.65rem}
+.adv-topic{font-size:12px;color:var(--muted);display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.adv-topic::before{content:'→';color:var(--fh);flex-shrink:0;margin-top:1px}
+.adv-topic b{color:var(--txt);font-weight:500}
+.adv-links{display:flex;flex-wrap:wrap;gap:5px}
+.adv-link{font-family:'Fira Code',monospace;font-size:9.5px;padding:2px 8px;border-radius:3px;border:1px solid;text-decoration:none;transition:all .15s}
+.al-yt{background:var(--ytl);color:#ff6b6b;border-color:var(--ytb)}
+.al-fr{background:var(--gl);color:#34d399;border-color:var(--gb)}
+.al-gh{background:rgba(255,255,255,.05);color:var(--muted);border-color:var(--b1)}
+
+/* CHECKLIST & RADAR */
+#radar-wrap{background:var(--card);border:1px solid var(--b1);border-radius:12px;padding:1.4rem;margin-bottom:1.75rem;display:flex;flex-direction:column;align-items:center}
+#radar-svg{max-width:480px;width:100%}
+.radar-axis-label{font-family:'Space Grotesk',sans-serif;font-size:10.5px;fill:var(--muted);text-anchor:middle}
+.radar-web-line{stroke:rgba(255,255,255,.06);stroke-width:1;fill:none}
+.radar-axis-line{stroke:rgba(255,255,255,.08);stroke-width:1}
+.radar-area{fill:rgba(124,58,237,.18);stroke:#7c3aed;stroke-width:2;opacity:.92;transition:all .35s ease}
+.radar-point{fill:#a78bfa;stroke:var(--bg);stroke-width:2;transition:all .35s ease}
+.score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;width:100%;margin-top:1.1rem}
+.score-item{background:var(--s2);border:1px solid var(--b0);border-radius:8px;padding:.55rem .75rem}
+.score-label{font-family:'Fira Code',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.score-bar-wrap{height:4px;background:var(--b1);border-radius:2px;overflow:hidden}
+.score-bar{height:100%;border-radius:2px;transition:width .4s}
+.score-pct{font-family:'Fira Code',monospace;font-size:11px;color:var(--txt);margin-top:3px}
+
+.cl-section{margin-bottom:1.75rem}
+.cl-section-head{display:flex;align-items:center;gap:10px;padding-bottom:.45rem;border-bottom:1px solid var(--b0);margin-bottom:.65rem}
+.cl-section-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700}
+.cl-section-pct{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted);margin-left:auto}
+.cl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:6px}
+.cl-item{display:flex;align-items:flex-start;gap:8px;background:var(--card);border:1px solid var(--b0);border-radius:7px;padding:.55rem .8rem;cursor:pointer;transition:border-color .15s}
+.cl-item:hover{border-color:var(--b1)}
+.cl-item.done{border-color:rgba(5,150,105,.25);background:rgba(5,150,105,.04)}
+.cl-item input[type=checkbox]{accent-color:#7c3aed;width:14px;height:14px;flex-shrink:0;margin-top:2px;cursor:pointer}
+.cl-item-body{flex:1;min-width:0}
+.cl-item-title{font-size:12px;font-weight:500;color:var(--txt);line-height:1.4}
+.cl-item.done .cl-item-title{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--dim)}
+.cl-item-meta{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.cl-badge{font-family:'Fira Code',monospace;font-size:9px;padding:1.5px 6px;border-radius:3px;border:1px solid}
+.b-ll{background:var(--lll);color:#60a5fa;border-color:var(--llb)}
+.b-yt{background:var(--ytl);color:#ff6b6b;border-color:var(--ytb)}
+.b-ud{background:var(--udl);color:#c084fc;border-color:var(--udb)}
+.b-nc{background:var(--ncl);color:#fb923c;border-color:var(--ncb)}
+.b-fr{background:rgba(52,211,153,.08);color:#34d399;border-color:rgba(52,211,153,.25)}
+.cl-link{font-family:'Fira Code',monospace;font-size:9px;color:#60a5fa;text-decoration:none;margin-left:2px}
+
+/* TIME INVESTMENT TABLE */
+.time-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:1.75rem}
+.time-table th{font-family:'Fira Code',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:.45rem .75rem;border-bottom:1px solid var(--b1)}
+.time-table td{padding:.55rem .75rem;border-bottom:1px solid var(--b0);vertical-align:middle}
+.time-table tr:hover td{background:var(--b0)}
+.heat{display:flex;gap:2px}
+.heat-block{width:12px;height:12px;border-radius:2px}
+
+/* IQ */
+.iq-section{margin-bottom:1.75rem}
+.iq-title{font-family:'Fraunces',serif;font-size:15px;font-weight:700;margin-bottom:.6rem;padding-bottom:.45rem;border-bottom:1px solid var(--b0)}
+.iq-item{border-bottom:1px solid var(--b0);padding:.65rem 0}
+.iq-item:last-child{border-bottom:none}
+.iq-q{font-size:13px;font-weight:500;color:var(--txt);margin-bottom:.3rem;display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.iq-a{font-size:12px;color:var(--muted);line-height:1.7}
+.iq-hint{font-family:'Fira Code',monospace;font-size:10px;color:#a78bfa;margin-top:3px}
+
+/* PROJ */
+.proj{background:var(--card);border:1px solid var(--b1);border-radius:10px;padding:1rem 1.1rem;margin-bottom:11px}
+.proj-top{display:flex;align-items:center;gap:10px;margin-bottom:.6rem;flex-wrap:wrap}
+.proj-n{font-family:'Fira Code',monospace;font-size:10px;color:var(--muted)}
+.proj-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700}
+.proj-stack{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:.55rem}
+.ps{font-family:'Fira Code',monospace;font-size:9.5px;padding:2px 7px;border-radius:3px;border:1px solid var(--b1);color:var(--muted)}
+.proj-desc{font-size:12px;color:var(--muted);line-height:1.7}
+.proj-why{font-size:11.5px;color:#34d399;margin-top:.4rem;font-style:italic}
+
+/* RES */
+.res-sec{margin-bottom:1.5rem}
+.rs-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700;margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid var(--b0)}
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.rc{background:var(--card);border:1px solid var(--b0);border-radius:8px;padding:.7rem .85rem;text-decoration:none;color:inherit;display:block;transition:border-color .15s,transform .12s}
+.rc:hover{border-color:var(--b1);transform:translateY(-1px)}
+.rc-name{font-weight:600;font-size:12.5px;color:var(--txt);margin-bottom:2px}
+.rc-desc{font-size:11px;color:var(--muted);line-height:1.55}
+.rc-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.rct{font-family:'Fira Code',monospace;font-size:9px;padding:1.5px 6px;border-radius:3px;border:1px solid}
+.rct-f{background:var(--gl);color:#34d399;border-color:var(--gb)}
+.rct-p{background:var(--al);color:#fbbf24;border-color:var(--ab)}
+
+/* SCHED */
+.sched-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:1rem 0}
+.sday{background:var(--card);border:1px solid var(--b0);border-radius:7px;padding:.5rem .35rem}
+.sday-name{font-family:'Fira Code',monospace;font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;text-align:center;margin-bottom:4px}
+.sblock{font-size:10px;padding:3px 5px;border-radius:4px;margin-bottom:3px;line-height:1.4}
+.sb-v{background:var(--vl);color:#c4b5fd}
+.sb-g{background:var(--gl);color:#6ee7b7}
+.sb-a{background:var(--al);color:#fcd34d}
+.sb-r{background:var(--rl);color:#fca5a5}
+
+/* TIMELINE */
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-bottom:1.75rem;border:1px solid var(--b1);border-radius:10px;overflow:hidden}
+.tl-col{padding:.9rem 1rem;border-right:1px solid var(--b1)}
+.tl-col:last-child{border-right:none}
+.tl-num{font-family:'Fira Code',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem}
+.tl-title{font-family:'Fraunces',serif;font-size:14px;font-weight:700;margin-bottom:.3rem}
+.tl-desc{font-size:11.5px;color:var(--muted);line-height:1.65}
+.tl-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:.55rem}
+.tl-tag{font-family:'Fira Code',monospace;font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid var(--b1);color:var(--dim)}
+
+.check-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:7px}
+.ci{display:flex;align-items:flex-start;gap:9px;background:var(--card);border:1px solid var(--b0);border-radius:7px;padding:.55rem .75rem;font-size:12px}
+.cbox{width:14px;height:14px;border:1.5px solid var(--dim);border-radius:4px;flex-shrink:0;margin-top:1px}
+
+@media(max-width:640px){
+  .page{padding:1.5rem 1.1rem 4rem}
+  .tabs-wrap{margin:0 -1.1rem;padding:0 1.1rem}
+  .hero-grid{grid-template-columns:1fr}
+  .week-grid,.res-grid,.cl-grid,.cert-grid,.adv-grid,.check-grid{grid-template-columns:1fr}
+  .timeline{grid-template-columns:1fr}
+  .tl-col{border-right:none;border-bottom:1px solid var(--b1)}
+  .tl-col:last-child{border-bottom:none}
+  .sched-grid{grid-template-columns:repeat(4,1fr)}
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .score-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="page">
+<!-- HERO -->
+<div class="hero">
+<div class="hero-grid">
+<div>
+<div class="eyebrow">// Zero to Hero · v6 · certifications + time indicators + advanced topics</div>
+<h1>Zero to Hero<br><em>20+ LPA</em> Roadmap</h1>
+<p class="hero-sub">Designed to make you capable of facing anything in a DevSecOps interview. Every topic rated Core / Advanced / Expert. Every hour you spend is prioritised by interview impact. Azure + AWS certifications mapped with Indian prices.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:.9rem">
+<span class="lv lv-core">CORE — must nail for shortlist</span>
+<span class="lv lv-adv">ADVANCED — 20+ LPA differentiator</span>
+<span class="lv lv-exp">EXPERT — global remote / FAANG</span>
+</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:.75rem;font-size:12px">
+<span class="ti ti-max"><span class="ti-dot"></span>Spend most time here</span>
+<span class="ti ti-high"><span class="ti-dot"></span>High priority</span>
+<span class="ti ti-med"><span class="ti-dot"></span>Learn it, don't obsess</span>
+</div>
+</div>
+<div class="kpis">
+<div class="kpi"><div class="kpi-v" style="color:#a78bfa">12</div><div class="kpi-l">Weeks</div></div>
+<div class="kpi"><div class="kpi-v" style="color:#34d399">15</div><div class="kpi-l">Hrs/wk</div></div>
+<div class="kpi"><div class="kpi-v" style="color:#fbbf24">150+</div><div class="kpi-l">LeetCode</div></div>
+<div class="kpi"><div class="kpi-v" style="color:#38bdf8">3</div><div class="kpi-l">Projects</div></div>
+<div class="kpi"><div class="kpi-v" style="color:#f87171">20+</div><div class="kpi-l">LPA goal</div></div>
+<div class="kpi"><div class="kpi-v" style="color:#fb923c">7</div><div class="kpi-l">Certs path</div></div>
+</div>
+</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap"><div class="tabs" id="tabs">
+<button class="tab active" data-tab="overview">Overview</button>
+<button class="tab" data-tab="progress">📊 Progress</button>
+<button class="tab" data-tab="certs">🏆 Certifications</button>
+<button class="tab" data-tab="time">⏱ Time Guide</button>
+<button class="tab" data-tab="advanced">🔥 Advanced Topics</button>
+<button class="tab" data-tab="m1">Month 1</button>
+<button class="tab" data-tab="m2">Month 2</button>
+<button class="tab" data-tab="m3">Month 3</button>
+<button class="tab" data-tab="interviews">Interviews</button>
+<button class="tab" data-tab="platforms">Platforms</button>
+</div></div>
+
+<!-- ══ OVERVIEW ══ -->
+<div class="section active" id="overview">
+<div class="outcome"><strong>End goal:</strong> After 12 weeks you can architect, build, and defend a complete cloud-native security platform. You understand why every control exists, not just how to configure it. You can threat-model a system on a whiteboard, write Python automation tools from scratch, discuss AWS multi-account architecture, and explain supply chain security — the topics that separate 15 LPA from 22+ LPA candidates.</div>
+<div class="timeline">
+<div class="tl-col"><div class="tl-num" style="color:#a78bfa">MONTH 01 · Weeks 1–4</div><div class="tl-title" style="color:#c4b5fd">Core Foundations</div><div class="tl-desc">Linux → Git → Docker → CI/CD Security → GitHub Actions → HashiCorp Vault → Container hardening. Python basics to OOP. Udemy DSA §1–6. AZ-900 taken end of Month 1.</div><div class="tl-tags"><span class="tl-tag">Linux</span><span class="tl-tag">Docker</span><span class="tl-tag">SAST/DAST</span><span class="tl-tag">Vault</span><span class="tl-tag">AZ-900</span></div></div>
+<div class="tl-col"><div class="tl-num" style="color:#34d399">MONTH 02 · Weeks 5–8</div><div class="tl-title" style="color:#6ee7b7">Cloud + K8s Depth</div><div class="tl-desc">Kubernetes security (RBAC, NetworkPolicy, Falco) → Terraform + OPA → AWS core + EKS + GuardDuty → Prometheus/SIEM. Udemy DSA complete. AZ-104 or AZ-500 attempted.</div><div class="tl-tags"><span class="tl-tag">K8s Security</span><span class="tl-tag">Terraform</span><span class="tl-tag">AWS</span><span class="tl-tag">AZ-104</span></div></div>
+<div class="tl-col"><div class="tl-num" style="color:#fbbf24">MONTH 03 · Weeks 9–12</div><div class="tl-title" style="color:#fcd34d">Advanced + Job Ready</div><div class="tl-desc">Supply chain security (Sigstore/SLSA) → AWS multi-account + auto-remediation → Security system design → 3 projects → 150 LeetCode → AWS CCP attempted → Apply.</div><div class="tl-tags"><span class="tl-tag">SLSA</span><span class="tl-tag">Multi-account</span><span class="tl-tag">System Design</span><span class="tl-tag">AWS CCP</span></div></div>
+</div>
+<div style="background:var(--card);border:1px solid var(--b1);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1.75rem">
+<div style="font-family:'Fraunces',serif;font-size:14px;font-weight:700;margin-bottom:.8rem">Daily schedule · 15 hrs/week</div>
+<div class="sched-grid">
+<div class="sday"><div class="sday-name">MON</div><div class="sblock sb-v">DevSecOps 1.5h</div><div class="sblock sb-g">Python 30m</div></div>
+<div class="sday"><div class="sday-name">TUE</div><div class="sblock sb-a">Udemy DSA 1h</div><div class="sblock sb-a">NeetCode 5LC 1h</div></div>
+<div class="sday"><div class="sday-name">WED</div><div class="sblock sb-v">DevSecOps 1.5h</div><div class="sblock sb-g">Python 30m</div></div>
+<div class="sday"><div class="sday-name">THU</div><div class="sblock sb-a">NeetCode 1h</div><div class="sblock sb-g">Python project 1h</div></div>
+<div class="sday"><div class="sday-name">FRI</div><div class="sblock sb-v">Lab practice 2h</div></div>
+<div class="sday"><div class="sday-name">SAT</div><div class="sblock sb-v">Project build 2h</div><div class="sblock sb-r">Cert study 1h</div></div>
+<div class="sday"><div class="sday-name">SUN</div><div class="sblock sb-a">LeetCode 2h</div><div class="sblock sb-r">Cert study 30m</div></div>
+</div>
+<div style="font-family:'Fira Code',monospace;font-size:10px;color:var(--dim);margin-top:.4rem">Red blocks = certification study (30–60 min/day on Sat/Sun) · Scales up in Month 2 as cert dates approach</div>
+</div>
+<div style="font-family:'Fraunces',serif;font-size:15px;font-weight:700;margin-bottom:.8rem">Milestone checkpoints</div>
+<div class="check-grid" id="milestone-el"></div>
+</div>
+
+<!-- ══ PROGRESS ══ -->
+<div class="section" id="progress">
+<div class="outcome"><strong>Live tracker:</strong> Tick a course → spider chart updates → progress saved to your browser. Comes back exactly where you left it next time you open the file.</div>
+<div id="radar-wrap">
+<div style="font-family:'Fraunces',serif;font-size:15px;font-weight:700;margin-bottom:.2rem;align-self:flex-start">Skill Coverage Radar</div>
+<div style="font-size:12px;color:var(--muted);margin-bottom:.6rem;align-self:flex-start;display:flex;align-items:center;gap:12px">
+  <span>Tick courses below — chart updates live</span>
+  <span style="font-family:'Fira Code',monospace;font-size:11px;background:var(--s2);border:1px solid var(--b1);padding:2px 10px;border-radius:4px">
+    <span id="total-done" style="color:#34d399">0</span> / <span id="total-items" style="color:var(--muted)">0</span> completed
+  </span>
+</div>
+<svg id="radar-svg" viewBox="0 0 480 420" xmlns="http://www.w3.org/2000/svg"></svg>
+<div class="score-grid" id="score-grid"></div>
+</div>
+<div id="checklist-el"></div>
+</div>
+
+<!-- ══ CERTS ══ -->
+<div class="section" id="certs">
+<div class="outcome"><strong>You noticed right:</strong> Azure certs are dramatically cheaper in India — AZ-900 is just ₹3,696 (and often FREE via Virtual Training Day vouchers). The strategy: get Azure certs fast for HR resume visibility, then invest in AWS certs for technical depth and salary. Both on your resume is the strongest combination.</div>
+<div class="info"><strong>💡 Free hack:</strong> Microsoft Virtual Training Day events give 50% vouchers for all -900 level exams — AZ-900 becomes ~₹1,848. Complete the Coursera AZ-900 specialisation and get another 50% off voucher. Cloud Skills Challenges on Microsoft Learn can unlock free exam vouchers entirely. Always check <a href="https://events.microsoft.com/" target="_blank" style="color:#38bdf8">events.microsoft.com</a> before paying full price.</div>
+
+<div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;margin-bottom:1rem">🟦 Azure Certifications — Cheap, Fast, HR-Visible</div>
+<div class="cert-grid" id="az-certs"></div>
+
+<div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;margin:2rem 0 1rem">🟠 AWS Certifications — Deep Tech, High Salary Signal</div>
+<div class="warn"><strong>⚠ AWS cert costs in India:</strong> Associate level ~₹12,600–15,000 + 18% GST. Professional/Specialty ~₹22,000–25,000 + 18% GST. But after passing your first exam, AWS gives you a <strong>50% discount voucher</strong> for the next one. Strategy: take Cloud Practitioner first (~₹8,000), unlock 50% off the next exam.</div>
+<div class="cert-grid" id="aws-certs"></div>
+
+<div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;margin:2rem 0 1rem">⚙ Other High-Value Certifications</div>
+<div class="cert-grid" id="other-certs"></div>
+
+<div style="background:var(--card);border:1px solid var(--b1);border-radius:10px;padding:1.1rem 1.2rem;margin-top:1.5rem">
+<div style="font-family:'Fraunces',serif;font-size:15px;font-weight:700;margin-bottom:.75rem">Recommended certification sequence with timeline</div>
+<table class="time-table">
+<thead><tr><th>Month</th><th>Certification</th><th>Cost (India)</th><th>Prep time</th><th>HR Impact</th><th>When to take</th></tr></thead>
+<tbody id="cert-seq-body"></tbody>
+</table>
+<div style="font-size:12px;color:var(--muted);margin-top:.5rem">Total cert investment across 3 months: <strong style="color:var(--txt)">₹25,000–35,000</strong> (Azure 3 certs + AWS CCP). Return: potential ₹3–5 LPA salary bump per year.</div>
+</div>
+</div>
+
+<!-- ══ TIME GUIDE ══ -->
+<div class="section" id="time">
+<div class="outcome"><strong>Where to spend your time:</strong> Not all topics are created equal. This tab shows exactly how many hours per week each track deserves, which topics have the highest interview ROI, and which ones you should learn but not obsess over. If you only have 10 hrs/week instead of 15, this tells you what to cut.</div>
+<div style="font-family:'Fraunces',serif;font-size:17px;font-weight:700;margin-bottom:1rem">Time allocation by track</div>
+<table class="time-table" id="time-allocation-table">
+<thead><tr><th>Track</th><th>Level</th><th>Hrs/week</th><th>Interview weight</th><th>What to prioritise</th><th>What to skim</th></tr></thead>
+<tbody id="time-table-body"></tbody>
+</table>
+
+<div style="font-family:'Fraunces',serif;font-size:17px;font-weight:700;margin:1.75rem 0 1rem">Topic-level time guide — 20+ LPA interview ROI</div>
+<div id="topic-time-grid"></div>
+</div>
+
+<!-- ══ ADVANCED TOPICS ══ -->
+<div class="section" id="advanced">
+<div class="outcome"><strong>These six topics are what separates a 17 LPA offer from a 22 LPA offer.</strong> The earlier roadmap covers tools. This section covers architecture — why the tools exist, how they connect, and how to design systems that use them correctly. Study these in Month 3 alongside your projects.</div>
+<div id="adv-content"></div>
+</div>
+
+<!-- ══ MONTHS ══ -->
+<div class="section" id="m1"><div class="outcome"><strong>Month 1:</strong> By end of Week 4 you can build a secure CI/CD pipeline from scratch with SAST/DAST/SCA, container hardening, OIDC-based auth, and Vault for secrets. Python OOP solid. Udemy §1–6 done. 40+ LeetCode. AZ-900 taken.</div><div id="m1-content"></div></div>
+<div class="section" id="m2"><div class="outcome"><strong>Month 2:</strong> Kubernetes security at CKS depth, Terraform + OPA live, EKS on AWS with IRSA, GuardDuty + CloudTrail alerts configured, Prometheus + Splunk/ELK operational. Udemy complete. 100+ LeetCode. AZ-104 or AZ-500 attempted.</div><div id="m2-content"></div></div>
+<div class="section" id="m3">
+<div class="outcome"><strong>Month 3:</strong> All core + advanced topics done. Supply chain security, AWS multi-account, security system design practised. 3 projects on GitHub. 150+ LeetCode. AWS CCP cert taken. 20+ applications sent.</div>
+<div id="m3-content"></div>
+<div style="font-family:'Fraunces',serif;font-size:16px;font-weight:700;margin:1.75rem 0 .85rem">Portfolio projects</div>
+<div id="proj-el"></div>
+<div style="font-family:'Fraunces',serif;font-size:16px;font-weight:700;margin:1.75rem 0 .85rem">Week 12 job hunt checklist</div>
+<div class="check-grid" id="job-el"></div>
+</div>
+
+<!-- ══ INTERVIEWS ══ -->
+<div class="section" id="interviews">
+<div class="outcome"><strong>Research-backed from 2025–2026 interviews</strong> at Razorpay, CRED, PhonePe, CrowdStrike, Palo Alto, and global fintech startups. The advanced section now includes the supply chain, multi-account, and system design questions that come up at 20+ LPA roles.</div>
+<div id="iq-el"></div>
+</div>
+
+<!-- ══ PLATFORMS ══ -->
+<div class="section" id="platforms">
+<div class="outcome"><strong>All free or meaningful free tiers.</strong> Use these on Fri lab days and Sat project days. KodeKloud and Killercoda give you real terminals — no AWS bill needed for most topics.</div>
+<div id="platforms-el"></div>
+</div>
+</div>
+<script>
+// ─── CHECKLIST DATA ───────────────────────────────────────────────────────
+const ITEMS=[
+  {id:'f01',cat:'foundations',label:'Learning Linux Command Line',src:'ll',week:'Wk1',url:'https://www.linkedin.com/learning/learning-linux-command-line-14447912',ytUrl:'https://www.youtube.com/watch?v=ROjZy1WbCIA'},
+  {id:'f02',cat:'foundations',label:'Linux for Developers',src:'ll',week:'Wk1',url:'https://www.linkedin.com/learning/topics/linux',ytUrl:'https://www.youtube.com/watch?v=ZtqBQ68cfJc'},
+  {id:'f03',cat:'foundations',label:'Git Essential Training',src:'ll',week:'Wk1',url:'https://www.linkedin.com/learning/git-essential-training-25677984',ytUrl:'https://www.youtube.com/watch?v=RGOj5yH7evk'},
+  {id:'f04',cat:'foundations',label:'DevOps Foundations',src:'ll',week:'Wk1',url:'https://www.linkedin.com/learning/devops-foundations',ytUrl:'https://www.youtube.com/watch?v=j5Zsa_eOXeY'},
+  {id:'f05',cat:'foundations',label:'DevOps Foundations: DevSecOps',src:'ll',week:'Wk2',url:'https://www.linkedin.com/learning/devops-foundations-devsecops-17416896',ytUrl:'https://www.youtube.com/watch?v=nrhxNNH5lt0'},
+  {id:'f06',cat:'foundations',label:'Networking Foundations',src:'ll',week:'Wk2',url:'https://www.linkedin.com/learning/topics/networking',ytUrl:'https://www.youtube.com/watch?v=qiQR5rTSshw'},
+  {id:'f07',cat:'foundations',label:'Cybersecurity Foundations',src:'ll',week:'Wk2',url:'https://www.linkedin.com/learning/cybersecurity-foundations-22006082',ytUrl:'https://www.youtube.com/watch?v=U_P23SqJaDc'},
+  {id:'f08',cat:'foundations',label:'OverTheWire: Bandit (levels 0–20)',src:'fr',week:'Wk1–2',url:'https://overthewire.org/wargames/bandit/'},
+  {id:'c01',cat:'containers_cicd',label:'Docker Essential Training',src:'ll',week:'Wk3',url:'https://www.linkedin.com/learning/docker-essential-training',ytUrl:'https://www.youtube.com/watch?v=3c-iBn73dDE'},
+  {id:'c02',cat:'containers_cicd',label:'Learning Docker',src:'ll',week:'Wk3',url:'https://www.linkedin.com/learning/topics/docker',ytUrl:'https://www.youtube.com/watch?v=pTFZFxd5hgI'},
+  {id:'c03',cat:'containers_cicd',label:'Docker Security: Container Hardening',src:'ll',week:'Wk3',url:'https://www.linkedin.com/learning/topics/docker',ytUrl:'https://www.youtube.com/watch?v=KINjI1tlo2w'},
+  {id:'c04',cat:'containers_cicd',label:'Learning the OWASP Top 10',src:'ll',week:'Wk3',url:'https://www.linkedin.com/learning/learning-the-owasp-top-10-9364599',ytUrl:'https://www.youtube.com/watch?v=rWHvp7rUka8'},
+  {id:'c05',cat:'containers_cicd',label:'GitHub Actions for CI/CD',src:'ll',week:'Wk4',url:'https://www.linkedin.com/learning/topics/github-actions',ytUrl:'https://www.youtube.com/watch?v=R8_veQiYBjI'},
+  {id:'c06',cat:'containers_cicd',label:'Advanced GitHub Actions',src:'yt',week:'Wk4',ytUrl:'https://www.youtube.com/watch?v=mFFXuXjVgkU'},
+  {id:'c07',cat:'containers_cicd',label:'Learning Jenkins',src:'ll',week:'Wk4',url:'https://www.linkedin.com/learning/topics/jenkins',ytUrl:'https://www.youtube.com/watch?v=6YZvp2GwT0A'},
+  {id:'c08',cat:'containers_cicd',label:'DevSecOps: SAST/DAST/SCA Pipeline',src:'ll',week:'Wk4',url:'https://www.linkedin.com/learning/paths/get-ahead-in-devsecops',ytUrl:'https://www.youtube.com/watch?v=aw6ED1LNPWY'},
+  {id:'c09',cat:'containers_cicd',label:'Learning HashiCorp Vault',src:'ll',week:'Wk4',url:'https://www.linkedin.com/learning/learning-hashicorp-vault',ytUrl:'https://www.youtube.com/watch?v=gJmMmHkpB2Q'},
+  {id:'k01',cat:'kubernetes_iac',label:'Learning Kubernetes',src:'ll',week:'Wk5',url:'https://www.linkedin.com/learning/learning-kubernetes-16086900',ytUrl:'https://www.youtube.com/watch?v=X48VuDVv0do'},
+  {id:'k02',cat:'kubernetes_iac',label:'Kubernetes Essential Training: App Dev',src:'ll',week:'Wk5',url:'https://www.linkedin.com/learning/kubernetes-essential-training-application-development',ytUrl:'https://www.youtube.com/watch?v=s_o8dwzRlu4'},
+  {id:'k03',cat:'kubernetes_iac',label:'CKS Cert Prep (K8s Security)',src:'ll',week:'Wk5',url:'https://www.linkedin.com/learning/certified-kubernetes-security-specialist-cks-cert-prep',ytUrl:'https://www.youtube.com/watch?v=d9xfB5qaOfg'},
+  {id:'k04',cat:'kubernetes_iac',label:'Learning Terraform',src:'ll',week:'Wk6',url:'https://www.linkedin.com/learning/learning-terraform-2',ytUrl:'https://www.youtube.com/watch?v=l5k1ai_GBDE'},
+  {id:'k05',cat:'kubernetes_iac',label:'Terraform Essential Training',src:'ll',week:'Wk6',url:'https://www.linkedin.com/learning/topics/terraform',ytUrl:'https://www.youtube.com/watch?v=SLB_c_ayRMo'},
+  {id:'k06',cat:'kubernetes_iac',label:'IaC Security: Checkov & Terrascan',src:'yt',week:'Wk6',ytUrl:'https://www.youtube.com/watch?v=68CHRlb5m8g'},
+  {id:'k07',cat:'kubernetes_iac',label:'OPA / Kyverno — TechWorld with Nana',src:'yt',week:'Wk6',ytUrl:'https://www.youtube.com/watch?v=l3j57-0KFWQ'},
+  {id:'k08',cat:'kubernetes_iac',label:'GitOps / ArgoCD — TechWorld with Nana',src:'yt',week:'Wk6',ytUrl:'https://www.youtube.com/watch?v=MeU5_k9ssrs'},
+  {id:'a01',cat:'aws_security',label:'AWS Essential Training for Developers',src:'ll',week:'Wk7',url:'https://www.linkedin.com/learning/aws-essential-training-for-developers-17237791',ytUrl:'https://www.youtube.com/watch?v=k1RI5locZE4'},
+  {id:'a02',cat:'aws_security',label:'AWS IAM: Identity and Access Management',src:'ll',week:'Wk7',url:'https://www.linkedin.com/learning/topics/aws-iam',ytUrl:'https://www.youtube.com/watch?v=iF9fs8Rw4Uo'},
+  {id:'a03',cat:'aws_security',label:'Running Kubernetes on AWS (EKS)',src:'ll',week:'Wk7',url:'https://www.linkedin.com/learning/running-kubernetes-on-aws-eks-2021',ytUrl:'https://www.youtube.com/watch?v=p6xDCz00TxU'},
+  {id:'a04',cat:'aws_security',label:'AWS Security Essentials',src:'ll',week:'Wk7',url:'https://www.linkedin.com/learning/topics/aws-security',ytUrl:'https://www.youtube.com/watch?v=Ia-UEYYR44s'},
+  {id:'a05',cat:'aws_security',label:'AWS Security Best Practices',src:'ll',week:'Wk8',url:'https://www.linkedin.com/learning/topics/aws-security',ytUrl:'https://www.youtube.com/watch?v=_eWyiiFqaKs'},
+  {id:'a06',cat:'aws_security',label:'AWS CloudTrail + EventBridge Auto-Remediation',src:'yt',week:'Wk10',ytUrl:'https://www.youtube.com/watch?v=Ia-UEYYR44s'},
+  {id:'a07',cat:'aws_security',label:'AWS Multi-Account Architecture (Control Tower)',src:'yt',week:'Wk9',ytUrl:'https://www.youtube.com/watch?v=T2QLDowrCBg'},
+  {id:'a08',cat:'aws_security',label:'AWS Certified Security Specialty Prep',src:'ll',week:'Wk10',url:'https://www.linkedin.com/learning/topics/aws-certified-security-specialty',ytUrl:'https://www.youtube.com/watch?v=oBM8DeLNHqQ'},
+  {id:'o01',cat:'obs_siem',label:'Prometheus + Grafana — TechWorld with Nana',src:'yt',week:'Wk8',ytUrl:'https://www.youtube.com/watch?v=h4Sl21AKiDg'},
+  {id:'o02',cat:'obs_siem',label:'K8s Monitoring with Prometheus',src:'ll',week:'Wk8',url:'https://www.linkedin.com/learning/kubernetes-monitoring-with-prometheus',ytUrl:'https://www.youtube.com/watch?v=QoDqxm7ybLc'},
+  {id:'o03',cat:'obs_siem',label:'Learning Splunk',src:'ll',week:'Wk8',url:'https://www.linkedin.com/learning/learning-splunk-22169111',ytUrl:'https://www.youtube.com/watch?v=SSsGsT8y0u0'},
+  {id:'o04',cat:'obs_siem',label:'Learning Elastic Stack (ELK)',src:'ll',week:'Wk8',url:'https://www.linkedin.com/learning/learning-elastic-stack',ytUrl:'https://www.youtube.com/watch?v=tBoLDpTWVOM'},
+  {id:'o05',cat:'obs_siem',label:'Istio Service Mesh — TechWorld with Nana',src:'yt',week:'Wk8',ytUrl:'https://www.youtube.com/watch?v=16fgzklcF7Y'},
+  {id:'s01',cat:'adv_security',label:'Supply Chain Security: Sigstore/Cosign/SLSA',src:'yt',week:'Wk9',ytUrl:'https://www.youtube.com/watch?v=x4BJ1bKMX_4'},
+  {id:'s02',cat:'adv_security',label:'Zero Trust Security — NetworkChuck',src:'yt',week:'Wk9',ytUrl:'https://www.youtube.com/watch?v=FCX0i7-5iCU'},
+  {id:'s03',cat:'adv_security',label:'Threat Modeling Foundations (STRIDE)',src:'ll',week:'Wk9',url:'https://www.linkedin.com/learning/topics/threat-modeling',ytUrl:'https://www.youtube.com/watch?v=GqmQg-cszw4'},
+  {id:'s04',cat:'adv_security',label:'AWS Multi-Account + SCPs + Control Tower',src:'yt',week:'Wk9',ytUrl:'https://www.youtube.com/watch?v=T2QLDowrCBg'},
+  {id:'s05',cat:'adv_security',label:'EventBridge + Lambda Auto-Remediation Patterns',src:'yt',week:'Wk10',ytUrl:'https://www.youtube.com/watch?v=KMzUDMxEnPk'},
+  {id:'s06',cat:'adv_security',label:'K8s Admission Webhooks (Mutating + Validating)',src:'yt',week:'Wk10',ytUrl:'https://www.youtube.com/watch?v=j-KXFezfCwU'},
+  {id:'s07',cat:'adv_security',label:'GRC: SOC2, PCI-DSS, GDPR, ISO 27001',src:'ll',week:'Wk9',url:'https://www.linkedin.com/learning/cybersecurity-foundations-governance-risk-and-compliance-grc-25657666'},
+  {id:'s08',cat:'adv_security',label:'Cyber Incident Response & Forensics',src:'ll',week:'Wk9',url:'https://www.linkedin.com/learning/learning-cyber-incident-response-and-digital-forensics-21598044',ytUrl:'https://www.youtube.com/watch?v=Dk-ZqQ-bfy4'},
+  {id:'p01',cat:'python',label:'Python Essential Training (LinkedIn Learning)',src:'ll',week:'Wk1–2',url:'https://www.linkedin.com/learning/python-essential-training-18764650',ytUrl:'https://www.youtube.com/watch?v=rfscVS0vtbw'},
+  {id:'p02',cat:'python',label:'CS50P — Harvard Python (FREE)',src:'fr',week:'Wk1–3',url:'https://cs50.harvard.edu/python/'},
+  {id:'p03',cat:'python',label:'Python OOP (LinkedIn Learning)',src:'ll',week:'Wk3',url:'https://www.linkedin.com/learning/python-object-oriented-programming-22888296',ytUrl:'https://www.youtube.com/watch?v=JeznW_7DlB0'},
+  {id:'p04',cat:'python',label:'Advanced Python (LinkedIn Learning)',src:'ll',week:'Wk5–6',url:'https://www.linkedin.com/learning/advanced-python',ytUrl:'https://www.youtube.com/watch?v=HGOBQPFzWKo'},
+  {id:'p05',cat:'python',label:'Python Security Libraries (cryptography, paramiko, jwt)',src:'yt',week:'Wk9–10',ytUrl:'https://www.youtube.com/watch?v=0jzjK0S8L9E'},
+  {id:'p06',cat:'python',label:'Build REST APIs with FastAPI',src:'ll',week:'Wk7–8',url:'https://www.linkedin.com/learning/build-rest-apis-with-fastapi',ytUrl:'https://www.youtube.com/watch?v=0sOvCWFmrtA'},
+  {id:'p07',cat:'python',label:'Python DSA & Algorithms (LinkedIn Learning)',src:'ll',week:'Wk7–8',url:'https://www.linkedin.com/learning/python-data-structures-and-algorithms'},
+  {id:'p08',cat:'python',label:'Automate the Boring Stuff (free book)',src:'fr',week:'Wk5–6',url:'https://automatetheboringstuff.com/'},
+  {id:'d01',cat:'dsa',label:'LL Prog. Foundations: Data Structures',src:'ll',week:'Wk1–2',url:'https://www.linkedin.com/learning/programming-foundations-data-structures'},
+  {id:'d02',cat:'dsa',label:'Udemy §1–2: Big O + Arrays',src:'ud',week:'Wk1',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+  {id:'d03',cat:'dsa',label:'Udemy §3–4: Linked Lists',src:'ud',week:'Wk2',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+  {id:'d04',cat:'dsa',label:'Udemy §5–6: Stacks + Queues',src:'ud',week:'Wk3',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+  {id:'d05',cat:'dsa',label:'Udemy §7–8: Binary Trees + BST',src:'ud',week:'Wk4–5',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+  {id:'d06',cat:'dsa',label:'LL Prog. Foundations: Algorithms',src:'ll',week:'Wk3–4',url:'https://www.linkedin.com/learning/programming-foundations-algorithms'},
+  {id:'d07',cat:'dsa',label:'Udemy §9–10: Graphs + Sorting',src:'ud',week:'Wk5–6',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+  {id:'d08',cat:'dsa',label:'Udemy §11–12: Recursion + DP',src:'ud',week:'Wk7–8',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+  {id:'d09',cat:'dsa',label:'NeetCode: Heaps + Tries (gap topics)',src:'nc',week:'Wk9',url:'https://neetcode.io/roadmap'},
+  {id:'d10',cat:'dsa',label:'NeetCode: Backtracking + Advanced Graphs',src:'nc',week:'Wk10',url:'https://neetcode.io/roadmap'},
+  {id:'d11',cat:'dsa',label:'NeetCode: Bit Manipulation + Math',src:'nc',week:'Wk10',url:'https://neetcode.io/roadmap'},
+  {id:'d12',cat:'dsa',label:'LeetCode: 50+ milestone',src:'nc',week:'Wk4',url:'https://leetcode.com/'},
+  {id:'d13',cat:'dsa',label:'LeetCode: 100+ milestone',src:'nc',week:'Wk8',url:'https://leetcode.com/'},
+  {id:'d14',cat:'dsa',label:'LeetCode: 150+ milestone ✓',src:'nc',week:'Wk12',url:'https://leetcode.com/'},
+  {id:'sd01',cat:'sys_design',label:'System Design Primer GitHub (250k stars)',src:'fr',week:'Wk9',url:'https://github.com/donnemartin/system-design-primer'},
+  {id:'sd02',cat:'sys_design',label:'Design a SIEM at scale (1M events/sec)',src:'fr',week:'Wk9',url:'https://github.com/donnemartin/system-design-primer'},
+  {id:'sd03',cat:'sys_design',label:'Design URL Shortener + Twitter feed',src:'fr',week:'Wk10',url:'https://bytebytego.com/'},
+  {id:'sd04',cat:'sys_design',label:'Design WhatsApp + Netflix',src:'fr',week:'Wk11',url:'https://github.com/donnemartin/system-design-primer'},
+  {id:'sd05',cat:'sys_design',label:'Security-specific SD: Distributed Rate Limiter',src:'fr',week:'Wk11',url:'https://github.com/donnemartin/system-design-primer'},
+  {id:'sd06',cat:'sys_design',label:'5 mock SD interviews (Pramp/interviewing.io)',src:'fr',week:'Wk12',url:'https://www.pramp.com/'},
+  {id:'ct01',cat:'certifications',label:'AZ-900: Azure Fundamentals',src:'fr',week:'Month 1 end',url:'https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/'},
+  {id:'ct02',cat:'certifications',label:'SC-900: Security Compliance & Identity',src:'fr',week:'Month 2 start',url:'https://learn.microsoft.com/en-us/credentials/certifications/security-compliance-and-identity-fundamentals/'},
+  {id:'ct03',cat:'certifications',label:'AZ-500: Azure Security Engineer',src:'fr',week:'Month 2 end',url:'https://learn.microsoft.com/en-us/credentials/certifications/azure-security-engineer/'},
+  {id:'ct04',cat:'certifications',label:'AWS Cloud Practitioner (CLF-C02)',src:'fr',week:'Month 3 mid',url:'https://aws.amazon.com/certification/certified-cloud-practitioner/'},
+  {id:'ct05',cat:'certifications',label:'HashiCorp Terraform Associate',src:'fr',week:'Month 3 end',url:'https://www.hashicorp.com/certification/terraform-associate'},
+];
+
+const CATS={
+  foundations:{label:'Linux & Foundations',color:'#a78bfa'},
+  containers_cicd:{label:'Containers & CI/CD',color:'#f87171'},
+  kubernetes_iac:{label:'Kubernetes & IaC',color:'#34d399'},
+  aws_security:{label:'AWS Security',color:'#fbbf24'},
+  obs_siem:{label:'Observability & SIEM',color:'#38bdf8'},
+  adv_security:{label:'Advanced Security',color:'#fb923c'},
+  python:{label:'Python',color:'#c084fc'},
+  dsa:{label:'DSA & Algorithms',color:'#f0abfc'},
+  sys_design:{label:'System Design',color:'#7dd3fc'},
+  certifications:{label:'Certifications',color:'#fbbf24'},
+};
+const CAT_ORDER=Object.keys(CATS);
+
+function getChecked(){try{return JSON.parse(localStorage.getItem('roadmap_v6')||'{}');}catch{return{};}}
+function saveChecked(s){localStorage.setItem('roadmap_v6',JSON.stringify(s));}
+let checked=getChecked();
+
+// Called via onchange on the checkbox — reads state directly, no double-fire
+function handleCheck(cb, id){
+  checked[id] = cb.checked;
+  saveChecked(checked);
+  // Update all instances of this item (checklist only has one but keep it safe)
+  document.querySelectorAll(`[data-cl="${id}"]`).forEach(el=>{
+    el.checked = cb.checked;
+    el.closest('.cl-item').classList.toggle('done', cb.checked);
+  });
+  updateRadar();
+  updateScores();
+  updateSectionPcts();
+}
+function getScore(cat){
+  const its=ITEMS.filter(i=>i.cat===cat);
+  if(!its.length)return 0;
+  return Math.round(its.filter(i=>checked[i.id]).length/its.length*100);
+}
+
+// RADAR
+const SVG_W=480,SVG_H=420,CX=240,CY=210,R=148;
+function radarPoint(angle,pct){const r=R*pct/100;return[CX+r*Math.cos(angle-Math.PI/2),CY+r*Math.sin(angle-Math.PI/2)];}
+function buildRadar(){
+  const svg=document.getElementById('radar-svg');svg.innerHTML='';
+  const n=CAT_ORDER.length;const angles=CAT_ORDER.map((_,i)=>i*2*Math.PI/n);
+  [20,40,60,80,100].forEach(pct=>{
+    const pts=CAT_ORDER.map((_,i)=>radarPoint(angles[i],pct).join(',')).join(' ');
+    const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points',pts);poly.setAttribute('class','radar-web-line');svg.appendChild(poly);
+  });
+  CAT_ORDER.forEach((_,i)=>{
+    const [x,y]=radarPoint(angles[i],100);
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',CX);line.setAttribute('y1',CY);line.setAttribute('x2',x);line.setAttribute('y2',y);
+    line.setAttribute('class','radar-axis-line');svg.appendChild(line);
+    const [lx,ly]=radarPoint(angles[i],118);
+    const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',lx);txt.setAttribute('y',ly+4);txt.setAttribute('class','radar-axis-label');
+    txt.setAttribute('font-size','10.5');txt.textContent=CATS[CAT_ORDER[i]].label;svg.appendChild(txt);
+  });
+  updateRadar();
+}
+function updateRadar(){
+  const svg=document.getElementById('radar-svg');
+  let area=svg.querySelector('.radar-area');
+  if(!area){area=document.createElementNS('http://www.w3.org/2000/svg','polygon');area.setAttribute('class','radar-area');svg.appendChild(area);}
+  const n=CAT_ORDER.length;const angles=CAT_ORDER.map((_,i)=>i*2*Math.PI/n);
+  const pts=CAT_ORDER.map((cat,i)=>radarPoint(angles[i],Math.max(getScore(cat),1)).join(',')).join(' ');
+  area.setAttribute('points',pts);
+  svg.querySelectorAll('.radar-point').forEach(p=>p.remove());
+  CAT_ORDER.forEach((cat,i)=>{
+    const pct=Math.max(getScore(cat),1);
+    const [px,py]=radarPoint(angles[i],pct);
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',px);c.setAttribute('cy',py);c.setAttribute('r',4);
+    c.setAttribute('class','radar-point');svg.appendChild(c);
+  });
+}
+function updateScores(){
+  CAT_ORDER.forEach(cat=>{
+    const pct=getScore(cat);
+    const bar=document.getElementById('bar-'+cat);
+    const spct=document.getElementById('spct-'+cat);
+    if(bar)bar.style.width=pct+'%';
+    if(spct)spct.textContent=pct+'%';
+  });
+}
+function updateSectionPcts(){
+  CAT_ORDER.forEach(cat=>{const el=document.getElementById('pct-'+cat);if(el)el.textContent=getScore(cat)+'%';});
+}
+
+function buildChecklist(){
+  const el=document.getElementById('checklist-el');let html='';
+  const srcLabel={ll:'LinkedIn Learning',yt:'YouTube',ud:'Udemy',nc:'NeetCode',fr:'Free'};
+  const badgeCls={ll:'b-ll',yt:'b-yt',ud:'b-ud',nc:'b-nc',fr:'b-fr'};
+  CAT_ORDER.forEach(cat=>{
+    const its=ITEMS.filter(i=>i.cat===cat);
+    html+=`<div class="cl-section"><div class="cl-section-head">
+      <span class="cl-section-title" style="color:${CATS[cat].color}">${CATS[cat].label}</span>
+      <span class="cl-section-pct" id="pct-${cat}">${getScore(cat)}%</span>
+    </div><div class="cl-grid">`;
+    its.forEach(item=>{
+      const isDone=!!checked[item.id];
+      const llLink=item.url?`<a class="cl-link" href="${item.url}" target="_blank">[open]</a>`:'';
+      const ytLink=item.ytUrl?`<a class="cl-link" href="${item.ytUrl}" target="_blank" style="color:#ff6b6b">[▶YT]</a>`:'';
+      html+=`<label class="cl-item${isDone?' done':''}">
+        <input type="checkbox" data-cl="${item.id}" ${isDone?'checked':''} onchange="handleCheck(this,'${item.id}')" style="cursor:pointer">
+        <div class="cl-item-body">
+          <div class="cl-item-title">${item.label}</div>
+          <div class="cl-item-meta">
+            <span class="cl-badge ${badgeCls[item.src]||'b-fr'}">${srcLabel[item.src]||'Free'}</span>
+            <span class="cl-badge b-fr">${item.week}</span>
+            ${llLink}${ytLink}
+          </div>
+        </div>
+      </label>`;
+    });
+    html+='</div></div>';
+  });
+  el.innerHTML=html;updateSectionPcts();
+}
+
+function buildScoreGrid(){
+  document.getElementById('score-grid').innerHTML=CAT_ORDER.map(cat=>{
+    const pct=getScore(cat);
+    return `<div class="score-item">
+      <div class="score-label">${CATS[cat].label}</div>
+      <div class="score-bar-wrap"><div class="score-bar" id="bar-${cat}" style="width:${pct}%;background:linear-gradient(90deg,${CATS[cat].color}80,${CATS[cat].color})"></div></div>
+      <div class="score-pct" id="spct-${cat}">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+</script>
+<script>
+// ─── CERTIFICATIONS DATA ────────────────────────────────────────────────
+const AZ_CERTS=[
+  {logo:'🟦',name:'Azure Fundamentals',code:'AZ-900',price:'₹3,696',note:'Often FREE via Virtual Training Day',priority:'priority',when:'Month 1 end',hrStars:4,techStars:2,
+   why:'Fastest cert to put on your resume. HRs love seeing any Azure cert. Covers cloud concepts, Azure services, security basics. Study time: 1–2 weeks alongside Month 1 courses.',
+   meta:['~1–2 weeks prep','Online proctored','Renews free','Pearson VUE'],
+   tip:'Register for a Microsoft Virtual Training Day (free) — you get a 50% discount voucher. Then find a Cloud Skills Challenge for another voucher. Combined = nearly free.',
+   url:'https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/'},
+  {logo:'🔐',name:'Security, Compliance & Identity Fund.',code:'SC-900',price:'₹3,696',note:'Often FREE via training voucher',priority:'priority',when:'Month 2 start',hrStars:4,techStars:2,
+   why:'SC-900 directly signals "security mindset" to HRs. Covers Zero Trust, compliance frameworks (GDPR, ISO 27001), Microsoft Defender basics. Pairs perfectly with AZ-900.',
+   meta:['~1 week prep','Online proctored','Free renewal','Pearson VUE'],
+   tip:'Take AZ-900 first — SC-900 concepts build on it. Both can be prepped simultaneously in 2 weeks total.',
+   url:'https://learn.microsoft.com/en-us/credentials/certifications/security-compliance-and-identity-fundamentals/'},
+  {logo:'🛡',name:'Azure Security Engineer Associate',code:'AZ-500',price:'₹4,800',note:'Associate level — most valued for DevSecOps',priority:'priority',when:'Month 2–3',hrStars:5,techStars:4,
+   why:'AZ-500 is the single best Azure cert for a DevSecOps resume in India. Covers IAM, Key Vault, Defender for Cloud, NSGs, Sentinel SIEM, container security. HRs know exactly what it signals.',
+   meta:['4–6 weeks prep','Online proctored','Free renewal','Pearson VUE'],
+   tip:'Use Microsoft Learn free paths + John Savill YouTube (600k+ subs). His AZ-500 playlist is extremely thorough and free.',
+   url:'https://learn.microsoft.com/en-us/credentials/certifications/azure-security-engineer/'},
+  {logo:'⚙',name:'Azure DevOps Solutions Expert',code:'AZ-400',price:'₹4,800',note:'Expert level — requires AZ-104 first',priority:'secondary',when:'Month 4+ (post-roadmap)',hrStars:5,techStars:5,
+   why:'AZ-400 is the highest DevOps signal on a resume. Covers CI/CD pipelines, IaC, monitoring, security in DevOps. Requires AZ-104 as prerequisite but worth the investment at Month 4+.',
+   meta:['6–8 weeks prep','Requires AZ-104','Expert level','High HR impact'],
+   tip:'Skip this for now — AZ-900 + SC-900 + AZ-500 is already a strong combination for a 3-month window. Revisit post-job.',
+   url:'https://learn.microsoft.com/en-us/credentials/certifications/devops-engineer/'},
+];
+const AWS_CERTS=[
+  {logo:'☁',name:'Cloud Practitioner',code:'CLF-C02',price:'₹8,000 + GST',note:'Take this first — unlocks 50% off next exam',priority:'priority',when:'Month 3 mid',hrStars:3,techStars:2,
+   why:'Entry point into AWS certs. HRs see it as confirmation you know cloud basics. Take it in Month 3 after your AWS study months — you will be over-qualified. Main value is the 50% voucher for your next exam.',
+   meta:['2–3 weeks prep','Online proctored','50% off next cert','Free practice exams'],
+   tip:'After passing CLF-C02, AWS mails you a 50% discount voucher. Apply it to SAA-C03 (~₹12,600 becomes ~₹6,300 + GST). Stack discounts: free retake if you fail first attempt.',
+   url:'https://aws.amazon.com/certification/certified-cloud-practitioner/'},
+  {logo:'🏗',name:'Solutions Architect Associate',code:'SAA-C03',price:'₹15,000 + GST',note:'Use 50% voucher from Cloud Practitioner',priority:'secondary',when:'Month 4–5 (post-roadmap)',hrStars:5,techStars:4,
+   why:'SAA-C03 is the most recognised AWS cert globally. Fintech and AI companies specifically look for it. Covers VPC design, IAM, S3, EKS, RDS, multi-region architecture. With 50% discount ~₹7,500 + GST.',
+   meta:['6–8 weeks prep','Highly recognised','Use 50% voucher','~₹7,500 with discount'],
+   tip:'Study with Stephane Maarek (Udemy SAA course, ~₹500 on sale) + Adrian Cantrill (higher quality, $40 USD). Maarek is sufficient for the exam.',
+   url:'https://aws.amazon.com/certification/certified-solutions-architect-associate/'},
+  {logo:'🔒',name:'Security Specialty',code:'SCS-C02',price:'₹22,000 + GST',note:'Gold standard for DevSecOps salary',priority:'secondary',when:'Month 5–6 (post-roadmap)',hrStars:5,techStars:5,
+   why:'SCS-C02 is THE cert for 20+ LPA DevSecOps roles at AWS-heavy companies. Covers GuardDuty, Macie, Inspector, Security Hub, KMS, WAF, incident response, compliance. Commands a direct salary premium.',
+   meta:['8–10 weeks prep','Specialty level','50% off with voucher chain','~₹11,000 with discount'],
+   tip:'Chain discounts: CLF-C02 (50% off) → SAA-C03 (50% off next) → SCS-C02 at potentially 50% off. Total cert spend can be under ₹25,000 for all three.',
+   url:'https://aws.amazon.com/certification/aws-certified-security-specialty/'},
+  {logo:'⚙',name:'DevOps Engineer Professional',code:'DOP-C02',price:'₹22,000 + GST',note:'Alternative to Security Specialty',priority:'optional',when:'Month 5–6 (post-roadmap)',hrStars:4,techStars:5,
+   why:'DOP-C02 covers CI/CD, IaC, monitoring, and incident management on AWS. Strong signal for DevSecOps + DevOps hybrid roles. Consider this or SCS-C02 depending on the roles you target.',
+   meta:['8–10 weeks prep','Professional level','Requires associate cert','Pair with 50% voucher'],
+   tip:'SCS-C02 has higher HR impact for pure security roles. DOP-C02 is better if you want platform engineering roles that are security-aware rather than pure security engineering.',
+   url:'https://aws.amazon.com/certification/certified-devops-engineer-professional/'},
+];
+const OTHER_CERTS=[
+  {logo:'🟣',name:'Terraform Associate',code:'003',price:'~₹5,800 ($70 USD)',note:'Most underrated cert on this list',priority:'priority',when:'Month 3 end',hrStars:4,techStars:4,
+   why:'HashiCorp Terraform Associate is highly underrated. It directly proves IaC skills — every DevSecOps job lists Terraform. Takes 2–3 weeks to prep if you have done the Month 2 Terraform courses. Very affordable.',
+   meta:['2–3 weeks prep','Multiple choice','2 years validity','Online proctored'],
+   tip:'Use KodeKloud free Terraform labs + HashiCorp official docs + Bryan Krausen study guide on Udemy (~₹500 on sale). Pass rate is high if you have hands-on experience.',
+   url:'https://www.hashicorp.com/certification/terraform-associate'},
+  {logo:'☸',name:'Certified Kubernetes Administrator',code:'CKA',price:'~₹33,000 ($395 USD)',note:'Most respected Kubernetes cert — performance based',priority:'secondary',when:'Month 4+ (post-roadmap)',hrStars:5,techStars:5,
+   why:'CKA is a performance-based exam (you actually run commands, not answer MCQs). Extremely respected in the industry. Shows real Kubernetes competence. Pair it with CKS after.',
+   meta:['8+ weeks prep','Performance-based','2 years validity','Linux Foundation'],
+   tip:'KodeKloud CKA course (paid, ~₹2,000) is the best prep. Killercoda free labs cover 80% of what you need. Can share 20% discount with LFCS bundle.',
+   url:'https://training.linuxfoundation.org/certification/certified-kubernetes-administrator-cka/'},
+  {logo:'🔒',name:'Certified K8s Security Specialist',code:'CKS',price:'~₹33,000 ($395 USD)',note:'Requires CKA first — worth it for 22+ LPA',priority:'optional',when:'Month 5–6 (post-roadmap)',hrStars:5,techStars:5,
+   why:'CKS is the most technically respected DevSecOps cert in the Kubernetes space. Requires CKA as prerequisite. Covers Falco, AppArmor, seccomp, OPA, supply chain security. Commands salary premium at fintech companies.',
+   meta:['6 weeks after CKA','Performance-based','Hardest K8s cert','Huge resume signal'],
+   tip:'KodeKloud CKS course is the standard prep. Killer.sh practice exams (included with purchase) are harder than the real exam. If you can pass Killer.sh you will pass CKS.',
+   url:'https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/'},
+  {logo:'🎯',name:'CompTIA Security+',code:'SY0-701',price:'~₹25,000 ($370 USD)',note:'Global standard — valued for MNCs',priority:'optional',when:'Post-roadmap',hrStars:4,techStars:3,
+   why:'Security+ is globally recognised and DoD-approved. MNCs and IT services companies (Accenture, IBM, Infosys security practices) specifically ask for it. Covers broad security concepts. Less valued at pure product companies.',
+   meta:['4–6 weeks prep','Vendor-neutral','3 years validity','MCQ + PBQ'],
+   tip:'Skip this for now unless targeting MNCs or government-adjacent roles. AZ-500 or SCS-C02 has higher ROI for product company DevSecOps roles in India.',
+   url:'https://www.comptia.org/certifications/security'},
+];
+
+const CERT_SEQ=[
+  {month:'Month 1 end',name:'AZ-900: Azure Fundamentals',cost:'₹3,696 (or FREE)',prep:'1–2 weeks',hr:'⭐⭐⭐⭐',when:'Week 4'},
+  {month:'Month 2 start',name:'SC-900: Security, Compliance & Identity',cost:'₹3,696 (or FREE)',prep:'1 week',hr:'⭐⭐⭐⭐',when:'Week 5'},
+  {month:'Month 2 end',name:'AZ-500: Azure Security Engineer',cost:'₹4,800',prep:'4–6 weeks (study in Month 2)',hr:'⭐⭐⭐⭐⭐',when:'Week 8'},
+  {month:'Month 3 mid',name:'AWS Cloud Practitioner (CLF-C02)',cost:'~₹8,000 + GST',prep:'2–3 weeks',hr:'⭐⭐⭐',when:'Week 10'},
+  {month:'Month 3 end',name:'HashiCorp Terraform Associate',cost:'~₹5,800',prep:'2–3 weeks (Month 2 study = prep)',hr:'⭐⭐⭐⭐',when:'Week 12'},
+  {month:'Month 4–5',name:'AWS Solutions Architect Associate',cost:'~₹7,500 (50% voucher)',prep:'6–8 weeks',hr:'⭐⭐⭐⭐⭐',when:'Post-roadmap'},
+  {month:'Month 5–6',name:'AWS Security Specialty (SCS-C02)',cost:'~₹11,000 (50% voucher)',prep:'8–10 weeks',hr:'⭐⭐⭐⭐⭐',when:'Post-roadmap'},
+];
+
+function stars(n){return '⭐'.repeat(n)+'☆'.repeat(5-n);}
+function buildCerts(){
+  function certCard(c){
+    const cls=c.priority==='priority'?'cert-card priority':c.priority==='secondary'?'cert-card secondary':'cert-card optional';
+    return `<div class="${cls}">
+      <span class="cert-when">${c.when}</span>
+      <div class="cert-head">
+        <div class="cert-logo">${c.logo}</div>
+        <div><div class="cert-name">${c.name}</div><div class="cert-code">${c.code}</div></div>
+      </div>
+      <div class="cert-body">
+        <div class="cert-price-row"><div class="cert-price">${c.price}</div><div class="cert-price-note">${c.note}</div></div>
+        <div class="cert-meta">${c.meta.map(m=>`<span class="cm">${m}</span>`).join('')}</div>
+        <div class="cert-why">${c.why}</div>
+        <div class="cert-hr-score">
+          <span class="cert-hr-label">HR visibility</span>
+          <div class="hr-stars">${[1,2,3,4,5].map(i=>`<div class="star ${i<=c.hrStars?'on':'off'}"></div>`).join('')}</div>
+        </div>
+        <div class="cert-hr-score">
+          <span class="cert-hr-label">Tech depth</span>
+          <div class="hr-stars">${[1,2,3,4,5].map(i=>`<div class="star ${i<=c.techStars?'on':'off'}"></div>`).join('')}</div>
+        </div>
+        <div class="cert-tip">💡 ${c.tip}</div>
+        <a href="${c.url}" target="_blank" style="font-family:'Fira Code',monospace;font-size:9.5px;color:#60a5fa;text-decoration:none;display:inline-block;margin-top:.5rem">Official page ↗</a>
+      </div>
+    </div>`;
+  }
+  document.getElementById('az-certs').innerHTML=AZ_CERTS.map(certCard).join('');
+  document.getElementById('aws-certs').innerHTML=AWS_CERTS.map(certCard).join('');
+  document.getElementById('other-certs').innerHTML=OTHER_CERTS.map(certCard).join('');
+  document.getElementById('cert-seq-body').innerHTML=CERT_SEQ.map(r=>`
+    <tr>
+      <td style="font-family:'Fira Code',monospace;font-size:10px;color:var(--muted)">${r.month}</td>
+      <td><strong>${r.name}</strong></td>
+      <td style="color:#34d399;font-weight:600">${r.cost}</td>
+      <td style="font-family:'Fira Code',monospace;font-size:10px;color:var(--muted)">${r.prep}</td>
+      <td style="font-size:12px">${r.hr}</td>
+      <td><span class="lv lv-core" style="font-size:9px">${r.when}</span></td>
+    </tr>`).join('');
+}
+
+// ─── TIME ALLOCATION DATA ──────────────────────────────────────────────
+const TIME_TRACKS=[
+  {track:'CI/CD Security + Secrets',level:'CORE',lv:'lv-core',hrs:'3–4 hrs/week',weight:'🔥🔥🔥 MAXIMUM',pri:'Build a real pipeline with SAST/DAST/SCA/Vault. This is Q1 in every interview.',skim:'Jenkins advanced plugins — focus on GitHub Actions'},
+  {track:'Kubernetes Security',level:'CORE',lv:'lv-core',hrs:'3 hrs/week',weight:'🔥🔥🔥 MAXIMUM',pri:'RBAC, NetworkPolicy, PodSecurityContext, Falco. K8s security = 30% of interviews.',skim:'CKS cert exam itself (good to have but not blocking for jobs)'},
+  {track:'AWS Security',level:'CORE',lv:'lv-core',hrs:'2.5 hrs/week',weight:'🔥🔥🔥 MAXIMUM',pri:'IAM, GuardDuty, CloudTrail, EKS/IRSA. Fintech runs on AWS.',skim:'Every single AWS service — focus on security services only'},
+  {track:'IaC Security (Terraform + OPA)',level:'CORE',lv:'lv-core',hrs:'2 hrs/week',weight:'🔥🔥 HIGH',pri:'Terraform + Checkov + OPA policy gate blocking bad infra in CI. Write real policies.',skim:'Pulumi, CDK — Terraform is sufficient'},
+  {track:'Python Automation',level:'CORE',lv:'lv-core',hrs:'1.5 hrs/week',weight:'🔥🔥 HIGH',pri:'Boto3 scripts, CLI tools, FastAPI. Build Project 3 iteratively throughout.',skim:'async internals, metaclasses — practical scripting is what matters'},
+  {track:'Supply Chain Security',level:'ADVANCED',lv:'lv-adv',hrs:'1.5 hrs/week (Month 3)',weight:'🔥🔥 HIGH',pri:'Sigstore/Cosign/SLSA/SBOM. Only 10% of candidates know this. Instant differentiator.',skim:'Deep Sigstore internals — concept + implementation is enough'},
+  {track:'AWS Multi-Account + Auto-Remediation',level:'ADVANCED',lv:'lv-adv',hrs:'1.5 hrs/week (Month 3)',weight:'🔥🔥 HIGH',pri:'EventBridge+Lambda remediation patterns. This is how real fintech AWS accounts work.',skim:'AWS Control Tower UI details — focus on the architecture patterns'},
+  {track:'Security System Design',level:'ADVANCED',lv:'lv-adv',hrs:'1 hr/week (Month 3)',weight:'🔥🔥 HIGH',pri:'Design SIEM, rate limiter, secrets platform. Practice aloud twice/week.',skim:'Generic system design (Twitter, YouTube) — do security-specific problems'},
+  {track:'Observability + SIEM',level:'CORE',lv:'lv-core',hrs:'1 hr/week',weight:'🔥 MEDIUM',pri:'Prometheus/Grafana hands-on, Splunk SPL basics. Detection is the payoff of all security work.',skim:'ELK deep tuning, Splunk ML — basic querying is enough'},
+  {track:'Compliance (GRC)',level:'CORE',lv:'lv-core',hrs:'0.5 hrs/week',weight:'🔥 MEDIUM',pri:'SOC2, PCI-DSS, GDPR conceptually. Interviewers ask "what controls would you implement?"',skim:'Full ISO 27001 audit process — concept-level is enough for interviews'},
+  {track:'DSA & LeetCode',level:'CORE',lv:'lv-core',hrs:'2 hrs/week',weight:'🔥 MEDIUM',pri:'80 well-practised problems > 150 rushed ones. Hash maps, graphs, DP, sliding window.',skim:'Hard LeetCode for DevSecOps — medium is the ceiling in most interviews'},
+  {track:'Python Security Libraries',level:'ADVANCED',lv:'lv-adv',hrs:'1 hr/week (Month 3)',weight:'🔥 MEDIUM',pri:'cryptography, paramiko, jwt. Write a real cert expiry checker and SSH automation.',skim:'scapy packet crafting — understand it conceptually only'},
+  {track:'K8s Admission Webhooks / etcd',level:'EXPERT',lv:'lv-exp',hrs:'0.5 hrs/week (Month 3)',weight:'🔥 MEDIUM',pri:'Know how OPA Gatekeeper uses webhooks. Know etcd encryption at rest. Senior Q only.',skim:'Writing custom webhooks from scratch — understand the concept'},
+  {track:'Certifications study',level:'CORE',lv:'lv-core',hrs:'1 hr/week',weight:'🔥 MEDIUM',pri:'30–60 min/day on Sat/Sun. AZ-900 → SC-900 → AZ-500 → AWS CCP → Terraform Assoc.',skim:'CompTIA Security+ for now — AZ-500 has better ROI'},
+  {track:'Linux & Networking basics',level:'CORE',lv:'lv-core',hrs:'1 hr/week (Month 1)',weight:'🔥 LOWER',pri:'Solid enough to not fumble basics in interview. Bandit wargame levels 0–20.',skim:'Deep networking internals — DevSecOps interviews test tools, not CCNA'},
+];
+
+function buildTimeTable(){
+  const FREQ_H={h:'<span class="freq fh">●●●</span>',m:'<span class="freq fm">●●○</span>',l:'<span class="freq fl">●○○</span>'};
+  const heatColor={'🔥🔥🔥 MAXIMUM':'#f87171','🔥🔥 HIGH':'#fbbf24','🔥 MEDIUM':'#6ee7b7','🔥 LOWER':'#7dd3fc'};
+  document.getElementById('time-table-body').innerHTML=TIME_TRACKS.map(t=>`
+    <tr>
+      <td><strong>${t.track}</strong></td>
+      <td><span class="lv ${t.lv}">${t.level}</span></td>
+      <td style="font-family:'Fira Code',monospace;color:${heatColor[t.weight]||'var(--muted)'};font-size:11px"><strong>${t.hrs}</strong></td>
+      <td style="font-size:12px;white-space:nowrap;color:${heatColor[t.weight]||'var(--muted)'}">${t.weight}</td>
+      <td style="font-size:11px;color:var(--muted)">${t.pri}</td>
+      <td style="font-size:11px;color:var(--dim)">${t.skim}</td>
+    </tr>`).join('');
+
+  // topic time ROI grid
+  const topicData=[
+    {topic:'SAST/DAST/SCA in CI pipeline',lv:'CORE',roi:'🔥🔥🔥',spend:'Build first, then understand tools',int:'95%'},
+    {topic:'K8s RBAC + NetworkPolicy',lv:'CORE',roi:'🔥🔥🔥',spend:'Hands-on in KodeKloud daily',int:'90%'},
+    {topic:'AWS IAM + IRSA + SCPs',lv:'CORE',roi:'🔥🔥🔥',spend:'Study actual JSON policies, not theory',int:'89%'},
+    {topic:'Secrets management (Vault)',lv:'CORE',roi:'🔥🔥🔥',spend:'Dynamic secrets concept is most asked',int:'87%'},
+    {topic:'Supply chain (Sigstore/SLSA)',lv:'ADVANCED',roi:'🔥🔥🔥',spend:'1 week deep = 90th percentile candidate',int:'75%'},
+    {topic:'IaC security (Checkov/OPA)',lv:'CORE',roi:'🔥🔥',spend:'Run Checkov on real Terraform, read output',int:'87%'},
+    {topic:'AWS multi-account architecture',lv:'ADVANCED',roi:'🔥🔥',spend:'Draw the architecture, explain trade-offs',int:'70%'},
+    {topic:'EventBridge auto-remediation',lv:'ADVANCED',roi:'🔥🔥',spend:'Build one real example, understand pattern',int:'68%'},
+    {topic:'Threat modeling (STRIDE)',lv:'CORE',roi:'🔥🔥',spend:'Apply STRIDE to your own projects',int:'75%'},
+    {topic:'Container hardening + Trivy',lv:'CORE',roi:'🔥🔥',spend:'Build a non-root hardened image, scan it',int:'85%'},
+    {topic:'Prometheus + Grafana',lv:'CORE',roi:'🔥🔥',spend:'Build a dashboard for your K8s cluster',int:'80%'},
+    {topic:'Python Boto3 automation',lv:'CORE',roi:'🔥🔥',spend:'Build 3 real scripts, not hello world',int:'60%'},
+    {topic:'Admission webhooks (OPA)',lv:'ADVANCED',roi:'🔥🔥',spend:'Understand Gatekeeper architecture',int:'60%'},
+    {topic:'K8s audit logging policy',lv:'EXPERT',roi:'🔥',spend:'Read the audit policy spec, configure once',int:'45%'},
+    {topic:'Python security libraries',lv:'ADVANCED',roi:'🔥',spend:'Build cert expiry checker + SSH scanner',int:'50%'},
+    {topic:'Zero Trust principles',lv:'CORE',roi:'🔥',spend:'Conceptual clarity only — 30 min NetworkChuck',int:'65%'},
+    {topic:'GRC + Compliance frameworks',lv:'CORE',roi:'🔥',spend:'Know what each framework requires, not details',int:'60%'},
+    {topic:'DSA: Hash maps + Graphs + DP',lv:'CORE',roi:'🔥',spend:'80 problems across core patterns, timed',int:'70%'},
+    {topic:'etcd encryption at rest',lv:'EXPERT',roi:'🔥',spend:'30 min — know the command and why it matters',int:'35%'},
+    {topic:'Security system design',lv:'ADVANCED',roi:'🔥🔥',spend:'Practice aloud 2x per week in Month 3',int:'70%'},
+  ];
+  const roiColor={'🔥🔥🔥':'var(--fh)','🔥🔥':'var(--fm)','🔥':'var(--fl)'};
+  document.getElementById('topic-time-grid').innerHTML=`
+    <table class="time-table">
+    <thead><tr><th>Topic</th><th>Level</th><th>Interview frequency</th><th>How to spend time on it</th><th>Seen in X% of interviews</th></tr></thead>
+    <tbody>${topicData.map(t=>`
+      <tr>
+        <td><strong>${t.topic}</strong></td>
+        <td><span class="lv ${t.lv==='CORE'?'lv-core':t.lv==='ADVANCED'?'lv-adv':'lv-exp'}">${t.lv}</span></td>
+        <td style="color:${roiColor[t.roi]};font-size:13px">${t.roi}</td>
+        <td style="font-size:11px;color:var(--muted)">${t.spend}</td>
+        <td style="font-family:'Fira Code',monospace;font-size:11px;color:${roiColor[t.roi]}">${t.int}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+</script>
+<script>
+// ─── ADVANCED TOPICS ──────────────────────────────────────────────────
+function buildAdvanced(){
+  const advTopics=[
+    {
+      title:'Supply Chain Security — Sigstore, Cosign, SLSA, SBOM',
+      badge:'ADVANCED',
+      why:'Only ~10% of DevSecOps candidates know this deeply. One week here puts you in the 90th percentile. Fintech companies processing card data are legally required to track software supply chains (PCI-DSS 6.3). This topic comes up in every senior interview at CrowdStrike, Palo Alto, and advanced fintech roles.',
+      topics:[
+        {t:'Sigstore',n:'Open-source infrastructure for signing, verifying, and protecting software. Backed by Google, Red Hat, Purdue University.'},
+        {t:'Cosign',n:'Sign container images and blobs. Sign at build time → verify in OPA admission webhook before deployment. Command: cosign sign --key cosign.key image:tag'},
+        {t:'SLSA Framework',n:'Supply-chain Levels for Software Artifacts (L1–L4). L1=provenance exists. L2=hosted build. L3=hardened build. L4=two-person review. GitHub Actions can achieve SLSA L2 natively.'},
+        {t:'SBOM (Software Bill of Materials)',n:'List every dependency in your software. Generate with Syft (syft image:tag -o spdx-json). Store in OCI registry alongside image. Required by US Executive Order 14028 and increasingly by Indian fintech regulators.'},
+        {t:'Dependency confusion attacks',n:'Attacker publishes malicious package with same name as internal package. Defend: private registry with explicit scoping, pip --index-url flag, npm publishConfig scope.'},
+        {t:'Build provenance',n:'GitHub Actions artifact attestation: actions/attest-build-provenance. Creates signed statement of who built what, from where, when.'},
+      ],
+      links:[
+        {t:'Sigstore docs',u:'https://docs.sigstore.dev/',cls:'al-fr'},
+        {t:'▶ SLSA explanation (YouTube)',u:'https://www.youtube.com/watch?v=x4BJ1bKMX_4',cls:'al-yt'},
+        {t:'SBOM with Syft (GitHub)',u:'https://github.com/anchore/syft',cls:'al-gh'},
+        {t:'▶ Supply chain security full course',u:'https://www.youtube.com/watch?v=BJsBVzT-cPs',cls:'al-yt'},
+      ]
+    },
+    {
+      title:'AWS Multi-Account Architecture + EventBridge Auto-Remediation',
+      badge:'ADVANCED',
+      why:'Every fintech company with more than 20 engineers runs multi-account AWS. When an interviewer asks "how would you design the AWS architecture for a new product?" they expect you to talk about account segregation, SCPs, and centralized logging. The EventBridge + Lambda auto-remediation pattern comes up in nearly every senior cloud security interview.',
+      topics:[
+        {t:'Account structure',n:'Management account → nested OUs: Security OU (Log Archive, Audit), Infrastructure OU, Workloads OU (Dev, Staging, Prod as separate accounts). Each environment is blast-radius limited.'},
+        {t:'SCPs (Service Control Policies)',n:'Org-level IAM guardrails. Example SCP: deny EC2 in non-approved regions, deny disabling CloudTrail, deny creating access keys for root. SCPs override individual account IAM — even admin cannot bypass them.'},
+        {t:'AWS Control Tower',n:'Automated landing zone setup. Enforces guardrails across all accounts. CIS benchmark controls applied automatically. Account Vending Machine for new account provisioning.'},
+        {t:'Centralized logging',n:'All accounts ship CloudTrail, VPC Flow Logs, Config logs to a dedicated Log Archive account S3 bucket. Log Archive account has SCPs denying deletion. Security team has read-only cross-account role.'},
+        {t:'EventBridge + Lambda auto-remediation',n:'Pattern: GuardDuty finding → EventBridge rule matches severity → Lambda triggered → isolate EC2 (attach quarantine SG, revoke IAM session), block S3 (set bucket ACL private), alert SNS. Runs in under 60 seconds.'},
+        {t:'AWS Config custom rules',n:'Write Lambda-backed Config rules to detect: EC2 without IMDSv2, S3 without versioning, IAM users with console access + no MFA. These fire continuously, not just at CI time.'},
+      ],
+      links:[
+        {t:'▶ AWS Control Tower deep dive',u:'https://www.youtube.com/watch?v=T2QLDowrCBg',cls:'al-yt'},
+        {t:'▶ EventBridge auto-remediation',u:'https://www.youtube.com/watch?v=KMzUDMxEnPk',cls:'al-yt'},
+        {t:'AWS Landing Zone docs',u:'https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html',cls:'al-fr'},
+        {t:'▶ AWS Security incident response',u:'https://www.youtube.com/watch?v=lWBISe3lLXU',cls:'al-yt'},
+      ]
+    },
+    {
+      title:'Kubernetes Runtime + Admission Deep Dive',
+      badge:'EXPERT',
+      why:'CKS-level K8s security is what separates 18 LPA from 23+ LPA candidates. Interviewers at CrowdStrike, Palo Alto, and advanced product companies ask about admission webhooks, Falco rules, and etcd encryption because most candidates have never actually configured these — they have only read about them.',
+      topics:[
+        {t:'Admission webhooks',n:'Two types: Mutating (modify the object before persistence) and Validating (allow/deny). OPA Gatekeeper and Kyverno both work as validating webhooks. You can write custom webhooks in Go or Python. Key interview Q: "what happens if the webhook server is down?" — answer: configured as FailOpen or FailClosed.'},
+        {t:'etcd encryption at rest',n:'By default etcd stores secrets in plain base64. Fix: EncryptionConfiguration resource using AES-CBC or AES-GCM provider. Key management via KMS provider (AWS KMS) for envelope encryption. Interview Q: "why is kubectl get secrets not showing encrypted data even after enabling encryption?" — because kubectl decrypts via API server.'},
+        {t:'Falco runtime rules',n:'Write Falco rules to detect: shell spawned in container, sensitive file read (/etc/passwd), network connection to unexpected IP, privilege escalation via setuid. Rules are YAML-based. Output to Slack/PagerDuty via falcosidekick.'},
+        {t:'K8s audit policy',n:'Defines what API server events to log. Levels: None, Metadata, Request, RequestResponse. Design: log RequestResponse for secrets, log Metadata for pods/deployments. Store to CloudWatch/Elasticsearch. Too verbose = disk flood. Too sparse = miss breaches.'},
+        {t:'Node security',n:'Kubelet: set --anonymous-auth=false, --authorization-mode=Webhook, --protect-kernel-defaults=true. Node restriction admission plugin prevents kubelets from modifying other nodes. Read-only port should be disabled (--read-only-port=0).'},
+        {t:'gVisor and kata containers',n:'Workload isolation beyond Linux namespaces. gVisor intercepts syscalls in userspace (runsc runtime). Kata containers use lightweight VMs. Use for multi-tenant K8s where you cannot trust workloads.'},
+      ],
+      links:[
+        {t:'▶ K8s admission webhooks',u:'https://www.youtube.com/watch?v=j-KXFezfCwU',cls:'al-yt'},
+        {t:'▶ Falco deep dive',u:'https://www.youtube.com/watch?v=Z4POV5IXnHQ',cls:'al-yt'},
+        {t:'Falco rules docs',u:'https://falco.org/docs/rules/',cls:'al-fr'},
+        {t:'KodeKloud CKS labs',u:'https://killercoda.com/killer-shell-cks',cls:'al-fr'},
+      ]
+    },
+    {
+      title:'Python Security Libraries — Write Real Tools',
+      badge:'ADVANCED',
+      why:'Being able to write a working SSL cert expiry scanner, SSH auditor, or JWT validator in Python is what separates candidates who "know security" from those who can "automate security". This comes up in take-home assessments and live coding rounds at fintech companies.',
+      topics:[
+        {t:'cryptography',n:'symmetric (Fernet), asymmetric (RSA/ECC), hashing (SHA-256), key derivation (PBKDF2). Use case: encrypt secrets at rest in your Python tools before writing to disk.'},
+        {t:'pyOpenSSL / ssl + socket',n:'Check SSL certificate expiry, cipher suites, chain validation. Build a cert_scanner.py that takes a list of domains → checks days until expiry → alerts if < 30 days.'},
+        {t:'paramiko',n:'SSH client in Python. Automate: run commands on remote hosts, check /etc/sudoers for wildcard entries, verify SSH key rotation compliance.'},
+        {t:'jwt (PyJWT)',n:'Decode, verify, and generate JWT tokens. Critical for API security testing. Build a JWT_scanner that detects alg:none vulnerability, checks expiry, validates signature.'},
+        {t:'hashlib + hmac',n:'File integrity checking. Build a script that computes SHA-256 of critical files (/etc/passwd, /etc/shadow) at baseline → compare daily → alert on change.'},
+        {t:'requests + httpx',n:'Build a web security scanner: check for missing security headers (HSTS, CSP, X-Frame-Options), follow redirects, detect open redirects.'},
+      ],
+      links:[
+        {t:'cryptography docs',u:'https://cryptography.io/en/latest/',cls:'al-fr'},
+        {t:'▶ Python security scripting',u:'https://www.youtube.com/watch?v=0jzjK0S8L9E',cls:'al-yt'},
+        {t:'paramiko docs',u:'https://www.paramiko.org/',cls:'al-fr'},
+        {t:'▶ Build security tools in Python',u:'https://www.youtube.com/watch?v=4vDO7E1lPSs',cls:'al-yt'},
+      ]
+    },
+    {
+      title:'Security System Design — DevSecOps-Specific Problems',
+      badge:'ADVANCED',
+      why:'Standard system design prep (Twitter, YouTube, Uber) will not be enough for senior DevSecOps interviews. Interviewers at security-focused companies ask security-specific design problems that require knowing both system design fundamentals AND security architecture. Practise these aloud twice per week in Month 3.',
+      topics:[
+        {t:'Design a SIEM for 1M events/second',n:'Ingest: Kafka (partition by source). Process: Flink or Spark Streaming for correlation rules. Store: ClickHouse for hot (30 days), S3 Parquet for cold. Query: Elasticsearch for text search. Alert: sub-second for P0 rules via in-memory stream. Scale: horizontal Kafka consumers, autoscaling processors.'},
+        {t:'Design a distributed rate limiter',n:'Token bucket per IP/user stored in Redis (INCR + EXPIRE). For distributed: sliding window counter in Redis with Lua scripts for atomicity. Edge case: clock skew between nodes. Alternative: API Gateway with Redis back-end.'},
+        {t:'Design a secrets management platform',n:'Storage: AES-256-GCM encrypted at rest, envelope encryption with KMS. Access: short-lived tokens (15-min TTL), audit every access. Rotation: scheduled Lambda rotates DB passwords, invalidates old leases. HA: multi-region with Raft consensus (Vault Enterprise). Zero downtime rotation via dual-active credentials.'},
+        {t:'Design a vulnerability scanning pipeline for 50 microservices',n:'Trigger: image push → ECR webhook → Lambda → Trivy scan → results to DynamoDB. Prioritise: CVSS score + reachability (is this CVE in a reachable code path?). SLA: P0 CVEs block deploy, P1 within 72h, P2 within 30 days. Dashboard: Grafana reading DynamoDB. Block deploy with OPA gate.'},
+        {t:'Design an AWS multi-account security posture management system',n:'Data collection: Config + Security Hub aggregated to security account. Normalise: EventBridge + Lambda transforms findings to ASFF (Amazon Security Finding Format). Correlate: graph DB (Neptune) maps resource → finding → risk score. Remediation: auto for low risk (tag missing), human approval for high risk (EC2 isolation).'},
+      ],
+      links:[
+        {t:'System Design Primer (GitHub)',u:'https://github.com/donnemartin/system-design-primer',cls:'al-fr'},
+        {t:'▶ Security system design examples',u:'https://www.youtube.com/watch?v=M5UBHQkRgXM',cls:'al-yt'},
+        {t:'ByteByteGo free blog',u:'https://blog.bytebytego.com/',cls:'al-fr'},
+        {t:'Pramp mock SD interviews',u:'https://www.pramp.com/',cls:'al-fr'},
+      ]
+    },
+    {
+      title:'Certificate Lifecycle Management + Golden AMI Strategy',
+      badge:'EXPERT',
+      why:'These topics come up at companies running large-scale infrastructure and are almost never covered in standard courses. Knowing them signals you have thought deeply about operational security — not just deployment security.',
+      topics:[
+        {t:'cert-manager on K8s',n:'Automatically provisions and renews TLS certificates from Let\'s Encrypt or internal CA. Annotate ingress → cert-manager creates Certificate resource → requests from ACME → stores in Kubernetes Secret. Alert on cert expiry via Prometheus cert-manager-controller metrics.'},
+        {t:'Internal CA with cert-manager',n:'Deploy an internal CA using cert-manager\'s CA issuer or Vault PKI secret engine. Issue short-lived certificates (24h for mTLS between services). Rotate root CA every 2 years with rolling leaf cert reissuance.'},
+        {t:'Golden AMI pipeline',n:'Start from CIS hardened base AMI → layer application dependencies via Packer → scan with Inspector → bake → store in golden AMI catalog. All EC2 instances must launch from golden AMIs (enforce via SCP + Config rule). Patch pipeline: monthly AMI rebuild → blue-green ASG rotation.'},
+        {t:'IMDSv2 enforcement',n:'EC2 Instance Metadata Service v2 requires a PUT request with session token before GET — prevents SSRF-based metadata theft (Capital One breach vector). Enforce: HttpTokens=required in launch template, SCP to deny EC2 launch without IMDSv2, AWS Config rule ec2-imdsv2-check.'},
+      ],
+      links:[
+        {t:'cert-manager docs',u:'https://cert-manager.io/docs/',cls:'al-fr'},
+        {t:'▶ cert-manager tutorial',u:'https://www.youtube.com/watch?v=DvXkD0f-lhY',cls:'al-yt'},
+        {t:'▶ Golden AMI with Packer',u:'https://www.youtube.com/watch?v=6u5OdSzCzXA',cls:'al-yt'},
+        {t:'AWS IMDSv2 guide',u:'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html',cls:'al-fr'},
+      ]
+    },
+  ];
+
+  const badgeCls={ADVANCED:'lv-adv',EXPERT:'lv-exp',CORE:'lv-core'};
+  document.getElementById('adv-content').innerHTML=`<div class="adv-grid">${
+    advTopics.map(t=>`
+      <div class="adv-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:.4rem">
+          <span class="lv ${badgeCls[t.badge]||'lv-adv'}">${t.badge}</span>
+        </div>
+        <div class="adv-card-title">${t.title}</div>
+        <div class="adv-card-why">${t.why}</div>
+        <ul class="adv-topics">${t.topics.map(i=>`<li class="adv-topic"><b>${i.t}:</b> ${i.n}</li>`).join('')}</ul>
+        <div class="adv-links">${t.links.map(l=>`<a class="adv-link ${l.cls}" href="${l.u}" target="_blank">${l.t}</a>`).join('')}</div>
+      </div>`).join('')}
+  </div>`;
+}
+
+// ─── MONTHS ───────────────────────────────────────────────────────────
+const FH='<span class="freq fh">●●●</span>',FM='<span class="freq fm">●●○</span>',FL='<span class="freq fl">●○○</span>';
+const SLL='<span class="src s-ll">LL</span>',SYT='<span class="src s-yt">YT</span>',SUD='<span class="src s-ud">UD</span>',SNC='<span class="src s-nc">NC</span>',SFR='<span class="src s-fr">Free</span>';
+const LC={core:'<span class="lv lv-core">CORE</span>',adv:'<span class="lv lv-adv">ADVANCED</span>',exp:'<span class="lv lv-exp">EXPERT</span>'};
+const TI={max:'<span class="ti ti-max"><span class="ti-dot"></span>Max time here</span>',high:'<span class="ti ti-high"><span class="ti-dot"></span>High priority</span>',med:'<span class="ti ti-med"><span class="ti-dot"></span>Learn + practice</span>'};
+
+function trow(color,label,items,pfs){
+  let h=`<div class="trow"><div class="trow-hdr"><div class="tdot" style="background:${color}"></div><span class="tn" style="color:${color}">${label}</span></div><ul class="topic-list">`;
+  items.forEach(i=>{
+    h+=`<li class="titem">`;
+    if(i.f)h+=FH==='<span class="freq fh">●●●</span>'&&i.f==='h'?FH:i.f==='m'?FM:FL;
+    if(i.lv)h+=LC[i.lv]||'';
+    if(i.ti)h+=TI[i.ti]||'';
+    const src={ll:SLL,yt:SYT,ud:SUD,nc:SNC,fr:SFR}[i.s]||'';
+    h+=src;
+    if(i.url)h+=`<a href="${i.url}" target="_blank">${i.t}</a>`;
+    else h+=`<b>${i.t}</b>`;
+    if(i.yt)h+=` <a href="${i.yt}" target="_blank" style="font-family:'Fira Code',monospace;font-size:9px;color:#ff6b6b;text-decoration:none">[▶YT]</a>`;
+    if(i.n)h+=`<span style="color:var(--dim);font-size:11px">— ${i.n}</span>`;
+    h+=`</li>`;
+  });
+  h+='</ul>';
+  if(pfs){h+='<div class="pf-row">';pfs.forEach(p=>h+=`<a href="${p.u}" class="pf" target="_blank">${p.n} ✓</a>`);h+='</div>';}
+  h+='</div>';return h;
+}
+function wcard(num,title,hrs,tracks){
+  let h=`<div class="wcard"><div class="wcard-head"><span class="wnum">${num}</span><span class="wtitle">${title}</span><span class="whrs">${hrs}</span></div><div class="wcard-body">`;
+  tracks.forEach((t,i)=>{if(i>0)h+='<hr class="rd">';h+=t;});
+  h+='</div></div>';return h;
+}
+function phase(tag,name,meta,cls,weeks){
+  return `<div class="phase ${cls}"><div class="phase-hdr"><span class="phase-tag">${tag}</span><span class="phase-name">${name}</span><span class="phase-meta">${meta}</span></div><div class="week-grid">${weeks.join('')}</div></div>`;
+}
+
+const M1=phase('PHASE 01','Linux · Git · DevOps · Security Foundations','Weeks 1–2 · Absolute beginner start','ph-m1',[
+  wcard('WK 01','Linux + Git + Big O + Python Basics','~15 hrs',[
+    trow('#a78bfa','DevSecOps',[
+      {t:'Learning Linux Command Line',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/learning-linux-command-line-14447912',yt:'https://www.youtube.com/watch?v=ROjZy1WbCIA',n:'file system, permissions, bash pipes, SSH, grep/awk/sed'},
+      {t:'Linux for Developers',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/topics/linux',yt:'https://www.youtube.com/watch?v=ZtqBQ68cfJc',n:'scripting, cron, processes, package mgmt'},
+      {t:'Git Essential Training',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/git-essential-training-25677984',yt:'https://www.youtube.com/watch?v=RGOj5yH7evk',n:'commit, branch, merge, rebase, PRs, signed commits'},
+      {t:'DevOps Foundations',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/devops-foundations',yt:'https://www.youtube.com/watch?v=j5Zsa_eOXeY',n:'CI/CD philosophy, feedback loops'},
+    ],[{n:'OverTheWire Bandit',u:'https://overthewire.org/wargames/bandit/'},{n:'KodeKloud Linux',u:'https://kodekloud.com/studio/labs/linux'},{n:'Learn Git Branching',u:'https://learngitbranching.js.org/'}]),
+    trow('#34d399','Python',[
+      {t:'Python Essential Training',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/python-essential-training-18764650',yt:'https://www.youtube.com/watch?v=rfscVS0vtbw',n:'variables, loops, functions, lists, dicts'},
+      {t:'CS50P Week 1–2 (parallel)',f:'h',lv:'core',s:'fr',url:'https://cs50.harvard.edu/python/',n:'Harvard problem sets reinforce LL concepts'},
+    ]),
+    trow('#fbbf24','DSA',[
+      {t:'Udemy §1: Big O Notation',f:'h',lv:'core',ti:'high',s:'ud',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+      {t:'Udemy §2: Arrays',f:'h',lv:'core',s:'ud',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+      {t:'NeetCode: Arrays & Hashing',f:'h',lv:'core',s:'nc',url:'https://neetcode.io/roadmap',n:'Two Sum, valid anagram, group anagrams — 10 LC Easy'},
+    ]),
+  ]),
+  wcard('WK 02','Security Foundations + Linked Lists','~15 hrs',[
+    trow('#a78bfa','DevSecOps',[
+      {t:'DevOps Foundations: DevSecOps',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/devops-foundations-devsecops-17416896',yt:'https://www.youtube.com/watch?v=nrhxNNH5lt0',n:'shift-left, secure SDLC — understand why, not just how'},
+      {t:'Networking Foundations',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/topics/networking',yt:'https://www.youtube.com/watch?v=qiQR5rTSshw',n:'TCP/IP, DNS, HTTP/S, VPN, subnets — interview Q: "what happens when you type google.com"'},
+      {t:'Cybersecurity Foundations',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/cybersecurity-foundations-22006082',yt:'https://www.youtube.com/watch?v=U_P23SqJaDc',n:'CIA triad, threat modeling intro, risk basics'},
+    ],[{n:'TryHackMe Pre-Security',u:'https://tryhackme.com/path/outline/presecurity'}]),
+    trow('#34d399','Python',[
+      {t:'Python Essential Training — finish',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/python-essential-training-18764650',n:'error handling, file I/O, comprehensions, string methods'},
+      {t:'Prog. Foundations: Data Structures',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/programming-foundations-data-structures',n:'conceptual layer alongside Udemy — start this week'},
+    ]),
+    trow('#fbbf24','DSA',[
+      {t:'Udemy §3–4: Linked Lists',f:'h',lv:'core',s:'ud',url:'https://www.udemy.com/course/data-structures-algorithms-python/',n:'singly, doubly, cycle detection, reversal'},
+      {t:'NeetCode: Two Pointers + Sliding Window',f:'h',lv:'core',s:'nc',url:'https://neetcode.io/roadmap',n:'+10 LC (total 20)'},
+    ]),
+    trow('#f87171','Cert prep',[
+      {t:'AZ-900 study — start Microsoft Learn path',f:'m',lv:'core',ti:'med',s:'fr',url:'https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/',n:'30 min/day on Sat+Sun — take exam end of Month 1'},
+    ]),
+  ]),
+])+
+phase('PHASE 02','Docker · CI/CD Security · Secrets Management','Weeks 3–4 · CORE territory, maximum time','ph-m1',[
+  wcard('WK 03','Docker + OWASP + OOP + Stacks','~15 hrs',[
+    trow('#a78bfa','DevSecOps',[
+      {t:'Docker Essential Training',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/docker-essential-training',yt:'https://www.youtube.com/watch?v=3c-iBn73dDE',n:'multi-stage Dockerfile, layers, build cache — know these deeply'},
+      {t:'Learning Docker',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/topics/docker',yt:'https://www.youtube.com/watch?v=pTFZFxd5hgI',n:'networking, volumes, Compose, private registries'},
+      {t:'Docker Security: Container Hardening',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/topics/docker',yt:'https://www.youtube.com/watch?v=KINjI1tlo2w',n:'non-root user, readOnlyRootFilesystem, drop capabilities, Trivy scan — this is always asked'},
+      {t:'Learning the OWASP Top 10',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/learning-the-owasp-top-10-9364599',yt:'https://www.youtube.com/watch?v=rWHvp7rUka8',n:'injection, broken auth, SSRF, misconfig — know all 10'},
+    ],[{n:'Play with Docker',u:'https://labs.play-with-docker.com/'},{n:'KodeKloud Docker',u:'https://kodekloud.com/studio/labs/docker'},{n:'PortSwigger OWASP',u:'https://portswigger.net/web-security'}]),
+    trow('#34d399','Python',[
+      {t:'Python OOP',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/python-object-oriented-programming-22888296',yt:'https://www.youtube.com/watch?v=JeznW_7DlB0',n:'classes, inheritance, magic methods, dataclasses'},
+      {t:'Prog. Foundations: OOP Design',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/programming-foundations-object-oriented-design',n:'SOLID principles — makes your code review-worthy'},
+    ]),
+    trow('#fbbf24','DSA',[
+      {t:'Udemy §5–6: Stacks + Queues',f:'h',lv:'core',s:'ud',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+      {t:'Prog. Foundations: Data Structures — finish',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/programming-foundations-data-structures'},
+      {t:'NeetCode: Stack section',f:'h',lv:'core',s:'nc',url:'https://neetcode.io/roadmap',n:'+10 LC (total 30)'},
+    ]),
+    trow('#f87171','Cert prep',[
+      {t:'AZ-900 practice tests — MeasureUp or free Microsoft exams',f:'m',lv:'core',s:'fr',url:'https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/',n:'Take AZ-900 exam this week or next'},
+    ]),
+  ]),
+  wcard('WK 04','CI/CD Pipeline Security + Vault + BST','~15 hrs',[
+    trow('#a78bfa','DevSecOps',[
+      {t:'GitHub Actions for CI/CD',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/topics/github-actions',yt:'https://www.youtube.com/watch?v=R8_veQiYBjI',n:'OIDC auth with AWS — this eliminates static keys entirely'},
+      {t:'Advanced GitHub Actions',f:'h',lv:'adv',ti:'max',s:'yt',yt:'https://www.youtube.com/watch?v=mFFXuXjVgkU',n:'reusable workflows, env protection rules, concurrent job limits'},
+      {t:'Learning Jenkins',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/topics/jenkins',yt:'https://www.youtube.com/watch?v=6YZvp2GwT0A',n:'Jenkinsfile, plugins, shared libraries'},
+      {t:'DevSecOps: SAST/DAST/SCA Pipeline',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/paths/get-ahead-in-devsecops',yt:'https://www.youtube.com/watch?v=aw6ED1LNPWY',n:'Semgrep (SAST), OWASP ZAP (DAST), Snyk (SCA) — all 3 in one pipeline'},
+      {t:'Learning HashiCorp Vault',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/learning-hashicorp-vault',yt:'https://www.youtube.com/watch?v=gJmMmHkpB2Q',n:'dynamic secrets concept is most asked — TTL, leases, AWS engine'},
+    ],[{n:'GitHub Actions free',u:'https://github.com/features/actions'},{n:'KodeKloud Jenkins',u:'https://kodekloud.com/studio/labs/jenkins'},{n:'Vault Tutorials',u:'https://developer.hashicorp.com/vault/tutorials'}]),
+    trow('#34d399','Python',[
+      {t:'Advanced Python — start',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/advanced-python',yt:'https://www.youtube.com/watch?v=HGOBQPFzWKo',n:'decorators, generators, subprocess'},
+      {t:'Automate the Boring Stuff Ch1–5',f:'h',lv:'core',s:'fr',url:'https://automatetheboringstuff.com/',n:'regex, file I/O, OS scripting — build real scripts'},
+    ]),
+    trow('#fbbf24','DSA',[
+      {t:'Udemy §7: Binary Trees',f:'h',lv:'core',s:'ud',url:'https://www.udemy.com/course/data-structures-algorithms-python/',n:'traversals, height, LCA'},
+      {t:'Prog. Foundations: Algorithms — start',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/programming-foundations-algorithms'},
+      {t:'NeetCode: Binary Trees',f:'h',lv:'core',s:'nc',url:'https://neetcode.io/roadmap',n:'+10 LC (total 40)'},
+    ]),
+    trow('#f87171','Cert',[
+      {t:'✓ Take AZ-900 exam',f:'h',lv:'core',s:'fr',url:'https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/',n:'First cert on your resume! Begin SC-900 study'},
+    ]),
+  ]),
+]);
+
+document.getElementById('m1-content').innerHTML=M1;
+
+const M2=phase('PHASE 03','Kubernetes · K8s Security · Terraform · IaC · OPA','Weeks 5–6 · Highest interview ROI','ph-m2',[
+  wcard('WK 05','Kubernetes Core + Security (CKS depth)','~15 hrs',[
+    trow('#a78bfa','DevSecOps',[
+      {t:'Learning Kubernetes',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/learning-kubernetes-16086900',yt:'https://www.youtube.com/watch?v=X48VuDVv0do',n:'pods, services, deployments, Helm, ConfigMaps, Secrets (TechWorld 5h)'},
+      {t:'Kubernetes Essential Training: App Dev',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/kubernetes-essential-training-application-development',yt:'https://www.youtube.com/watch?v=s_o8dwzRlu4',n:'ingress, PV/PVC, jobs, namespaces, HPA'},
+      {t:'CKS Cert Prep — K8s Security',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/certified-kubernetes-security-specialist-cks-cert-prep',yt:'https://www.youtube.com/watch?v=d9xfB5qaOfg',n:'RBAC, NetworkPolicy, PodSecurityContext, Falco, Trivy — this is where you go deep'},
+    ],[{n:'KodeKloud K8s',u:'https://kodekloud.com/studio/labs/kubernetes'},{n:'Killercoda CKS',u:'https://killercoda.com/killer-shell-cks'},{n:'Play with K8s',u:'https://labs.play-with-k8s.com/'}]),
+    trow('#34d399','Python',[
+      {t:'Advanced Python — finish',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/advanced-python',n:'context managers, itertools, type hints, dataclasses'},
+    ]),
+    trow('#fbbf24','DSA',[
+      {t:'Udemy §8: BST',f:'h',lv:'core',s:'ud',url:'https://www.udemy.com/course/data-structures-algorithms-python/',n:'insert, search, validate, kth smallest'},
+      {t:'NeetCode: Binary Search',f:'h',lv:'core',s:'nc',url:'https://neetcode.io/roadmap',n:'+15 LC (total 55)'},
+    ]),
+    trow('#f87171','Cert',[
+      {t:'✓ Take SC-900 exam (build on AZ-900)',f:'h',lv:'core',s:'fr',url:'https://learn.microsoft.com/en-us/credentials/certifications/security-compliance-and-identity-fundamentals/',n:'Begin AZ-500 study alongside this week'},
+    ]),
+  ]),
+  wcard('WK 06','Terraform + IaC Security + OPA + GitOps','~15 hrs',[
+    trow('#a78bfa','DevSecOps',[
+      {t:'Learning Terraform',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/learning-terraform-2',yt:'https://www.youtube.com/watch?v=l5k1ai_GBDE',n:'HCL, state, modules, workspaces — write real AWS infra'},
+      {t:'Terraform Essential Training',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/topics/terraform',yt:'https://www.youtube.com/watch?v=SLB_c_ayRMo',n:'variables, for_each, data sources, outputs'},
+      {t:'IaC Security: Checkov & Terrascan',f:'h',lv:'core',ti:'max',s:'yt',yt:'https://www.youtube.com/watch?v=68CHRlb5m8g',n:'scan Terraform → fail CI on violations — interviewers love this'},
+      {t:'OPA / Kyverno — admission control',f:'h',lv:'adv',ti:'max',s:'yt',yt:'https://www.youtube.com/watch?v=l3j57-0KFWQ',n:'Rego policy blocking non-compliant K8s objects — write 3 real policies'},
+      {t:'GitOps + ArgoCD',f:'m',lv:'core',s:'yt',yt:'https://www.youtube.com/watch?v=MeU5_k9ssrs',n:'declarative deploys, drift detection, sync policies'},
+    ],[{n:'KodeKloud Terraform',u:'https://kodekloud.com/studio/labs/terraform'},{n:'HashiCorp Tutorials',u:'https://developer.hashicorp.com/terraform/tutorials'}]),
+    trow('#34d399','Python',[
+      {t:'Requests + argparse + subprocess',f:'h',lv:'core',s:'fr',url:'https://docs.python-requests.org/',n:'Build your first real CLI tool this week'},
+    ]),
+    trow('#fbbf24','DSA',[
+      {t:'Udemy §9–10: Graphs + Sorting',f:'h',lv:'core',s:'ud',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+      {t:'Prog. Foundations: Algorithms — finish',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/programming-foundations-algorithms'},
+      {t:'NeetCode: Graphs (BFS/DFS)',f:'h',lv:'core',s:'nc',url:'https://neetcode.io/roadmap',n:'+15 LC (total 70)'},
+    ]),
+  ]),
+])+
+phase('PHASE 04','AWS Core · EKS · Security · Observability · SIEM','Weeks 7–8 · AWS is the battleground','ph-m2',[
+  wcard('WK 07','AWS Core + EKS + IAM + Boto3','~15 hrs',[
+    trow('#a78bfa','DevSecOps',[
+      {t:'AWS Essential Training for Developers',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/aws-essential-training-for-developers-17237791',yt:'https://www.youtube.com/watch?v=k1RI5locZE4',n:'EC2, S3, VPC, security groups, ELB, Route53 (FreeCodeCamp 4h)'},
+      {t:'AWS IAM',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/topics/aws-iam',yt:'https://www.youtube.com/watch?v=iF9fs8Rw4Uo',n:'roles, policies, SCPs, permission boundaries, IRSA — policies are JSON, read them carefully'},
+      {t:'Running Kubernetes on AWS (EKS)',f:'h',lv:'core',ti:'max',s:'ll',url:'https://www.linkedin.com/learning/running-kubernetes-on-aws-eks-2021',yt:'https://www.youtube.com/watch?v=p6xDCz00TxU',n:'IRSA replaces static keys, VPC CNI, managed node groups'},
+      {t:'AWS Security Essentials',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/topics/aws-security',yt:'https://www.youtube.com/watch?v=Ia-UEYYR44s',n:'GuardDuty, Security Hub, Config, Macie — know what each detects'},
+    ],[{n:'AWS Free Tier',u:'https://aws.amazon.com/free/'},{n:'AWS Skill Builder',u:'https://skillbuilder.aws/'}]),
+    trow('#34d399','Python',[
+      {t:'Boto3 — list S3, EC2, IAM, CloudTrail',f:'h',lv:'core',s:'fr',url:'https://boto3.amazonaws.com/v1/documentation/api/latest/index.html'},
+      {t:'Python DSA & Algorithms (LL)',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/python-data-structures-and-algorithms',n:'heapq, deque, defaultdict — Python stdlib for DSA'},
+      {t:'Build: audit-s3.py (detect public buckets)',f:'h',lv:'core',s:'fr',url:'https://boto3.amazonaws.com/v1/documentation/api/latest/index.html'},
+    ]),
+    trow('#fbbf24','DSA',[
+      {t:'Udemy §11: Recursion',f:'h',lv:'core',s:'ud',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+      {t:'NeetCode: Intervals',f:'h',lv:'core',s:'nc',url:'https://neetcode.io/roadmap',n:'+15 LC (total 85)'},
+    ]),
+    trow('#f87171','Cert',[
+      {t:'AZ-500 study — John Savill YouTube playlist',f:'h',lv:'core',ti:'high',s:'yt',yt:'https://www.youtube.com/watch?v=6vISs55lb7I',n:'Best free AZ-500 prep. Take exam end of Week 8.'},
+    ]),
+  ]),
+  wcard('WK 08','AWS Security + Prometheus + SIEM + Istio','~15 hrs',[
+    trow('#a78bfa','DevSecOps',[
+      {t:'AWS Security Best Practices (WAF, KMS)',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/topics/aws-security',yt:'https://www.youtube.com/watch?v=_eWyiiFqaKs',n:'WAF rules, KMS CMK vs AWS managed, CloudFront + WAF'},
+      {t:'Prometheus + Grafana',f:'m',lv:'core',ti:'high',s:'yt',yt:'https://www.youtube.com/watch?v=h4Sl21AKiDg',n:'PromQL, alertmanager, dashboards — scrape your K8s cluster'},
+      {t:'K8s Monitoring with Prometheus',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/kubernetes-monitoring-with-prometheus',yt:'https://www.youtube.com/watch?v=QoDqxm7ybLc',n:'cAdvisor, kube-state-metrics, node-exporter'},
+      {t:'Learning Splunk (SPL queries)',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/learning-splunk-22169111',yt:'https://www.youtube.com/watch?v=SSsGsT8y0u0',n:'Search, stats, alerts — know enough to investigate a "breach" in interview'},
+      {t:'Learning Elastic Stack (ELK)',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/learning-elastic-stack',yt:'https://www.youtube.com/watch?v=tBoLDpTWVOM',n:'Kibana, Logstash, Filebeat — index a pipeline log'},
+      {t:'Istio Service Mesh — mTLS between services',f:'m',lv:'adv',s:'yt',yt:'https://www.youtube.com/watch?v=16fgzklcF7Y',n:'Zero trust networking at the service level (TechWorld 42min)'},
+    ],[{n:'Splunk Dev Free',u:'https://dev.splunk.com/enterprise/dev_license'},{n:'TryHackMe ELK',u:'https://tryhackme.com/room/investigatingwitheelk101'}]),
+    trow('#34d399','Python',[
+      {t:'Build REST APIs with FastAPI',f:'h',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/build-rest-apis-with-fastapi',yt:'https://www.youtube.com/watch?v=0sOvCWFmrtA',n:'FastAPI /metrics endpoint for Project 2'},
+      {t:'Python DSA & Algorithms (LL) — finish',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/python-data-structures-and-algorithms'},
+    ]),
+    trow('#fbbf24','DSA',[
+      {t:'Udemy §12: Dynamic Programming — ✓ COMPLETE',f:'h',lv:'core',s:'ud',url:'https://www.udemy.com/course/data-structures-algorithms-python/'},
+      {t:'NeetCode: DP 1D patterns',f:'h',lv:'core',s:'nc',url:'https://neetcode.io/roadmap',n:'+15 LC (total 100)'},
+    ]),
+    trow('#f87171','Cert',[
+      {t:'✓ Take AZ-500 exam',f:'h',lv:'core',s:'fr',url:'https://learn.microsoft.com/en-us/credentials/certifications/azure-security-engineer/',n:'Three Azure certs on your resume. Start AWS CCP study.'},
+    ]),
+  ]),
+]);
+
+document.getElementById('m2-content').innerHTML=M2;
+
+const M3=phase('PHASE 05','Advanced Security · Zero Trust · Supply Chain · Compliance','Weeks 9–10 · Advanced differentiators','ph-m3',[
+  wcard('WK 09','Supply Chain + Multi-Account AWS + Compliance','~15 hrs',[
+    trow('#a78bfa','DevSecOps',[
+      {t:'Supply Chain Security: Sigstore/Cosign/SLSA',f:'h',lv:'adv',ti:'max',s:'yt',yt:'https://www.youtube.com/watch?v=x4BJ1bKMX_4',n:'Sign images with Cosign, verify in OPA webhook, SLSA L2 in GitHub Actions — 90th percentile topic'},
+      {t:'AWS Multi-Account Architecture (Control Tower)',f:'h',lv:'adv',ti:'max',s:'yt',yt:'https://www.youtube.com/watch?v=T2QLDowrCBg',n:'Management → Security → Log Archive → Workload accounts, SCP design, centralized logging'},
+      {t:'Zero Trust Security — NetworkChuck',f:'m',lv:'core',s:'yt',yt:'https://www.youtube.com/watch?v=FCX0i7-5iCU',n:'never trust/always verify, BeyondCorp model, identity-based access'},
+      {t:'Threat Modeling: STRIDE on your projects',f:'m',lv:'core',ti:'high',s:'ll',url:'https://www.linkedin.com/learning/topics/threat-modeling',yt:'https://www.youtube.com/watch?v=GqmQg-cszw4',n:'Apply STRIDE to your CI/CD pipeline — bring diagram to interviews'},
+      {t:'GRC: SOC2, PCI-DSS, GDPR, NIST CSF',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/cybersecurity-foundations-governance-risk-and-compliance-grc-25657666',n:'Conceptual — know what each requires and why, not every detail'},
+      {t:'Cyber Incident Response & Forensics',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/learning-cyber-incident-response-and-digital-forensics-21598044',yt:'https://www.youtube.com/watch?v=Dk-ZqQ-bfy4',n:'Triage → contain → preserve → investigate → eradicate → recover'},
+    ],[{n:'TryHackMe SOC L1',u:'https://tryhackme.com/path/outline/soclevel1'},{n:'LetsDefend',u:'https://letsdefend.io/'},{n:'MITRE ATT&CK',u:'https://mitre-attack.github.io/attack-navigator/'}]),
+    trow('#38bdf8','System Design',[
+      {t:'CAP theorem + Load Balancing + Caching (Redis)',f:'h',lv:'core',ti:'high',s:'fr',url:'https://github.com/donnemartin/system-design-primer'},
+      {t:'Design a SIEM at scale (1M events/sec)',f:'h',lv:'adv',ti:'high',s:'fr',url:'https://github.com/donnemartin/system-design-primer',n:'Kafka + Flink + ClickHouse + Elasticsearch — see Advanced Topics tab'},
+    ]),
+    trow('#fbbf24','DSA — Udemy Gap Topics',[
+      {t:'NeetCode: Heaps / Priority Queue',f:'h',lv:'core',ti:'high',s:'nc',url:'https://neetcode.io/roadmap',n:'heapq, Top K, merge K sorted — Python stdlib now makes sense'},
+      {t:'NeetCode: Trie',f:'m',lv:'core',s:'nc',url:'https://neetcode.io/roadmap',n:'+15 LC (total 115)'},
+    ]),
+    trow('#f87171','Cert',[
+      {t:'AWS CCP (CLF-C02) — study Week 9–10',f:'h',lv:'core',s:'fr',url:'https://aws.amazon.com/certification/certified-cloud-practitioner/',n:'2–3 weeks prep, take end of Week 10. Unlocks 50% off SAA.'},
+    ]),
+  ]),
+  wcard('WK 10','EventBridge Auto-Remediation + K8s Advanced + Security SD','~15 hrs',[
+    trow('#a78bfa','DevSecOps',[
+      {t:'EventBridge + Lambda auto-remediation',f:'h',lv:'adv',ti:'max',s:'yt',yt:'https://www.youtube.com/watch?v=KMzUDMxEnPk',n:'GuardDuty → EventBridge rule → Lambda → isolate EC2 in under 60s — build this'},
+      {t:'K8s Admission Webhooks (Mutating + Validating)',f:'h',lv:'exp',s:'yt',yt:'https://www.youtube.com/watch?v=j-KXFezfCwU',n:'How OPA Gatekeeper works under the hood — FailOpen vs FailClosed'},
+      {t:'AWS DevOps: Docker to Fargate',f:'m',lv:'core',s:'ll',url:'https://www.linkedin.com/learning/topics/aws-devops',yt:'https://www.youtube.com/watch?v=0W3Os7xSs0g'},
+      {t:'AWS CloudTrail + Config custom rules',f:'m',lv:'adv',s:'ll',url:'https://www.linkedin.com/learning/topics/aws-cloudtrail',yt:'https://www.youtube.com/watch?v=Ia-UEYYR44s',n:'Write Lambda-backed Config rule: EC2 without IMDSv2 → auto-flag'},
+      {t:'AI Security: Securing ML Pipelines',f:'l',lv:'adv',s:'ll',url:'https://www.linkedin.com/learning/topics/ai-security',n:'MLSecOps, model supply chain, prompt injection — fintech AI relevance'},
+    ]),
+    trow('#34d399','Python',[
+      {t:'Python Security Libraries',f:'h',lv:'adv',ti:'high',s:'yt',yt:'https://www.youtube.com/watch?v=0jzjK0S8L9E',n:'cryptography, pyOpenSSL, paramiko, PyJWT — build cert expiry checker + SSH auditor'},
+    ]),
+    trow('#38bdf8','System Design',[
+      {t:'Design URL Shortener + Twitter feed',f:'h',lv:'core',s:'fr',url:'https://bytebytego.com/',n:'Practice aloud — explain in 15 min without notes'},
+      {t:'Design distributed rate limiter (security SD)',f:'h',lv:'adv',s:'fr',url:'https://github.com/donnemartin/system-design-primer',n:'Token bucket in Redis with Lua atomic scripts'},
+    ]),
+    trow('#fbbf24','DSA',[
+      {t:'NeetCode: Backtracking',f:'m',lv:'core',s:'nc',url:'https://neetcode.io/roadmap'},
+      {t:'NeetCode: Advanced Graphs + Bit Manip.',f:'m',lv:'core',s:'nc',url:'https://neetcode.io/roadmap',n:'+15 LC (total 130)'},
+    ]),
+    trow('#f87171','Cert',[
+      {t:'✓ Take AWS Cloud Practitioner exam',f:'h',lv:'core',s:'fr',url:'https://aws.amazon.com/certification/certified-cloud-practitioner/',n:'Four certs done. Begin Terraform Associate study.'},
+    ]),
+  ]),
+])+
+phase('PHASE 06','Projects · Mock Interviews · System Design · Apply','Weeks 11–12 · Ship everything','ph-m3',[
+  wcard('WK 11','Project Build Sprint + System Design Deep Dive','~15 hrs',[
+    trow('#a78bfa','Projects',[
+      {t:'FINISH Project 1: Secure CI/CD on EKS',f:'h',lv:'core',ti:'max',s:'fr',url:'https://github.com',n:'GitHub Actions OIDC → Trivy → OPA → ArgoCD → EKS + Terraform + Checkov'},
+      {t:'START Project 2: AWS Security Dashboard',f:'h',lv:'core',s:'fr',url:'https://github.com',n:'Boto3 + CloudTrail + Prometheus + Grafana — add auto-remediation Lambda'},
+      {t:'Architecture diagram in Excalidraw for both',f:'m',lv:'core',s:'fr',url:'https://excalidraw.com/'},
+    ],[{n:'Excalidraw',u:'https://excalidraw.com/'},{n:'GitHub',u:'https://github.com/'}]),
+    trow('#38bdf8','System Design',[
+      {t:'Design WhatsApp (websockets, storage, delivery)',f:'h',lv:'core',s:'fr',url:'https://github.com/donnemartin/system-design-primer'},
+      {t:'Design secrets management platform',f:'h',lv:'adv',ti:'high',s:'fr',url:'https://github.com/donnemartin/system-design-primer',n:'AES-256 + KMS + short-lived tokens + zero-downtime rotation — see Advanced tab'},
+    ]),
+    trow('#fbbf24','DSA + Mock',[
+      {t:'Mock timed sessions — 25 min/problem, explain aloud',f:'h',lv:'core',s:'nc',url:'https://neetcode.io/'},
+      {t:'Pramp peer mock coding interviews',f:'h',lv:'core',s:'fr',url:'https://www.pramp.com/'},
+      {t:'+10 LC (total 140)',f:'m',lv:'core',s:'nc',url:'https://neetcode.io/'},
+    ]),
+    trow('#f87171','Cert',[
+      {t:'HashiCorp Terraform Associate study',f:'m',lv:'core',s:'fr',url:'https://www.hashicorp.com/certification/terraform-associate',n:'KodeKloud Terraform labs = 80% of what exam tests'},
+    ]),
+  ]),
+  wcard('WK 12','Final Polish + Resume + Apply','~15 hrs',[
+    trow('#a78bfa','Final DevSecOps',[
+      {t:'FINISH Project 2 — README, demo GIF, v1.0 tag',f:'h',lv:'core',ti:'max',s:'fr',url:'https://github.com'},
+      {t:'FINISH Project 3: Python DevSecOps CLI Toolkit',f:'h',lv:'core',s:'fr',url:'https://pypi.org/',n:'Typer + Boto3 + Checkov + pytest — published to GitHub Releases'},
+      {t:'Practise: "walk me through your secure pipeline" (5-min verbal)',f:'h',lv:'core',ti:'max',s:'fr',url:'https://www.pramp.com/'},
+    ]),
+    trow('#38bdf8','System Design',[
+      {t:'Design vulnerability scanning platform',f:'h',lv:'adv',s:'fr',url:'https://github.com/donnemartin/system-design-primer',n:'50 microservices — see Advanced Topics tab'},
+      {t:'STAR stories aloud: security incident, pipeline built, trade-off decision',f:'h',lv:'core',s:'fr',url:'https://www.pramp.com/'},
+    ]),
+    trow('#fbbf24','DSA Final Push',[
+      {t:'Final 10 problems targeting weakest patterns',f:'h',lv:'core',s:'nc',url:'https://neetcode.io/roadmap'},
+      {t:'5 full mock coding interviews — Pramp / interviewing.io',f:'h',lv:'core',s:'fr',url:'https://www.pramp.com/'},
+      {t:'✓ 150+ LeetCode solved',f:'h',lv:'core',s:'nc',url:'https://leetcode.com/'},
+    ]),
+    trow('#f87171','Cert + Apply',[
+      {t:'✓ Take Terraform Associate exam',f:'h',lv:'core',s:'fr',url:'https://www.hashicorp.com/certification/terraform-associate',n:'5 certs on your resume. Plan SAA post-roadmap.'},
+      {t:'Apply to 20+ companies',f:'h',lv:'core',ti:'max',s:'fr',url:'https://www.linkedin.com/jobs/',n:'Razorpay, CRED, PhonePe, Groww, CrowdStrike, Palo Alto, remote fintech'},
+    ]),
+  ]),
+]);
+
+document.getElementById('m3-content').innerHTML=M3;
+</script>
+<script>
+// ─── INTERVIEW QUESTIONS ──────────────────────────────────────────────
+const IQS=[
+  {cat:'CI/CD & Pipeline Security',qs:[
+    {q:'Walk me through a secure CI/CD pipeline you built.',f:'h',lv:'core',a:'Source (branch protection, signed commits, OIDC auth — zero static keys) → SAST (Semgrep/SonarQube) + SCA (Snyk) + secrets scan (TruffleHog) → build (multi-stage Docker, non-root, Trivy scan, Cosign signing) → OPA policy gate → Terraform plan + Checkov → ArgoCD GitOps sync to EKS → Falco runtime + Prometheus alerts.',hint:'OIDC + policy-gate + GitOps + Cosign = the four keywords that signal a senior answer'},
+    {q:'What is the difference between SAST, DAST, SCA, and IAST?',f:'h',lv:'core',a:'SAST = static code analysis pre-build (SonarQube/Semgrep — finds insecure code patterns). DAST = dynamic testing on running app (OWASP ZAP — finds runtime vulns like XSS, SQLi). SCA = dependency scanning for known CVEs (Snyk/Dependabot). IAST = instrumented analysis inside running app (best coverage, most complex to set up). In CI: SAST first (fast, shift-left), SCA alongside, DAST on staging environment.',hint:'Name a tool for each type — that is what completes the answer'},
+    {q:'How do you prevent secrets from leaking in CI/CD?',f:'h',lv:'core',a:'Never store secrets in code or CI env vars. HashiCorp Vault with dynamic secrets (auto-expire after TTL) or AWS Secrets Manager. OIDC federation: CI gets short-lived AWS token via GitHub OIDC provider — zero static keys ever created. TruffleHog/GitLeaks as pre-commit hook and in CI. GitHub secret scanning + push protection enabled at org level. Audit every secret access.',hint:'Dynamic secrets + OIDC + pre-commit hooks together = the gold answer. Interviewers love OIDC because most candidates still use static keys.'},
+    {q:'What is supply chain security and how would you implement it?',f:'h',lv:'adv',a:'Supply chain security ensures the software you ship is exactly what you built — not tampered with by a compromised dependency or build system. Implementation: (1) Cosign to sign every image at build time, verify signature in OPA admission webhook before deployment. (2) SBOM generated with Syft — full inventory of every dependency. (3) SLSA Level 2 in GitHub Actions: GitHub-hosted runner with attestation. (4) Private registry with scoping to prevent dependency confusion attacks. (5) Pin all dependency versions with hash verification.',hint:'SLSA + Cosign + SBOM together = top 5% answer. Most candidates have never heard of SLSA.'},
+  ]},
+  {cat:'Kubernetes Security',qs:[
+    {q:'How do you secure a Kubernetes cluster in production?',f:'h',lv:'core',a:'Defence in depth across 6 layers: (1) RBAC — one ServiceAccount per workload, minimal Role, never ClusterAdmin. (2) NetworkPolicy — deny-all default, explicit allow per service pair. (3) PodSecurityContext — runAsNonRoot, readOnlyRootFilesystem, drop ALL capabilities, seccompProfile. (4) Admission control — OPA Gatekeeper/Kyverno validating webhooks enforcing policies. (5) Image security — Trivy in CI + admission webhook blocks images with critical CVEs. (6) Runtime — Falco rules detecting shell spawns, sensitive file reads, privilege escalation.',hint:'6-layer answer: RBAC → Network → Pod → Admission → Image → Runtime. Most candidates only know the first 3.'},
+    {q:'What is an admission webhook and how does OPA Gatekeeper use it?',f:'h',lv:'adv',a:'Kubernetes API server calls external webhooks before persisting objects. Two types: Mutating (modifies the object — e.g. inject sidecar) and Validating (allow/deny — e.g. OPA Gatekeeper). Gatekeeper registers as a ValidatingWebhookConfiguration. When a pod is created, API server sends AdmissionReview JSON to Gatekeeper. Gatekeeper evaluates Rego policies against the object — deny response blocks creation. Key config: failurePolicy=Fail means if Gatekeeper is down, all admission is blocked (safer than Ignore).',hint:'failurePolicy=Fail vs Ignore is the detail that shows you have actually run this in production'},
+    {q:'What is RBAC in Kubernetes and how do you apply least privilege?',f:'h',lv:'core',a:'Roles define allowed verbs on resources (get, list, create). RoleBindings attach Roles to Subjects. For least privilege: one ServiceAccount per app (never default SA), bind only exact verbs needed (get secrets only for secret-reading pods), use Roles not ClusterRoles unless cross-namespace. Audit with kubectl auth can-i --as=system:serviceaccount:ns:sa. Automate review with kube-score or rbac-tool.',hint:'kubectl auth can-i --as flag and kube-score = the two tools that show real K8s experience'},
+  ]},
+  {cat:'AWS & Cloud Security',qs:[
+    {q:'How do you prevent over-privileged IAM in AWS?',f:'h',lv:'core',a:'Five-layer approach: (1) IAM Access Analyzer — identifies unused permissions, external resource access. (2) SCPs at Org level — deny EC2 in disallowed regions, deny disabling CloudTrail, deny root API calls. (3) Permission boundaries — cap what developer-created roles can ever do. (4) IRSA for EKS — pods get temporary AWS credentials via OIDC, no keys anywhere. (5) AWS SSO for human access — temporary credentials per session, no long-lived keys for humans. Audit monthly with Prowler.',hint:'IRSA for workloads + SSO for humans + SCPs as guardrails = the 3-tier answer that sounds like production experience'},
+    {q:'Design the AWS account structure for a new fintech product.',f:'h',lv:'adv',a:'AWS Organizations with nested OUs: Management account (billing, org policies only). Security OU: Log Archive account (all logs shipped here — S3 + CloudTrail + VPC flow logs, SCPs deny deletion), Audit account (read-only security tooling, GuardDuty master). Infrastructure OU: shared services. Workloads OU: Dev, Staging, Prod as separate accounts — blast radius limited. Control Tower automates guardrails. Each account has Security Hub member reporting to aggregator in Security OU.',hint:'Log Archive + Audit as separate accounts = the detail that shows you know real enterprise AWS architecture'},
+    {q:'EventBridge alert: GuardDuty detects cryptocurrency mining on EC2. Walk me through your response.',f:'h',lv:'adv',a:'Auto-remediation (seconds): EventBridge rule triggers Lambda → isolate EC2 (attach quarantine SG with no outbound, detach from ASG, revoke all IAM session tokens for the instance role). Manual investigation (minutes): CloudTrail logs — what API calls did this instance make? VPC flow logs — what external IPs? EBS snapshot for forensics. Determine: was it instance compromise or container escape? Eradicate: terminate instance, rotate all secrets it had access to. Recover: redeploy from golden AMI via IaC. Post-mortem: how did attacker get in? Patch that vector.',hint:'Auto-remediation Lambda + specific steps (revoke IAM session, not just stop instance) = senior-level answer'},
+  ]},
+  {cat:'Supply Chain & Advanced Security',qs:[
+    {q:'What is SLSA and how would you achieve Level 2 in your CI/CD?',f:'h',lv:'adv',a:'SLSA (Supply-chain Levels for Software Artifacts) is a framework for securing the build pipeline. L1: build generates provenance. L2: hosted build service, signed provenance. L3: hardened build, two-party review. L4: hermetic build. For L2 in GitHub Actions: use GitHub-hosted runners (hosted build ✓), enable actions/attest-build-provenance (signed provenance ✓). Result: every artifact has a signed statement of what source commit built it, using which workflow, on which runner. Verify at deploy time.',hint:'Knowing L1–L4 levels and saying "GitHub Actions can achieve L2 natively" = immediate credibility'},
+    {q:'What is a dependency confusion attack and how do you defend against it?',f:'h',lv:'adv',a:'Attacker publishes a malicious package with the same name as your internal package (e.g., company-auth) to the public npm/PyPI registry with a higher version number. Package managers default to highest version — they pull the malicious public package instead of your internal one. Defence: (1) scope all internal packages (@company/auth for npm). (2) Configure pip/npm with --index-url pointing exclusively to private registry. (3) Set publishConfig.access=restricted. (4) Monitor for public packages matching your internal names.',hint:'Scoping packages (@company/name) is the specific technical defence that most candidates miss'},
+  ]},
+  {cat:'Threat Modeling & Incident Response',qs:[
+    {q:'STRIDE-model our CI/CD pipeline.',f:'m',lv:'core',a:'Spoofing — attacker commits as legitimate dev (mitigate: signed commits, PR reviews, branch protection). Tampering — malicious code injected into pipeline script (mitigate: pipeline-as-code in version control, immutable build environments, artifact signing with Cosign). Repudiation — no trace of who deployed what (mitigate: CloudTrail, immutable audit log, ArgoCD deployment history). Info Disclosure — secrets leak in build logs (mitigate: Vault dynamic secrets, mask env vars, TruffleHog scan). DoS — pipeline flooded with malicious PRs (mitigate: concurrency limits, rate limiting on webhooks). Elevation — CI runner has admin cloud access (mitigate: OIDC with scoped IAM role, ephemeral runners).',hint:'STRIDE as an acronym + one specific CI/CD example per letter = the answer that impresses every interviewer'},
+    {q:'Walk me through your incident response process for a compromised container.',f:'m',lv:'core',a:'1. Detect: Falco alert (shell spawned in container) or GuardDuty (unusual API calls). 2. Triage: severity, blast radius — what secrets did this container have? 3. Contain: isolate pod (NetworkPolicy deny-all), cordon node (kubectl cordon), capture pod spec and logs. 4. Preserve: export container filesystem for forensics (docker export), copy K8s audit logs. 5. Investigate: how did attacker get in (vuln in image? misconfigured RBAC?), did they exfiltrate? 6. Eradicate: delete pod, revoke all credentials it touched, patch vulnerability. 7. Recover: redeploy clean image via ArgoCD. 8. Post-mortem: blameless review, improve detection.',hint:'Mentioning Falco for detection and kubectl cordon for node isolation = production-level K8s knowledge'},
+  ]},
+  {cat:'Python & Security Automation',qs:[
+    {q:'Write a Python script to check SSL certificate expiry across 100 domains.',f:'m',lv:'adv',a:'Use ssl + socket: connect to each domain on port 443, call getpeercert(), parse notAfter date with datetime.strptime. Compare to datetime.utcnow() — days remaining. For 100 domains concurrently: asyncio with semaphore (limit 20 concurrent) + httpx or asyncio.open_connection. Output: JSON report with domain, expiry date, days remaining, alert if < 30. Schedule with cron or Lambda. Bonus: send Slack alert via webhook if any cert expires in < 7 days.',hint:'asyncio + semaphore for concurrent checks = senior Python answer. Mention the exact ssl module method.'},
+    {q:'What Python libraries would you use to build a security scanner?',f:'m',lv:'adv',a:'cryptography: symmetric (Fernet) and asymmetric (RSA) encryption for secure storage. pyOpenSSL / ssl: certificate inspection and validation. paramiko: SSH connectivity for remote host auditing. PyJWT: decode, verify, generate JWTs — detect alg:none vulnerability. requests/httpx: HTTP security header checking (HSTS, CSP, X-Frame-Options). hashlib: file integrity checking with SHA-256. socket: port scanning and banner grabbing. subprocess: running system tools (nmap, Trivy) and capturing output.',hint:'Mentioning PyJWT alg:none vulnerability detection shows you know real attack patterns, not just library names'},
+  ]},
+  {cat:'Security System Design',qs:[
+    {q:'Design a SIEM that ingests 1 million security events per second.',f:'m',lv:'adv',a:'Ingest layer: Kafka cluster (partition by source IP for ordering guarantees). Processing: Apache Flink for stateful stream processing — correlation rules (3 failed logins in 60s from same IP → alert). Storage: hot path to ClickHouse (30-day retention, fast aggregations), cold path to S3 Parquet (1 year, queried with Athena). Search: Elasticsearch for full-text log search and Kibana dashboards. Alerting: sub-second for P0 rules via in-memory Flink state. Scale: Kafka scales horizontally, Flink task managers auto-scale. Exactly-once semantics: Flink checkpointing to S3.',hint:'Kafka + Flink + ClickHouse + Elasticsearch — naming all four with their roles = a complete architecture'},
+    {q:'Design a distributed rate limiter for an API that processes 50k req/sec.',f:'m',lv:'adv',a:'Algorithm: sliding window counter (more accurate than fixed window, avoids boundary burst). Storage: Redis with Lua scripts for atomic INCR + EXPIRE (prevents race conditions). Key: {user_id}:{minute_bucket}. For distributed: Redis Cluster with consistent hashing — any API node hits the same Redis shard for a given user. Edge case: Redis failure → fail open (pass requests) or fail closed (block all) — depends on security requirement. For API Gateway: AWS API Gateway built-in throttling backed by Redis.',hint:'Lua scripts for atomicity + fail open vs fail closed trade-off = the two details that show real system design thinking'},
+  ]},
+];
+
+function buildInterviews(){
+  const FC={h:'<span class="freq fh">●●●</span>',m:'<span class="freq fm">●●○</span>',l:'<span class="freq fl">●○○</span>'};
+  const LVC={core:'<span class="lv lv-core">CORE</span>',adv:'<span class="lv lv-adv">ADVANCED</span>',exp:'<span class="lv lv-exp">EXPERT</span>'};
+  document.getElementById('iq-el').innerHTML=IQS.map(s=>`
+    <div class="iq-section">
+      <div class="iq-title">${s.cat}</div>
+      ${s.qs.map(q=>`<div class="iq-item">
+        <div class="iq-q">${FC[q.f]||''} ${LVC[q.lv]||''} ${q.q}</div>
+        <div class="iq-a">${q.a}</div>
+        <div class="iq-hint">💡 ${q.hint}</div>
+      </div>`).join('')}
+    </div>`).join('');
+}
+
+// ─── PLATFORMS ────────────────────────────────────────────────────────
+function buildPlatforms(){
+  const secs=[
+    {t:'Linux & Bash',ps:[
+      {n:'OverTheWire: Bandit',u:'https://overthewire.org/wargames/bandit/',d:'Linux wargame from zero. Level 0 = total beginner. Best free Linux practice.',tags:['100% free','wargame'],f:true},
+      {n:'KodeKloud Linux Labs',u:'https://kodekloud.com/studio/labs/linux',d:'Browser terminal, no setup. Structured exercises.',tags:['free','browser'],f:true},
+      {n:'TechWorld with Nana (YouTube)',u:'https://www.youtube.com/@TechWorldwithNana',d:'#1 DevOps YouTube channel. Full Docker, K8s, Terraform, CI/CD, Prometheus, Istio, Vault courses.',tags:['free','1.4M subs','full courses'],f:true},
+    ]},
+    {t:'Docker & Containers',ps:[
+      {n:'Play with Docker',u:'https://labs.play-with-docker.com/',d:'Real Docker in browser. 4h sessions.',tags:['free'],f:true},
+      {n:'KodeKloud Docker Labs',u:'https://kodekloud.com/studio/labs/docker',d:'200+ exercises. Basics to security hardening.',tags:['free','200+ labs'],f:true},
+      {n:'DevOps Directive (YouTube)',u:'https://www.youtube.com/@DevOpsDirective',d:'Technically precise Docker and K8s deep dives. Zero fluff.',tags:['free','intermediate'],f:true},
+    ]},
+    {t:'Kubernetes & K8s Security',ps:[
+      {n:'KodeKloud K8s Labs',u:'https://kodekloud.com/studio/labs/kubernetes',d:'1000+ exercises. Best free K8s practice.',tags:['free','1000+ labs'],f:true},
+      {n:'Killercoda CKS Scenarios',u:'https://killercoda.com/killer-shell-cks',d:'Real CKS exam scenarios in browser: RBAC, Falco, Trivy, NetworkPolicy.',tags:['free','CKS prep'],f:true},
+      {n:'Killer.sh (paid, worth it)',u:'https://killer.sh/',d:'Included with CKA/CKS exam purchase. Harder than real exam. If you pass Killer.sh, you pass the cert.',tags:['paid','exam prep'],f:false},
+    ]},
+    {t:'Terraform & IaC',ps:[
+      {n:'KodeKloud Terraform Labs',u:'https://kodekloud.com/studio/labs/terraform',d:'50+ labs: HCL, state, modules, AWS provisioning.',tags:['free','50+ labs'],f:true},
+      {n:'HashiCorp Vault Tutorials',u:'https://developer.hashicorp.com/vault/tutorials',d:'Official Vault + Terraform tutorials. Dynamic secrets walkthrough.',tags:['free','official'],f:true},
+    ]},
+    {t:'AWS Cloud Security',ps:[
+      {n:'AWS Free Tier',u:'https://aws.amazon.com/free/',d:'12 months free. EC2, S3, IAM, GuardDuty trial, CloudTrail.',tags:['12 months','real AWS'],f:true},
+      {n:'AWS Skill Builder',u:'https://skillbuilder.aws/',d:'500+ official courses + free labs.',tags:['free','official'],f:true},
+      {n:'CloudGoat (Rhino Security)',u:'https://github.com/RhinoSecurityLabs/cloudgoat',d:'Intentionally vulnerable AWS — learn by attacking + defending.',tags:['free','attack/defend'],f:true},
+      {n:'John Savill (YouTube)',u:'https://www.youtube.com/@NTFAQGuy',d:'Best free Azure content globally. AZ-500 full playlist. 600k+ subs.',tags:['free','Azure cert prep'],f:true},
+      {n:'Stephane Maarek (YouTube)',u:'https://www.youtube.com/@StephaneMaarek',d:'AWS deep dives and cert prep. 500k+ students.',tags:['free','AWS cert prep'],f:true},
+    ]},
+    {t:'Cybersecurity & Supply Chain',ps:[
+      {n:'TryHackMe',u:'https://tryhackme.com/',d:'Best beginner platform. Guided rooms, SOC path.',tags:['free tier','beginner'],f:true},
+      {n:'PortSwigger Web Security Academy',u:'https://portswigger.net/web-security',d:'OWASP Top 10 hands-on. 100% free. Used by pro pen testers.',tags:['100% free','OWASP'],f:true},
+      {n:'LetsDefend',u:'https://letsdefend.io/',d:'SOC analyst simulations — IR, SIEM, malware analysis.',tags:['free tier','SOC'],f:true},
+      {n:'Sigstore Docs',u:'https://docs.sigstore.dev/',d:'Official Sigstore + Cosign + SLSA documentation.',tags:['free','supply chain'],f:true},
+      {n:'Abhishek Veeramalla (YouTube)',u:'https://www.youtube.com/@AbhishekVeeramalla',d:'Real-world DevSecOps pipelines, AWS + K8s projects. Very practical.',tags:['free','DevSecOps'],f:true},
+    ]},
+    {t:'Python & DSA',ps:[
+      {n:'CS50P — Harvard Python',u:'https://cs50.harvard.edu/python/',d:'Best free Python course with problem sets + certificate.',tags:['100% free','certificate'],f:true},
+      {n:'Automate the Boring Stuff',u:'https://automatetheboringstuff.com/',d:'Free book. Real automation projects. Essential reading.',tags:['100% free','book'],f:true},
+      {n:'NeetCode Roadmap',u:'https://neetcode.io/roadmap',d:'Best DSA roadmap. 150 problems with Python video explanations.',tags:['free','150 problems'],f:true},
+      {n:'Pramp',u:'https://www.pramp.com/',d:'Free peer mock coding + system design + behavioral interviews.',tags:['free','mock interviews'],f:true},
+    ]},
+    {t:'System Design',ps:[
+      {n:'System Design Primer (GitHub)',u:'https://github.com/donnemartin/system-design-primer',d:'250k stars. Complete reference — caching, CAP, sharding.',tags:['100% free','250k stars'],f:true},
+      {n:'ByteByteGo Free Blog',u:'https://blog.bytebytego.com/',d:"Alex Xu's free newsletter — FAANG-quality system design.",tags:['free newsletter'],f:true},
+      {n:'interviewing.io',u:'https://interviewing.io/',d:'Watch free FAANG mock interview recordings.',tags:['free recordings'],f:true},
+    ]},
+    {t:'Certification Prep (Free)',ps:[
+      {n:'Microsoft Learn — AZ-900',u:'https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/',d:'Official free learning path. Covers everything on the exam.',tags:['free','official'],f:true},
+      {n:'Microsoft Learn — AZ-500',u:'https://learn.microsoft.com/en-us/credentials/certifications/azure-security-engineer/',d:'Official AZ-500 path. Combine with John Savill YouTube.',tags:['free','official'],f:true},
+      {n:'AWS Skill Builder — CCP',u:'https://explore.skillbuilder.aws/learn/course/external/view/elearning/134/aws-cloud-practitioner-essentials',d:'Official Cloud Practitioner Essentials course. Free.',tags:['free','official'],f:true},
+      {n:'HashiCorp Study Guide',u:'https://developer.hashicorp.com/terraform/tutorials/certification-003',d:'Official Terraform Associate study guide with practice questions.',tags:['free','official'],f:true},
+    ]},
+  ];
+  document.getElementById('platforms-el').innerHTML=secs.map(s=>`
+    <div class="res-sec"><div class="rs-title">${s.t}</div>
+    <div class="res-grid">${s.ps.map(p=>`
+      <a class="rc" href="${p.u}" target="_blank" rel="noopener">
+        <div class="rc-name">${p.n}</div>
+        <div class="rc-desc">${p.d}</div>
+        <div class="rc-tags">${p.tags.map(t=>`<span class="rct ${p.f?'rct-f':'rct-p'}">${t}</span>`).join('')}</div>
+      </a>`).join('')}</div></div>`).join('');
+}
+
+// ─── PROJECTS ─────────────────────────────────────────────────────────
+function buildProjects(){
+  const projs=[
+    {n:'01',title:'🛡 Secure CI/CD Pipeline on AWS EKS',week:'Weeks 10–11',
+     stack:['GitHub Actions OIDC','EKS','Terraform','Cosign image signing','Trivy','OPA/Kyverno','ArgoCD','Checkov','SBOM via Syft'],
+     desc:'Full pipeline: code push → OIDC auth (zero static keys) → Semgrep SAST + Snyk SCA + Trivy image scan + Cosign signing → OPA policy gate (blocks unsigned or CVE-critical images) → Terraform plan + Checkov IaC scan → ArgoCD GitOps sync to EKS. SBOM generated per build. Vault for secrets. NetworkPolicy + RBAC on cluster. SLSA L2 provenance attached.',
+     why:"'Walk me through your secure pipeline' — this entire repo is the answer. Shows shift-left + zero-trust + supply chain security in one project."},
+    {n:'02',title:'☁ AWS Security Monitoring + Auto-Remediation',week:'Weeks 11–12',
+     stack:['Python/Boto3','CloudTrail','GuardDuty','EventBridge','Lambda','Prometheus','Grafana','FastAPI','SNS'],
+     desc:'Boto3 polls CloudTrail, GuardDuty findings, and Config violations every 5 min. FastAPI /metrics endpoint exposes as Prometheus metrics. Grafana dashboard: open SGs, failed logins, unencrypted S3, IAM violations. EventBridge rule on GuardDuty HIGH finding → Lambda isolates EC2 (quarantine SG + revoke IAM session) automatically. SNS alert on critical findings.',
+     why:'Shows Python automation + AWS security + auto-remediation + observability together. Demonstrates the EventBridge pattern that senior interviewers specifically ask about.'},
+    {n:'03',title:'🐍 Python DevSecOps CLI Toolkit',week:'Across Month 3',
+     stack:['Python','Typer','Boto3','ssl/socket','paramiko','cryptography','Checkov API','pytest','GitHub Releases'],
+     desc:'pip-installable: dsec scan-image (Trivy), dsec audit-iam (over-privileged roles), dsec check-s3 (public buckets), dsec scan-tf (Checkov on directory), dsec cert-check (SSL expiry across domains), dsec ssh-audit (check host SSH config via paramiko). Full pytest suite. Published to GitHub Releases.',
+     why:'Shows you build security tools not just run them. Uses Python security libraries (ssl, paramiko, cryptography) that demonstrate real security scripting capability. Unique across 90% of candidates.'},
+  ];
+  document.getElementById('proj-el').innerHTML=projs.map(p=>`
+    <div class="proj">
+      <div class="proj-top"><span class="proj-n">PROJECT ${p.n} · ${p.week}</span><span class="proj-title">${p.title}</span></div>
+      <div class="proj-stack">${p.stack.map(s=>`<span class="ps">${s}</span>`).join('')}</div>
+      <div class="proj-desc">${p.desc}</div>
+      <div class="proj-why">🎯 ${p.why}</div>
+    </div>`).join('');
+}
+
+// ─── MILESTONES ────────────────────────────────────────────────────────
+const MILESTONES=[
+  'Week 1 — Linux fluent, Git configured. Udemy §1–2 done. Python Essential Training started. AZ-900 study begun.',
+  'Week 2 — Security foundations clear. Udemy §3–4 (Linked Lists). 20 LeetCode Easy. AZ-900 practice tests started.',
+  'Week 3 — Dockerized + Trivy-scanned app running in CI. Udemy §5–6. Python OOP done. AZ-900 taken ✓',
+  'Week 4 — Full GitHub Actions pipeline: OIDC + SAST + SCA + Vault. Udemy §7. 40+ LeetCode. SC-900 study started.',
+  'Week 5 — K8s cluster with RBAC + NetworkPolicy + Falco. Udemy §8–9. 55+ LeetCode. SC-900 taken ✓',
+  'Week 6 — Terraform + Checkov + OPA gate live. Udemy §9–10. Advanced Python done. 70+ LeetCode. AZ-500 study.',
+  'Week 7 — EKS + IRSA configured. GuardDuty + CloudTrail alerts live. Boto3 scripts done. 85+ LeetCode.',
+  'Week 8 — Prometheus + Grafana scraping K8s. Splunk/ELK ingesting logs. Udemy complete ✓. 100+ LeetCode. AZ-500 taken ✓',
+  'Week 9 — Supply chain: Cosign + SLSA L2 + SBOM. Multi-account AWS architecture understood. 115+ LeetCode. AWS CCP study.',
+  'Week 10 — EventBridge auto-remediation Lambda built. K8s admission webhooks understood. SD: SIEM designed. 130+ LC. AWS CCP taken ✓',
+  'Week 11 — Project 1 on GitHub with README + arch diagram + Cosign signing. System Design: WhatsApp + secrets platform. 140+ LC.',
+  'Week 12 — 3 projects live. Terraform cert taken ✓. Resume polished. 20+ applications sent. 5 mock interviews done. 150+ LeetCode ✓',
+];
+document.getElementById('milestone-el').innerHTML=MILESTONES.map((m,i)=>`
+  <div class="ci"><div class="cbox"></div><div><span style="font-family:'Fira Code',monospace;font-size:10px;color:var(--muted)">Wk ${i+1} · </span>${m}</div></div>`).join('');
+
+const JC=["Resume: 1 page, quantified — 'reduced MTTR 60%', 'zero P0 security incidents in 90 days'","LinkedIn: 'DevSecOps Engineer | AWS · K8s · IaC · Supply Chain | Fintech/AI'","List all 5 certs prominently: AZ-900, SC-900, AZ-500, AWS CCP, Terraform Associate","GitHub: 3 repos, clean READMEs, architecture diagrams, demo GIFs or Asciinema recordings","Project 1 live: Secure CI/CD — EKS + OPA + Trivy + Cosign + ArgoCD + SBOM","Project 2 live: AWS security monitoring — Python + Boto3 + auto-remediation Lambda + Grafana","Project 3 live: Python CLI toolkit — installable, tested, with ssl + paramiko + boto3","150+ LeetCode across all NeetCode patterns — can show profile link","5 mock interviews done — Pramp and/or interviewing.io","3 security system design problems practiced aloud: SIEM, rate limiter, secrets platform","STAR stories ready for: security incident handled, trade-off decision made, pipeline built from scratch","Target shortlisted: Razorpay, CRED, PhonePe, Groww, Zepto, CrowdStrike, Palo Alto, Wiz, remote fintech","20+ applications via LinkedIn Easy Apply + DMs to engineering managers on LinkedIn"];
+document.getElementById('job-el').innerHTML=JC.map(c=>`<div class="ci"><div class="cbox"></div><div>${c}</div></div>`).join('');
+
+// ─── INIT ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+buildChecklist();
+buildScoreGrid();
+buildRadar();
+updateScores();
+buildCerts();
+buildTimeTable();
+buildAdvanced();
+buildInterviews();
+buildPlatforms();
+buildProjects();
+</script>
+</body>
+</html>

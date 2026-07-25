@@ -16,11 +16,42 @@ function daysBetween(a, b) {
 const LS_KEY = 'chronoTimer_v1';
 
 function loadStreak() {
-  try { const r = localStorage.getItem(LS_KEY); if (r) return JSON.parse(r); } catch { }
-  return { days: {}, streak: 0, bestStreak: 0, totalXP: 0, lastActiveDate: null, shownMs: [] };
+  try {
+    const r = localStorage.getItem(LS_KEY);
+    if (r) {
+      const parsed = JSON.parse(r);
+      return {
+        days: {},
+        streak: 0,
+        bestStreak: 0,
+        totalXP: 0,
+        lastActiveDate: null,
+        shownMs: [],
+        tasks: [],
+        activeTaskId: null,
+        customRoadmap: null,
+        ...parsed
+      };
+    }
+  } catch { }
+  return { days: {}, streak: 0, bestStreak: 0, totalXP: 0, lastActiveDate: null, shownMs: [], tasks: [], activeTaskId: null, customRoadmap: null };
 }
 function persist(s) {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch { }
+  try {
+    const current = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      ...current,
+      streak: s.streak,
+      bestStreak: s.bestStreak,
+      totalXP: s.totalXP,
+      lastActiveDate: s.lastActiveDate,
+      days: s.days,
+      shownMs: s.shownMs,
+      tasks: s.tasks ?? current.tasks ?? [],
+      activeTaskId: s.activeTaskId !== undefined ? s.activeTaskId : (current.activeTaskId ?? null),
+      customRoadmap: s.customRoadmap !== undefined ? s.customRoadmap : (current.customRoadmap ?? null)
+    }));
+  } catch { }
 }
 
 // ── Level table ───────────────────────────────────────────────────────────────
@@ -94,18 +125,25 @@ function applySession(s, xpEarned) {
   days[today] = { sessions: days[today].sessions + 1, xp: days[today].xp + xpEarned };
 
   let streak = s.streak;
-  if (!s.lastActiveDate) {
-    streak = 1;
-  } else if (s.lastActiveDate === today) {
-    // already active today — streak unchanged
-  } else if (daysBetween(s.lastActiveDate, today) === 1) {
-    streak += 1;
-  } else {
-    streak = 1;
+  let lastActiveDate = s.lastActiveDate;
+
+  // Streak only advances if user is logged in AND focusing on an active task
+  if (s.user && s.activeTaskId) {
+    if (!lastActiveDate) {
+      streak = 1;
+    } else if (lastActiveDate === today) {
+      // already active today — streak unchanged
+    } else if (daysBetween(lastActiveDate, today) === 1) {
+      streak += 1;
+    } else {
+      streak = 1;
+    }
+    lastActiveDate = today;
   }
+
   const bestStreak = Math.max(streak, s.bestStreak);
   const totalXP = s.totalXP + xpEarned;
-  return { ...s, days, streak, bestStreak, totalXP, lastActiveDate: today };
+  return { ...s, days, streak, bestStreak, totalXP, lastActiveDate };
 }
 
 // ── Zustand store ─────────────────────────────────────────────────────────────
@@ -126,7 +164,7 @@ export const useStore = create((set, get) => ({
         // Fetch stats from Appwrite
         const cloudStats = await fetchUserStats(u.$id);
         if (cloudStats) {
-          set({
+          const loadedData = {
             userDocId: cloudStats.docId,
             streak: cloudStats.streak,
             bestStreak: cloudStats.bestStreak,
@@ -134,7 +172,15 @@ export const useStore = create((set, get) => ({
             lastActiveDate: cloudStats.lastActiveDate,
             days: cloudStats.days,
             shownMs: cloudStats.shownMs,
-          });
+            tasks: cloudStats.tasks || [],
+            customRoadmap: cloudStats.customRoadmap || null,
+          };
+          set(loadedData);
+          persist(loadedData);
+        } else {
+          // Newly logged in user has no stats doc in Appwrite yet.
+          // Sync current local stats to create their first cloud document.
+          await get().syncCloudStats();
         }
       }
     } catch (e) {
@@ -153,7 +199,21 @@ export const useStore = create((set, get) => ({
 
   async logout() {
     await logoutUser();
-    set({ user: null, userDocId: null });
+    const clearedState = {
+      user: null,
+      userDocId: null,
+      streak: 0,
+      bestStreak: 0,
+      totalXP: 0,
+      lastActiveDate: null,
+      days: {},
+      shownMs: [],
+      tasks: [],
+      customRoadmap: null,
+      activeTaskId: null,
+    };
+    set(clearedState);
+    persist(clearedState);
   },
 
   async syncCloudStats() {
@@ -166,6 +226,8 @@ export const useStore = create((set, get) => ({
       lastActiveDate: s.lastActiveDate,
       days: s.days,
       shownMs: s.shownMs,
+      tasks: s.tasks || [],
+      customRoadmap: s.customRoadmap || null,
     };
     const res = await saveUserStats(s.user.$id, statsData, s.userDocId);
     if (res && res.$id) {
@@ -348,7 +410,19 @@ export const useStore = create((set, get) => ({
     );
     const shownMs = found ? [...newState.shownMs, found.days] : newState.shownMs;
 
-    persist({ ...newState, shownMs });
+    // Update active task if selected
+    let tasks = s.tasks || [];
+    if (s.activeTaskId) {
+      tasks = tasks.map(t => {
+        if (t.id === s.activeTaskId) {
+          const sessionsCompleted = t.sessionsCompleted + 1;
+          return { ...t, sessionsCompleted };
+        }
+        return t;
+      });
+    }
+
+    persist({ ...newState, shownMs, tasks, activeTaskId: s.activeTaskId });
 
     const nextMode = sessions % s.totalSess === 0 ? 'long' : 'short';
 
@@ -356,6 +430,7 @@ export const useStore = create((set, get) => ({
       ...newState,
       sessions,
       shownMs,
+      tasks,
       xpFlash: { amount: xp, bonus: bonus > 1, levelUp: newLvl > prevLvl, ts: Date.now() },
       milestone: found ?? null,
       completedPrompt: { isBreak: false, nextMode },
@@ -371,5 +446,190 @@ export const useStore = create((set, get) => ({
 
   clearXpFlash() {
     set({ xpFlash: null });
+  },
+
+  addTask(title, description = '', category = 'foundations') {
+    const s = get();
+    const newTask = {
+      id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      title,
+      description,
+      category,
+      sessionsCompleted: 0,
+      completed: false,
+      date: todayStr(),
+    };
+    const tasks = [...(s.tasks || []), newTask];
+    set({ tasks });
+    persist({
+      ...s,
+      tasks,
+      activeTaskId: s.activeTaskId
+    });
+    s.syncCloudStats();
+  },
+
+  toggleTaskCompleted(taskId) {
+    const s = get();
+    let taskCompletedJustNow = false;
+    const tasks = (s.tasks || []).map(t => {
+      if (t.id === taskId) {
+        const nextCompleted = !t.completed;
+        if (nextCompleted) taskCompletedJustNow = true;
+        return {
+          ...t,
+          completed: nextCompleted
+        };
+      }
+      return t;
+    });
+
+    let extraState = {};
+    if (taskCompletedJustNow) {
+      const xpEarned = 50;
+      const today = todayStr();
+      const prevLvl = getLevelInfo(s.totalXP).lvl.n;
+      
+      const days = { ...s.days };
+      if (!days[today]) days[today] = { sessions: 0, xp: 0 };
+      days[today] = { ...days[today], xp: days[today].xp + xpEarned };
+
+      let streak = s.streak;
+      if (!s.lastActiveDate) {
+        streak = 1;
+      } else if (s.lastActiveDate === today) {
+        // already active today
+      } else if (daysBetween(s.lastActiveDate, today) === 1) {
+        streak += 1;
+      } else {
+        streak = 1;
+      }
+      const bestStreak = Math.max(streak, s.bestStreak);
+      const totalXP = s.totalXP + xpEarned;
+      const newLvl = getLevelInfo(totalXP).lvl.n;
+
+      extraState = {
+        days,
+        streak,
+        bestStreak,
+        totalXP,
+        xpFlash: { amount: xpEarned, bonus: false, levelUp: newLvl > prevLvl, ts: Date.now() },
+        lastActiveDate: today
+      };
+    }
+
+    const nextActiveId = s.activeTaskId === taskId && taskCompletedJustNow ? null : s.activeTaskId;
+
+    const mergedState = {
+      tasks,
+      activeTaskId: nextActiveId,
+      ...extraState
+    };
+
+    set(mergedState);
+
+    const sNew = get();
+    persist({
+      ...sNew,
+      tasks,
+      activeTaskId: nextActiveId
+    });
+    sNew.syncCloudStats();
+  },
+
+  deleteTask(taskId) {
+    const s = get();
+    const tasks = (s.tasks || []).filter(t => t.id !== taskId);
+    const activeTaskId = s.activeTaskId === taskId ? null : s.activeTaskId;
+    set({ tasks, activeTaskId });
+    persist({
+      ...s,
+      tasks,
+      activeTaskId
+    });
+    s.syncCloudStats();
+  },
+
+  setActiveTaskId(taskId) {
+    const s = get();
+    set({ activeTaskId: taskId });
+    persist({
+      ...s,
+      tasks: s.tasks,
+      activeTaskId: taskId
+    });
+  },
+
+  importWeekTasks(weekKey, weekItems) {
+    const s = get();
+    const existingTitles = new Set((s.tasks || []).map(t => t.title.toLowerCase()));
+    
+    const newTasks = weekItems
+      .filter(item => !existingTitles.has(item.label.toLowerCase()))
+      .map(item => ({
+        id: 'task_roadmap_' + item.id + '_' + Date.now(),
+        title: item.label,
+        description: `Source: ${item.src} | Week: ${item.week}${item.url ? ` | Link: ${item.url}` : ''}`,
+        category: item.cat,
+        sessionsCompleted: 0,
+        completed: false,
+        date: todayStr(),
+        roadmapId: item.id,
+      }));
+
+    if (newTasks.length === 0) return;
+
+    const tasks = [...(s.tasks || []), ...newTasks];
+    set({ tasks });
+    persist({
+      ...s,
+      tasks,
+      activeTaskId: s.activeTaskId
+    });
+    s.syncCloudStats();
+  },
+
+  importSingleTask(item) {
+    const s = get();
+    const existing = (s.tasks || []).find(t => t.roadmapId === item.id || t.title.toLowerCase() === item.label.toLowerCase());
+    if (existing) return;
+
+    const newTask = {
+      id: 'task_roadmap_' + item.id + '_' + Date.now(),
+      title: item.label,
+      description: `Source: ${item.src} | Week: ${item.week}${item.url ? ` | Link: ${item.url}` : ''}`,
+      category: item.cat,
+      sessionsCompleted: 0,
+      completed: false,
+      date: todayStr(),
+      roadmapId: item.id,
+    };
+
+    const tasks = [...(s.tasks || []), newTask];
+    set({ tasks });
+    persist({
+      ...s,
+      tasks,
+      activeTaskId: s.activeTaskId
+    });
+    s.syncCloudStats();
+  },
+
+  setCustomRoadmap(roadmapData) {
+    const s = get();
+    set({ customRoadmap: roadmapData });
+    persist({
+      ...s,
+      customRoadmap: roadmapData
+    });
+  },
+
+  resetCustomRoadmap() {
+    const s = get();
+    set({ customRoadmap: null });
+    persist({
+      ...s,
+      customRoadmap: null
+    });
   },
 }));

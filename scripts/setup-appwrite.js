@@ -67,6 +67,8 @@ async function autoProvision() {
     { key: 'lastActiveDate', type: 'string',  size: 32,    required: false },
     { key: 'daysData',       type: 'string',  size: 65535, required: false },
     { key: 'shownMs',        type: 'string',  size: 4096,  required: false },
+    { key: 'tasksData',      type: 'string',  size: 65535, required: false },
+    { key: 'roadmapData',    type: 'string',  size: 65535, required: false },
   ];
 
   console.log(`⚙️ Provisioning attributes...`);

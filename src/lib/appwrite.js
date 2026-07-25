@@ -152,6 +152,8 @@ export async function fetchUserStats(userId) {
         lastActiveDate: doc.lastActiveDate,
         days: doc.daysData ? JSON.parse(doc.daysData) : {},
         shownMs: doc.shownMs ? JSON.parse(doc.shownMs) : [],
+        tasks: doc.tasksData ? JSON.parse(doc.tasksData) : [],
+        customRoadmap: doc.roadmapData ? JSON.parse(doc.roadmapData) : null,
       };
     }
   } catch (e) {
@@ -170,6 +172,8 @@ export async function saveUserStats(userId, statsData, docId = null) {
     lastActiveDate: statsData.lastActiveDate || '',
     daysData: JSON.stringify(statsData.days || {}),
     shownMs: JSON.stringify(statsData.shownMs || []),
+    tasksData: JSON.stringify(statsData.tasks || []),
+    roadmapData: JSON.stringify(statsData.customRoadmap || null),
   };
 
   try {

@@ -148,6 +148,13 @@ export default function TimerPage() {
   const toggleSettings = useStore(s => s.toggleSettings);
   const user           = useStore(s => s.user);
   const logout         = useStore(s => s.logout);
+  const tasks        = useStore(s => s.tasks || []);
+  const activeTaskId = useStore(s => s.activeTaskId);
+  const activeTask   = tasks.find(t => t.id === activeTaskId);
+  const setActiveTaskId = useStore(s => s.setActiveTaskId);
+  
+  const streak         = useStore(s => s.streak);
+  const lastActiveDate = useStore(s => s.lastActiveDate);
 
   // rAF-driven tick
   const rafRef   = useRef();
@@ -165,6 +172,9 @@ export default function TimerPage() {
   useEffect(() => {
     document.title = `${fmt(remaining)} — CHRONO`;
   }, [remaining, mode]);
+
+  const today = new Date().toISOString().split('T')[0];
+  const hasCompletedToday = lastActiveDate === today;
 
   return (
     <div className={styles.pageViewport}>
@@ -185,7 +195,38 @@ export default function TimerPage() {
 
       {/* Center Main Focus Container */}
       <main className={styles.centerStage}>
-        <div className={styles.promptText}>What do you want to focus on?</div>
+        <div className={styles.taskSelectorContainer}>
+          <span className={styles.selectorLabel}>🎯 Target:</span>
+          <select
+            value={activeTaskId || ''}
+            onChange={(e) => setActiveTaskId(e.target.value || null)}
+            className={styles.taskDropdown}
+            title={activeTask ? activeTask.description : 'Select a study task from your roadmap queue'}
+          >
+            <option value="">-- No active focus task --</option>
+            {tasks.filter(t => !t.completed).map(t => (
+              <option key={t.id} value={t.id}>
+                {t.title}
+              </option>
+            ))}
+            {tasks.filter(t => !t.completed).length === 0 && (
+              <option value="" disabled>No active tasks. Go to Study Hub to import!</option>
+            )}
+          </select>
+          {activeTask && (
+            <span className={styles.activeTaskPomoCount}>
+              ({activeTask.sessionsCompleted} Pomos)
+            </span>
+          )}
+          {streak > 0 && !hasCompletedToday && (
+            <span 
+              className={styles.miniStreakWarning} 
+              title={user ? `Streak Warning: Complete a task focus session today to save your ${streak}-day streak!` : `Streak Warning: You are not logged in! Log in to protect your streak.`}
+            >
+              ⚠️
+            </span>
+          )}
+        </div>
         
         <ModeTabs />
 
@@ -236,6 +277,13 @@ export default function TimerPage() {
               </svg>
             )}
           </button>
+
+          <Link to="/tasks" className={styles.dockIconBtn} aria-label="Tasks & Roadmap" title="Tasks & Roadmap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 11l3 3L22 4" />
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+            </svg>
+          </Link>
 
           <Link to="/analytics" className={styles.dockIconBtn} aria-label="Analytics" title="Analytics">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">

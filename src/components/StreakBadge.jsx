@@ -3,19 +3,24 @@ import styles from './StreakBadge.module.css';
 
 export default function StreakBadge() {
   const streak = useStore(s => s.streak);
-  const today  = useStore(s => {
-    const d = new Date();
-    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    return (s.days[k] || {}).sessions || 0;
-  });
-  const hour = new Date().getHours();
-  const atRisk = streak > 0 && today === 0 && hour >= 18;
+  const lastActiveDate = useStore(s => s.lastActiveDate);
+  const user = useStore(s => s.user);
+
+  const today = new Date().toISOString().split('T')[0];
+  const hasCompletedToday = lastActiveDate === today;
+  const atRisk = streak > 0 && (!hasCompletedToday || !user);
+
+  const tooltipMsg = !user
+    ? `Streak Warning: You are not logged in! Log in and focus on a task to save your ${streak}-day streak.`
+    : !hasCompletedToday
+    ? `Streak Warning: Focus on a task today to save your ${streak}-day streak!`
+    : `${streak}-day streak active!`;
 
   return (
-    <div className={`${styles.badge} ${atRisk ? styles.risk : ''}`} title={`${streak} day streak`}>
+    <div className={`${styles.badge} ${atRisk ? styles.risk : ''}`} title={tooltipMsg}>
       <span className={styles.flame}>{streak >= 14 ? '🔥🔥' : '🔥'}</span>
       <span className={styles.count}>{streak}</span>
-      {atRisk && <span className={styles.riskDot} title="Study today to keep your streak!" />}
+      {atRisk && <span className={styles.riskDot} />}
     </div>
   );
 }
