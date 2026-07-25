@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { playFocusChime, playBreakChime, unlockAudio } from './utils/audio';
 import { playLofi, pauseLofi, setLofiVolume as updateLofiVolume, skipToNextLofiTrack, getCurrentLofiTrack } from './utils/musicApi';
 import { getCurrentUser, logoutUser, fetchUserStats, saveUserStats } from './lib/appwrite';
+import { CATS as DEFAULT_CATS } from './utils/roadmapData';
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 export function todayStr() {
@@ -161,7 +162,7 @@ export const useStore = create((set, get) => ({
       const u = await getCurrentUser();
       if (u) {
         set({ user: u });
-        // Fetch stats from Appwrite
+        // Fetch stats strictly for this authenticated user ID from Appwrite
         const cloudStats = await fetchUserStats(u.$id);
         if (cloudStats) {
           const loadedData = {
@@ -179,7 +180,21 @@ export const useStore = create((set, get) => ({
           persist(loadedData);
         } else {
           // Newly logged in user has no stats doc in Appwrite yet.
-          // Sync current local stats to create their first cloud document.
+          // Initialize clean default state and sync to create their DB document.
+          const freshData = {
+            userDocId: null,
+            streak: 0,
+            bestStreak: 0,
+            totalXP: 0,
+            lastActiveDate: null,
+            days: {},
+            shownMs: [],
+            tasks: [],
+            customRoadmap: null,
+            activeTaskId: null,
+          };
+          set(freshData);
+          persist(freshData);
           await get().syncCloudStats();
         }
       }
@@ -702,6 +717,19 @@ export const useStore = create((set, get) => ({
     const customRoadmap = { ...s.customRoadmap, items: updatedItems };
     set({ customRoadmap });
     persist({ ...s, customRoadmap });
+    s.syncCloudStats();
+  },
+
+  loadDefaultRoadmap() {
+    const s = get();
+    const defaultRoadmap = {
+      categories: DEFAULT_CATS,
+      items: [],
+      weeks: [],
+      includeDefaults: true
+    };
+    set({ customRoadmap: defaultRoadmap });
+    persist({ ...s, customRoadmap: defaultRoadmap });
     s.syncCloudStats();
   },
 }));

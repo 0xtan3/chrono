@@ -261,18 +261,20 @@ export default function TasksPage() {
   const addRoadmapItem = useStore(s => s.addRoadmapItem);
   const addRoadmapWeek = useStore(s => s.addRoadmapWeek);
   const deleteRoadmapItem = useStore(s => s.deleteRoadmapItem);
+  const loadDefaultRoadmap = useStore(s => s.loadDefaultRoadmap);
 
-  // Resolve active dataset
-  // When user has a custom roadmap, use it. Otherwise use the bundled defaults.
-  // But when user adds items/weeks in-app, we always switch to customRoadmap mode,
-  // bootstrapped from defaults on first item add (handled in store).
+  // Resolve active dataset.
+  // activeItems/activeWeeks are EMPTY for new users (no default roadmap forced on anyone).
+  // Users must explicitly load a template or import a file to get a roadmap.
+  // activeCategories keeps DEFAULT_CATS as fallback so the task creation form always has options.
   const activeCategories = customRoadmap ? customRoadmap.categories : DEFAULT_CATS;
   const activeItems = useMemo(() => customRoadmap
     ? [...(customRoadmap.items || []), ...(customRoadmap.includeDefaults ? DEFAULT_ITEMS : [])]
-    : DEFAULT_ITEMS, [customRoadmap]);
+    : [], [customRoadmap]);
   const activeWeeks = useMemo(() => customRoadmap
     ? [...(customRoadmap.weeks || []), ...(customRoadmap.includeDefaults ? DEFAULT_WEEK_GROUPS : [])]
-    : DEFAULT_WEEK_GROUPS, [customRoadmap]);
+    : [], [customRoadmap]);
+  const hasRoadmap = customRoadmap !== null;
 
   // Form State
   const [newTitle, setNewTitle] = useState('');
@@ -392,7 +394,7 @@ export default function TasksPage() {
           <div>
             <h1 className={styles.title}>Study Hub</h1>
             <span className={styles.subtitle}>
-              {customRoadmap ? '📂 Custom Roadmap' : '⚡ DevSecOps Master Roadmap'}
+              {customRoadmap ? '📂 My Roadmap' : '📭 No Roadmap Yet'}
             </span>
           </div>
         </div>
@@ -400,7 +402,7 @@ export default function TasksPage() {
         <div className={styles.headerRight}>
           <div className={styles.roadmapActionsWrap}>
             {customRoadmap && (
-              <button onClick={resetCustomRoadmap} className={styles.resetBtn}>Reset Default</button>
+              <button onClick={resetCustomRoadmap} className={styles.resetBtn}>Clear Roadmap</button>
             )}
             <button onClick={() => fileInputRef.current?.click()} className={styles.uploadBtn}>
               Import File
@@ -588,34 +590,62 @@ export default function TasksPage() {
             selectedWeek={selectedWeek}
           />
 
-          <div className={styles.cardHeader}>
-            <div>
-              <h2 className={styles.sectionHeading}>Weekly Roadmap</h2>
-              <span className={styles.weekImportInfo}>
-                {weekImportedCount} / {currentWeekItems.length} tasks imported
-              </span>
+          {!hasRoadmap ? (
+            /* ── Get Started Panel (shown to users with no roadmap) ──────────── */
+            <div className={styles.getStartedPanel}>
+              <div className={styles.getStartedIcon}>🗺️</div>
+              <h3 className={styles.getStartedTitle}>Set Up Your Roadmap</h3>
+              <p className={styles.getStartedSub}>
+                Your roadmap is personal — add your own courses, plan your weeks, and track your learning progress.
+              </p>
+              <div className={styles.getStartedActions}>
+                <button
+                  className={styles.templateBtn}
+                  onClick={loadDefaultRoadmap}
+                >
+                  <span>⚡</span>
+                  Use DevSecOps Template
+                </button>
+                <button
+                  className={styles.freshBtn}
+                  onClick={() => setCustomRoadmap({ categories: DEFAULT_CATS, items: [], weeks: [], includeDefaults: false })}
+                >
+                  <span>✏️</span>
+                  Start Fresh
+                </button>
+              </div>
+              <p className={styles.getStartedHint}>Or click <strong>Import File</strong> above to load a roadmap file.</p>
             </div>
+          ) : (
+            <>
+              <div className={styles.cardHeader}>
+                <div>
+                  <h2 className={styles.sectionHeading}>Weekly Roadmap</h2>
+                  <span className={styles.weekImportInfo}>
+                    {weekImportedCount} / {currentWeekItems.length} tasks imported
+                  </span>
+                </div>
 
-            <div className={styles.weekSelectorWrap}>
-              {activeWeeks.length > 0 ? (
-                <select value={selectedWeek} onChange={(e) => setSelectedWeek(e.target.value)} className={styles.weekSelect}>
-                  {activeWeeks.map(g => (
-                    <option key={g.key} value={g.key}>{g.label}</option>
-                  ))}
-                </select>
-              ) : (
-                <span className={styles.noWeeksText}>No weeks configured</span>
-              )}
+                <div className={styles.weekSelectorWrap}>
+                  {activeWeeks.length > 0 ? (
+                    <select value={selectedWeek} onChange={(e) => setSelectedWeek(e.target.value)} className={styles.weekSelect}>
+                      {activeWeeks.map(g => (
+                        <option key={g.key} value={g.key}>{g.label}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className={styles.noWeeksText}>No weeks yet — add one below</span>
+                  )}
 
-              <button
-                onClick={handleBulkImport}
-                disabled={currentWeekItems.length === 0 || weekImportedCount === currentWeekItems.length}
-                className={styles.bulkImportBtn}
-              >
-                Bulk Import
-              </button>
-            </div>
-          </div>
+                  <button
+                    onClick={handleBulkImport}
+                    disabled={currentWeekItems.length === 0 || weekImportedCount === currentWeekItems.length}
+                    className={styles.bulkImportBtn}
+                  >
+                    Bulk Import
+                  </button>
+                </div>
+              </div>
 
           {/* Roadmap edit toolbar */}
           <div className={styles.roadmapEditBar}>
@@ -691,6 +721,8 @@ export default function TasksPage() {
               })
             )}
           </div>
+            </>
+          )}
         </section>
 
       </div>

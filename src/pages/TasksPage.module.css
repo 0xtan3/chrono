@@ -1430,3 +1430,92 @@
   border-color: rgba(167, 139, 250, 0.4);
   color: #a78bfa;
 }
+
+/* ── Get Started Onboarding Panel ─────────────────────────────────────────── */
+.getStartedPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  background: rgba(18, 21, 31, 0.5);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.getStartedIcon {
+  font-size: 2.2rem;
+  margin-bottom: 0.6rem;
+  filter: drop-shadow(0 0 12px rgba(167, 139, 250, 0.3));
+}
+
+.getStartedTitle {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.4rem 0;
+}
+
+.getStartedSub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  max-width: 380px;
+  line-height: 1.45;
+  margin: 0 0 1.4rem 0;
+}
+
+.getStartedActions {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.templateBtn,
+.freshBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.2rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.templateBtn {
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  color: #c4b5fd;
+}
+
+.templateBtn:hover {
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.35) 0%, rgba(124, 58, 237, 0.35) 100%);
+  border-color: rgba(167, 139, 250, 0.7);
+  box-shadow: 0 0 20px rgba(167, 139, 250, 0.25);
+  transform: translateY(-1px);
+}
+
+.freshBtn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+}
+
+.freshBtn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.getStartedHint {
+  font-size: 0.73rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0;
+}
+
