@@ -35,14 +35,14 @@ export default function MusicPlayer() {
         <div className={styles.volumePopover}>
           <div className={styles.trackInfoRow}>
             <div className={styles.trackMeta}>
-              <span className={styles.trackTitle}>{currentLofiTrack?.title || 'Chill Lofi Beats'}</span>
-              <span className={styles.trackGenre}>Chill Lofi Stream</span>
+              <span className={styles.trackTitle}>{currentLofiTrack?.title || 'Deep Space Organ'}</span>
+              <span className={styles.trackGenre}>{currentLofiTrack?.genre || 'Cinematic Space'}</span>
             </div>
             <button
               className={styles.skipBtn}
               onClick={skipLofiTrack}
-              title="Skip to Next Chill Lofi Track"
-              aria-label="Skip to Next Chill Lofi Track"
+              title="Skip to Next Track"
+              aria-label="Skip to Next Track"
             >
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <polygon points="5 4 15 12 5 20 5 4"/>
@@ -71,11 +71,11 @@ export default function MusicPlayer() {
       <button
         className={`${styles.musicBtn} ${isPlayingLofi ? styles.playing : ''}`}
         onClick={toggleLofi}
-        aria-label={isPlayingLofi ? 'Pause Lofi Beats' : 'Play Chill Lofi Beats'}
+        aria-label={isPlayingLofi ? 'Pause Music' : 'Play Background Music'}
         title={
           isPlayingLofi
-            ? `Playing: ${currentLofiTrack?.title || 'Chill Lofi'} (Click to Pause, Hover for Volume & Skip)`
-            : 'Play Chill Lofi Beats (Hover for Volume & Skip)'
+            ? `Playing: ${currentLofiTrack?.title || 'Space Ambient'} (Click to Pause, Hover for Volume & Skip)`
+            : 'Play Background Music (Hover for Volume & Skip)'
         }
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

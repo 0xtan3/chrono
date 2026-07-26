@@ -1,29 +1,38 @@
-// Chill Lofi Beats Track Pool Engine for CHRONO
+// Chill Lofi & Cinematic Space Track Pool Engine for CHRONO
+import { useStore } from '../store';
 
 export const LOFI_PLAYLIST = [
+  // Interstellar / Cinematic Space Vibes
+  {
+    id: 'space_deep',
+    title: 'Deep Space Organ',
+    genre: 'Cinematic Space',
+    streamUrl: 'https://cdn.pixabay.com/audio/2022/11/22/audio_febc508520.mp3'
+  },
+  {
+    id: 'space_epic',
+    title: 'Interstellar Journey',
+    genre: 'Cinematic Space',
+    streamUrl: 'https://cdn.pixabay.com/audio/2021/11/23/audio_88c7d853e3.mp3'
+  },
+  {
+    id: 'space_ambient',
+    title: 'Sci-Fi Cosmos',
+    genre: 'Cinematic Space',
+    streamUrl: 'https://cdn.pixabay.com/audio/2022/10/25/audio_249db7120a.mp3'
+  },
+  // Chill Lofi
   {
     id: 'lofi_chillhop',
-    title: 'Lofi Chillhop Beats',
+    title: 'Late Night Coffee',
     genre: 'Chill Lofi',
-    streamUrl: 'https://stream.zeno.fm/f3wvbbqmdg8uv'
+    streamUrl: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3'
   },
   {
-    id: 'lofi_cafe',
-    title: 'Lofi Study Cafe',
+    id: 'lofi_study',
+    title: 'Focus Beats',
     genre: 'Chill Lofi',
-    streamUrl: 'https://stream.zeno.fm/0r0xa792kwzuv'
-  },
-  {
-    id: 'lofi_peaceful',
-    title: 'Peaceful Lofi Melodies',
-    genre: 'Chill Lofi',
-    streamUrl: 'https://stream.zeno.fm/4v362bca1d0uv'
-  },
-  {
-    id: 'lofi_midnight',
-    title: 'Midnight Focus Lofi',
-    genre: 'Chill Lofi',
-    streamUrl: 'https://stream.zeno.fm/z8m8a3791d0uv'
+    streamUrl: 'https://cdn.pixabay.com/audio/2022/04/27/audio_82c61e8eb1.mp3'
   }
 ];
 
@@ -36,7 +45,7 @@ function getAudioElement() {
     audioEl.crossOrigin = 'anonymous';
     audioEl.preload = 'none';
 
-    // Auto-advance to a different Lofi track when stream/track ends
+    // Auto-advance when track ends, maintaining volume!
     audioEl.addEventListener('ended', () => {
       skipToNextLofiTrack();
     });
@@ -44,7 +53,7 @@ function getAudioElement() {
   return audioEl;
 }
 
-export function playLofi(volume = 0.5, forceTrackIndex = null) {
+export function playLofi(forceTrackIndex = null) {
   try {
     const audio = getAudioElement();
 
@@ -57,10 +66,13 @@ export function playLofi(volume = 0.5, forceTrackIndex = null) {
       audio.src = currentTrack.streamUrl;
     }
 
-    audio.volume = Math.max(0, Math.min(1, volume));
+    // Pull volume DIRECTLY from the Zustand store, guaranteeing it adheres
+    const vol = useStore.getState().lofiVolume;
+    audio.volume = Math.max(0, Math.min(1, vol));
+    
     const p = audio.play();
     if (p !== undefined) {
-      p.catch(err => console.warn('Lofi playback warning:', err));
+      p.catch(err => console.warn('Playback warning (requires user interaction first):', err));
     }
 
     return currentTrack;
@@ -70,14 +82,14 @@ export function playLofi(volume = 0.5, forceTrackIndex = null) {
   }
 }
 
-export function skipToNextLofiTrack(volume = 0.5) {
+export function skipToNextLofiTrack() {
   // Pick a DIFFERENT track index from the current one
   let nextIndex = (currentTrackIndex + 1) % LOFI_PLAYLIST.length;
   if (nextIndex === currentTrackIndex && LOFI_PLAYLIST.length > 1) {
     nextIndex = (nextIndex + 1) % LOFI_PLAYLIST.length;
   }
   currentTrackIndex = nextIndex;
-  return playLofi(volume, currentTrackIndex);
+  return playLofi(currentTrackIndex);
 }
 
 export function pauseLofi() {

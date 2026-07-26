@@ -297,15 +297,14 @@ export const useStore = create((set, get) => ({
       pauseLofi();
       set({ isPlayingLofi: false });
     } else {
-      const activeTrack = playLofi(s.lofiVolume);
+      const activeTrack = playLofi();
       set({ isPlayingLofi: true, currentLofiTrack: activeTrack });
     }
   },
 
   skipLofiTrack() {
     unlockAudio();
-    const s = get();
-    const nextTrack = skipToNextLofiTrack(s.lofiVolume);
+    const nextTrack = skipToNextLofiTrack();
     set({ isPlayingLofi: true, currentLofiTrack: nextTrack });
   },
 
