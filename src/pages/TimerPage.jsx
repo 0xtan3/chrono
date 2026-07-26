@@ -103,6 +103,28 @@ function MilestoneModal() {
   );
 }
 
+// ── Badge modal ─────────────────────────────────────────────────────────────
+function BadgeModal() {
+  const badge       = useStore(s => s.newBadgeAlert);
+  const dismissBadge = useStore(s => s.dismissBadgeAlert);
+
+  if (!badge) return null;
+
+  return (
+    <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && dismissBadge()}>
+      <div className={styles.milestoneCard}>
+        <span className={styles.milestoneEmoji}>{badge.emoji}</span>
+        <h2 className={styles.milestoneTitle}>Badge Unlocked!</h2>
+        <h3 className={styles.badgeTitle}>{badge.title}</h3>
+        <p className={styles.milestoneSub}>{badge.sub}</p>
+        <button className={styles.milestoneBtn} onClick={dismissBadge}>
+          Awesome!
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Completion Choice Modal (00:00 completion prompt) ─────────────────────────
 function CompletionChoiceModal() {
   const prompt           = useStore(s => s.completedPrompt);
@@ -181,6 +203,7 @@ export default function TimerPage() {
   return (
     <div className={styles.pageViewport}>
       <MilestoneModal />
+      <BadgeModal />
       <CompletionChoiceModal />
       <SettingsModal />
 

@@ -85,6 +85,16 @@ export const MILESTONES = [
   { days: 100, emoji: '👑', title: '100-Day Streak!', sub: 'ONE HUNDRED DAYS. You are a legend.' },
 ];
 
+// ── Badge config ──────────────────────────────────────────────────────────────
+export const BADGES = [
+  { id: 'first_step', type: 'session', target: 1, emoji: '🔥', title: 'First Step', sub: 'Completed your first Pomodoro today.' },
+  { id: 'double_focus', type: 'session', target: 2, emoji: '🥉', title: 'Double Focus', sub: 'Completed 2 Pomodoros in a single day.' },
+  { id: 'deep_work', type: 'session', target: 4, emoji: '🥈', title: 'Deep Work', sub: 'Completed 4 Pomodoros in a single day.' },
+  { id: 'flow_state', type: 'session', target: 6, emoji: '🥇', title: 'Flow State', sub: 'Completed 6 Pomodoros in a single day.' },
+  { id: 'finisher', type: 'task', target: 1, emoji: '🎯', title: 'Finisher', sub: 'Completed a task today.' },
+  { id: 'overachiever', type: 'task', target: 3, emoji: '🚀', title: 'Overachiever', sub: 'Completed 3 tasks today.' },
+];
+
 // ── Mode config ───────────────────────────────────────────────────────────────
 export const MODES = {
   focus: { label: 'Focus', h: 252, s: 88, lb: 65, defaultMin: 25 },
@@ -123,8 +133,10 @@ function recalcStreak(s) {
 function applySession(s, xpEarned) {
   const today = todayStr();
   const days = { ...s.days };
-  if (!days[today]) days[today] = { sessions: 0, xp: 0 };
-  days[today] = { sessions: days[today].sessions + 1, xp: days[today].xp + xpEarned };
+  if (!days[today]) days[today] = { sessions: 0, xp: 0, badges: [] };
+  // Ensure existing days have badges array
+  if (!days[today].badges) days[today].badges = [];
+  days[today] = { ...days[today], sessions: days[today].sessions + 1, xp: days[today].xp + xpEarned };
 
   let streak = s.streak;
   let lastActiveDate = s.lastActiveDate;
@@ -156,6 +168,7 @@ export const useStore = create((set, get) => ({
   user: null,
   authLoading: true,
   userDocId: null,
+  newBadgeAlert: null,
 
   async initAuth() {
     set({ authLoading: true });
@@ -438,6 +451,23 @@ export const useStore = create((set, get) => ({
       });
     }
 
+    // Check new badges
+    const today = todayStr();
+    const todaySessions = newState.days[today]?.sessions || 0;
+    const earnedBadges = newState.days[today]?.badges || [];
+    let newBadge = null;
+
+    BADGES.filter(b => b.type === 'session').forEach(badge => {
+      if (todaySessions >= badge.target && !earnedBadges.includes(badge.id)) {
+        earnedBadges.push(badge.id);
+        newBadge = badge;
+      }
+    });
+
+    if (newBadge) {
+      newState.days[today].badges = earnedBadges;
+    }
+
     persist({ ...newState, shownMs, tasks, activeTaskId: s.activeTaskId });
 
     const nextMode = sessions % s.totalSess === 0 ? 'long' : 'short';
@@ -449,6 +479,7 @@ export const useStore = create((set, get) => ({
       tasks,
       xpFlash: { amount: xp, bonus: bonus > 1, levelUp: newLvl > prevLvl, ts: Date.now() },
       milestone: found ?? null,
+      newBadgeAlert: newBadge,
       completedPrompt: { isBreak: false, nextMode },
     });
 
@@ -458,6 +489,10 @@ export const useStore = create((set, get) => ({
 
   dismissMilestone() {
     set({ milestone: null });
+  },
+
+  dismissBadgeAlert() {
+    set({ newBadgeAlert: null });
   },
 
   clearXpFlash() {
@@ -507,7 +542,8 @@ export const useStore = create((set, get) => ({
       const prevLvl = getLevelInfo(s.totalXP).lvl.n;
       
       const days = { ...s.days };
-      if (!days[today]) days[today] = { sessions: 0, xp: 0 };
+      if (!days[today]) days[today] = { sessions: 0, xp: 0, badges: [] };
+      if (!days[today].badges) days[today].badges = [];
       days[today] = { ...days[today], xp: days[today].xp + xpEarned };
 
       let streak = s.streak;
@@ -520,18 +556,33 @@ export const useStore = create((set, get) => ({
       } else {
         streak = 1;
       }
-      const bestStreak = Math.max(streak, s.bestStreak);
-      const totalXP = s.totalXP + xpEarned;
-      const newLvl = getLevelInfo(totalXP).lvl.n;
-
+      
       extraState = {
         days,
         streak,
-        bestStreak,
-        totalXP,
-        xpFlash: { amount: xpEarned, bonus: false, levelUp: newLvl > prevLvl, ts: Date.now() },
-        lastActiveDate: today
+        lastActiveDate: today,
+        bestStreak: Math.max(streak, s.bestStreak),
+        totalXP: s.totalXP + xpEarned,
       };
+
+      // Check task badges
+      const tasksCompletedToday = tasks.filter(t => t.completed && t.date === today).length;
+      const earnedBadges = extraState.days[today].badges || [];
+      let newBadge = null;
+
+      BADGES.filter(b => b.type === 'task').forEach(badge => {
+        if (tasksCompletedToday >= badge.target && !earnedBadges.includes(badge.id)) {
+          earnedBadges.push(badge.id);
+          newBadge = badge;
+        }
+      });
+
+      if (newBadge) {
+        extraState.days[today].badges = earnedBadges;
+        extraState.newBadgeAlert = newBadge;
+      }
+
+      extraState.xpFlash = { amount: xpEarned, bonus: false, levelUp: getLevelInfo(extraState.totalXP).lvl.n > prevLvl, ts: Date.now() };
     }
 
     const nextActiveId = s.activeTaskId === taskId && taskCompletedJustNow ? null : s.activeTaskId;

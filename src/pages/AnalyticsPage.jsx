@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useStore, getLevelInfo, MILESTONES, todayStr } from '../store';
+import { useStore, getLevelInfo, MILESTONES, BADGES, todayStr } from '../store';
 import styles from './AnalyticsPage.module.css';
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -255,6 +255,56 @@ function MilestoneList({ streak }) {
   );
 }
 
+// ── Daily Badges List ─────────────────────────────────────────────────────────
+function DailyBadgesList({ days }) {
+  // Count how many times each badge was earned
+  const badgeCounts = {};
+  BADGES.forEach(b => badgeCounts[b.id] = 0);
+
+  Object.values(days).forEach(dayStats => {
+    if (dayStats.badges) {
+      dayStats.badges.forEach(badgeId => {
+        if (badgeCounts[badgeId] !== undefined) {
+          badgeCounts[badgeId]++;
+        }
+      });
+    }
+  });
+
+  return (
+    <div className={styles.milestoneCardContainer} style={{ marginTop: '2rem' }}>
+      <div className={styles.chartHeader}>
+        <div>
+          <h3 className={styles.cardTitle}>Daily Badges</h3>
+          <span className={styles.cardSub}>Earned for intense daily focus</span>
+        </div>
+      </div>
+
+      <div className={styles.milestonesGrid}>
+        {BADGES.map(b => {
+          const count = badgeCounts[b.id] || 0;
+          const unlocked = count > 0;
+          return (
+            <div
+              key={b.id}
+              className={`${styles.milestoneCard} ${unlocked ? styles.milestoneUnlocked : ''}`}
+            >
+              <div className={styles.msHeader}>
+                <span className={styles.msEmoji}>{unlocked ? b.emoji : '🔒'}</span>
+                <span className={`${styles.msBadge} ${unlocked ? styles.msBadgeUnlocked : ''}`}>
+                  {unlocked ? `Earned ${count}x` : 'Locked'}
+                </span>
+              </div>
+              <div className={styles.msTitle}>{b.title}</div>
+              <div className={styles.msSub}>{b.sub}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Analytics Page Dashboard ─────────────────────────────────────────────────
 export default function AnalyticsPage() {
   const streak     = useStore(s => s.streak);
@@ -335,6 +385,7 @@ export default function AnalyticsPage() {
           <Heatmap days={days} />
           <MilestoneList streak={streak} />
         </div>
+        <DailyBadgesList days={days} />
       </main>
     </div>
   );
