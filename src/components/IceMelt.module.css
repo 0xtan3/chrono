@@ -1,0 +1,20 @@
+/* IceMelt.module.css — full-size transparent visualizer, sits inside .blobWrap */
+
+.wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  filter: drop-shadow(0 0 28px rgba(130, 210, 255, 0.30));
+  transition: filter 0.5s ease;
+}
+
+.canvas {
+  /* Canvas fills the wrapper; JS sets pixel dimensions dynamically */
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: transparent;
+}

@@ -5,6 +5,14 @@ import { ITEMS as DEFAULT_ITEMS, CATS as DEFAULT_CATS, WEEK_GROUPS as DEFAULT_WE
 import { parseRoadmapFile } from '../utils/roadmapParser';
 import styles from './TasksPage.module.css';
 
+// Generic categories shown in the task form for users who haven't set up a roadmap.
+// These are intentionally simple and domain-agnostic.
+const GENERIC_CATS = {
+  study:    { label: 'Study',    color: '#a78bfa' },
+  work:     { label: 'Work',     color: '#38bdf8' },
+  personal: { label: 'Personal', color: '#34d399' },
+  general:  { label: 'General',  color: '#94a3b8' },
+};
 
 function WeeklyStatsHub({ activeCategories, activeItems, tasks, selectedWeek }) {
   const weekItems = activeItems.filter(item => item.week === selectedWeek);
@@ -264,9 +272,11 @@ export default function TasksPage() {
   const loadDefaultRoadmap = useStore(s => s.loadDefaultRoadmap);
 
   // Resolve active dataset.
-  // activeItems/activeWeeks are EMPTY for new users (no default roadmap forced on anyone).
-  // Users must explicitly load a template or import a file to get a roadmap.
-  // activeCategories keeps DEFAULT_CATS as fallback so the task creation form always has options.
+  // When no roadmap is set up yet, use GENERIC_CATS (Study / Work / Personal / General)
+  // instead of the DevSecOps-specific DEFAULT_CATS — those labels are meaningless to
+  // someone who hasn't chosen that roadmap.
+  const formCategories = customRoadmap ? customRoadmap.categories : GENERIC_CATS;
+  // Full roadmap display categories (roadmap column uses DEFAULT_CATS for template-based roadmaps)
   const activeCategories = customRoadmap ? customRoadmap.categories : DEFAULT_CATS;
   const activeItems = useMemo(() => customRoadmap
     ? [...(customRoadmap.items || []), ...(customRoadmap.includeDefaults ? DEFAULT_ITEMS : [])]
@@ -278,7 +288,7 @@ export default function TasksPage() {
 
   // Form State
   const [newTitle, setNewTitle] = useState('');
-  const [newCat, setNewCat] = useState('foundations');
+  const [newCat, setNewCat] = useState('study');
   const [newDesc, setNewDesc] = useState('');
 
   // Filters & Week selector
@@ -300,12 +310,15 @@ export default function TasksPage() {
     }
   }, [activeWeeks, selectedWeek]);
 
+  // Auto-correction: reset category selection when the available category set changes
+  // (e.g. user loads a roadmap – generic GENERIC_CATS keys won't exist in roadmap categories)
   useEffect(() => {
-    const catKeys = Object.keys(activeCategories);
-    if (!catKeys.includes(newCat) && catKeys.length > 0) {
-      setNewCat(catKeys[0]);
+    const catKeys = Object.keys(formCategories);
+    if (!catKeys.includes(newCat)) {
+      setNewCat(catKeys[0] || '');
     }
-  }, [activeCategories, newCat]);
+  }, [formCategories]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   const handleCreateTask = (e) => {
     e.preventDefault();
@@ -471,7 +484,7 @@ export default function TasksPage() {
                   required
                 />
                 <select value={newCat} onChange={(e) => setNewCat(e.target.value)} className={styles.selectInput}>
-                  {Object.entries(activeCategories).map(([key, cat]) => (
+                  {Object.entries(formCategories).map(([key, cat]) => (
                     <option key={key} value={key}>{cat.label}</option>
                   ))}
                 </select>

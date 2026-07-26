@@ -1,15 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore, MODES } from '../store';
-import BlobScene    from '../components/BlobScene';
-import ModeTabs     from '../components/ModeTabs';
-import Controls     from '../components/Controls';
-import SessionDots  from '../components/SessionDots';
-import StreakBadge  from '../components/StreakBadge';
-import DurationPicker from '../components/DurationPicker';
-import MusicPlayer from '../components/MusicPlayer';
-import SettingsModal  from '../components/SettingsModal';
+import BlobScene       from '../components/BlobScene';
+import ModeTabs        from '../components/ModeTabs';
+import Controls        from '../components/Controls';
+import SessionDots     from '../components/SessionDots';
+import StreakBadge     from '../components/StreakBadge';
+import DurationPicker  from '../components/DurationPicker';
+import MusicPlayer     from '../components/MusicPlayer';
+import SettingsModal   from '../components/SettingsModal';
 import styles from './TimerPage.module.css';
+
+
 
 // ── Formatted time ─────────────────────────────────────────────────────────────
 function fmt(secs) {

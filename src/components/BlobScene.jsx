@@ -4,6 +4,8 @@ import * as THREE from 'three';
 import { blobVert } from '../shaders/blob.vert';
 import { blobFrag } from '../shaders/blob.frag';
 import { useStore, MODES } from '../store';
+import IceMeltAnimation from './IceMeltAnimation';
+
 
 // ── Colour helpers ────────────────────────────────────────────────────────────
 function modeColors(mode) {
@@ -155,6 +157,23 @@ export default function BlobScene() {
   // Blank template -> NO visualizer canvas
   if (selectedVisualizer === 'blank') {
     return null;
+  }
+
+  // Ice Melt -> HTML5 Canvas visualizer (no WebGL needed)
+  if (selectedVisualizer === 'ice_melt') {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <IceMeltAnimation />
+      </div>
+    );
   }
 
   return (

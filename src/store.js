@@ -96,10 +96,11 @@ export const BREAK_PRESETS = [5, 10, 15];
 
 // ── Visualizers Catalog ────────────────────────────────────────────────────────
 export const VISUALIZERS = [
-  { id: 'liquid_blob', name: 'Liquid Blob', reqStreak: 0, emoji: '🔮', desc: '3D fluid wave sphere' },
-  { id: 'blank',       name: 'Blank Minimal', reqStreak: 0, emoji: '✨', desc: 'Clean typography (no visualizer)' },
-  { id: 'neon_ring',   name: 'Neon Torus',   reqStreak: 3, emoji: '⭕', desc: 'Rotating cyberpunk energy ring' },
-  { id: 'cosmic_orb',  name: 'Cosmic Orb',   reqStreak: 7, emoji: '🌌', desc: 'Deep space stardust particle sphere' },
+  { id: 'liquid_blob', name: 'Liquid Blob',    reqStreak: 0,  emoji: '🔮', desc: '3D fluid wave sphere' },
+  { id: 'blank',       name: 'Blank Minimal',  reqStreak: 0,  emoji: '✨', desc: 'Clean typography (no visualizer)' },
+  { id: 'ice_melt',    name: 'Ice Melt',       reqStreak: 5,  emoji: '🧊', desc: 'Frozen ice block that melts to zero — realistic caustics, drips & steam' },
+  { id: 'neon_ring',   name: 'Neon Torus',     reqStreak: 3,  emoji: '⭕', desc: 'Rotating cyberpunk energy ring' },
+  { id: 'cosmic_orb',  name: 'Cosmic Orb',     reqStreak: 7,  emoji: '🌌', desc: 'Deep space stardust particle sphere' },
 ];
 
 // ── Background Themes Catalog ──────────────────────────────────────────────────
