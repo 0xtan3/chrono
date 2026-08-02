@@ -616,6 +616,17 @@ export const useStore = create((set, get) => ({
     s.syncCloudStats();
   },
 
+  reorderTasks(reorderedTasks) {
+    const s = get();
+    set({ tasks: reorderedTasks });
+    persist({
+      ...s,
+      tasks: reorderedTasks,
+      activeTaskId: s.activeTaskId
+    });
+    s.syncCloudStats();
+  },
+
   setActiveTaskId(taskId) {
     const s = get();
     set({ activeTaskId: taskId });
@@ -766,6 +777,76 @@ export const useStore = create((set, get) => ({
     if (!s.customRoadmap) return;
     const updatedItems = (s.customRoadmap.items || []).filter(i => i.id !== itemId);
     const customRoadmap = { ...s.customRoadmap, items: updatedItems };
+    set({ customRoadmap });
+    persist({ ...s, customRoadmap });
+    s.syncCloudStats();
+  },
+
+  // Edit a roadmap item by id and sync to active tasks
+  editRoadmapItem(itemId, updates) {
+    const s = get();
+    if (!s.customRoadmap) return;
+    const items = [...(s.customRoadmap.items || [])];
+    const index = items.findIndex(i => i.id === itemId);
+    if (index !== -1) {
+      items[index] = { ...items[index], ...updates };
+      const customRoadmap = { ...s.customRoadmap, items };
+      
+      // Sync tasks that were imported from this item
+      const tasks = (s.tasks || []).map(t => {
+        if (t.roadmapId === itemId) {
+          return {
+            ...t,
+            title: updates.label || t.title,
+            category: updates.cat || t.category,
+            referenceUrl: updates.url !== undefined ? updates.url : t.referenceUrl
+          };
+        }
+        return t;
+      });
+
+      set({ customRoadmap, tasks });
+      persist({ ...s, customRoadmap, tasks });
+      s.syncCloudStats();
+    }
+  },
+
+  // Delete a category and fallback orphaned items
+  deleteRoadmapCategory(catKey, fallbackCatKey = 'general') {
+    const s = get();
+    if (!s.customRoadmap) return;
+    const categories = { ...s.customRoadmap.categories };
+    delete categories[catKey];
+    
+    // Ensure fallback category exists
+    if (!categories[fallbackCatKey]) {
+      categories[fallbackCatKey] = { label: 'General', color: '#94a3b8' };
+    }
+
+    const items = (s.customRoadmap.items || []).map(i => {
+      if (i.cat === catKey) return { ...i, cat: fallbackCatKey };
+      return i;
+    });
+
+    const tasks = (s.tasks || []).map(t => {
+      if (t.category === catKey) return { ...t, category: fallbackCatKey };
+      return t;
+    });
+
+    const customRoadmap = { ...s.customRoadmap, categories, items };
+    set({ customRoadmap, tasks });
+    persist({ ...s, customRoadmap, tasks });
+    s.syncCloudStats();
+  },
+
+  // Delete a week and cascade delete items
+  deleteRoadmapWeek(weekKey) {
+    const s = get();
+    if (!s.customRoadmap) return;
+    const weeks = (s.customRoadmap.weeks || []).filter(w => w.key !== weekKey);
+    const items = (s.customRoadmap.items || []).filter(i => i.week !== weekKey);
+    
+    const customRoadmap = { ...s.customRoadmap, weeks, items };
     set({ customRoadmap });
     persist({ ...s, customRoadmap });
     s.syncCloudStats();

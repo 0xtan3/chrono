@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useStore } from '../store';
+import confetti from 'canvas-confetti';
+import { useStore, todayStr } from '../store';
 import { ITEMS as DEFAULT_ITEMS, CATS as DEFAULT_CATS, WEEK_GROUPS as DEFAULT_WEEK_GROUPS } from '../utils/roadmapData';
 import { parseRoadmapFile } from '../utils/roadmapParser';
 import styles from './TasksPage.module.css';
@@ -247,6 +248,199 @@ function AddWeekModal({ activeWeeks, onClose, addRoadmapWeek }) {
   );
 }
 
+// ── Edit Roadmap Item Modal ───────────────────────────────────────────────────
+function EditRoadmapItemModal({ item, activeCategories, activeWeeks, onClose, editRoadmapItem }) {
+  const [label, setLabel] = useState(item.label);
+  const [cat, setCat] = useState(item.cat);
+  const [src, setSrc] = useState(item.src || 'web');
+  const [url, setUrl] = useState(item.url || '');
+  const [week, setWeek] = useState(item.week);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!label.trim() || !week) return;
+    editRoadmapItem(item.id, { label: label.trim(), cat, src, url: url.trim(), week });
+    onClose();
+  };
+
+  const srcOptions = [
+    { v: 'yt', l: '▶ YouTube' },
+    { v: 'll', l: '💼 LinkedIn Learning' },
+    { v: 'ud', l: '🎓 Udemy' },
+    { v: 'nc', l: '🔵 NeetCode' },
+    { v: 'web', l: '🌐 Web / Docs' },
+    { v: 'fr', l: '🆓 Free Resource' },
+  ];
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modalCard} onClick={e => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <h3 className={styles.modalTitle}>✏️ Edit Roadmap Item</h3>
+          <button className={styles.modalClose} onClick={onClose}>✕</button>
+        </div>
+
+        <form onSubmit={handleSubmit} className={styles.modalForm}>
+          <div className={styles.modalField}>
+            <label className={styles.modalLabel}>Topic / Course Title</label>
+            <input className={styles.modalInput} value={label} onChange={e => setLabel(e.target.value)} required autoFocus />
+          </div>
+
+          <div className={styles.modalRow}>
+            <div className={styles.modalField}>
+              <label className={styles.modalLabel}>Category</label>
+              <select className={styles.modalSelect} value={cat} onChange={e => setCat(e.target.value)}>
+                {Object.entries(activeCategories).map(([k, c]) => (
+                  <option key={k} value={k}>{c.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.modalField}>
+              <label className={styles.modalLabel}>Week</label>
+              <select className={styles.modalSelect} value={week} onChange={e => setWeek(e.target.value)}>
+                {activeWeeks.map(w => (
+                  <option key={w.key} value={w.key}>{w.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className={styles.modalRow}>
+            <div className={styles.modalField}>
+              <label className={styles.modalLabel}>Source Platform</label>
+              <select className={styles.modalSelect} value={src} onChange={e => setSrc(e.target.value)}>
+                {srcOptions.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
+              </select>
+            </div>
+            <div className={styles.modalField}>
+              <label className={styles.modalLabel}>Reference URL</label>
+              <input className={styles.modalInput} value={url} onChange={e => setUrl(e.target.value)} type="url" />
+            </div>
+          </div>
+
+          <div className={styles.modalActions}>
+            <button type="button" className={styles.modalCancelBtn} onClick={onClose}>Cancel</button>
+            <button type="submit" className={styles.modalSubmitBtn}>Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── Roadmap Builder Panel ─────────────────────────────────────────────────────
+function RoadmapBuilderPanel({ 
+  customRoadmap, activeCategories, activeWeeks, activeItems, 
+  addRoadmapCategory, deleteRoadmapCategory, 
+  deleteRoadmapWeek, deleteRoadmapItem,
+  onEditItem, onAddWeek, onAddItem
+}) {
+  const [newCatLabel, setNewCatLabel] = useState('');
+  const [newCatColor, setNewCatColor] = useState('#a78bfa');
+
+  const handleAddCategory = (e) => {
+    e.preventDefault();
+    if (!newCatLabel.trim()) return;
+    const key = newCatLabel.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
+    addRoadmapCategory(key, newCatLabel.trim(), newCatColor);
+    setNewCatLabel('');
+  };
+
+  return (
+    <div className={styles.builderPanel}>
+      <h2 className={styles.builderTitle}>⚙️ Roadmap Builder</h2>
+      
+      {/* Category Manager */}
+      <div className={styles.builderSection}>
+        <h3 className={styles.builderSectionTitle}>Categories</h3>
+        <div className={styles.categoryChips}>
+          {Object.entries(activeCategories).map(([key, cat]) => (
+            <div key={key} className={styles.builderCatChip} style={{ '--cat-color': cat.color }}>
+              <span className={styles.builderCatColor} style={{ backgroundColor: cat.color }}></span>
+              <span className={styles.builderCatLabel}>{cat.label}</span>
+              <button 
+                className={styles.builderCatDelete} 
+                onClick={() => {
+                  if (confirm(`Delete category "${cat.label}"? Items will be moved to General.`)) {
+                    deleteRoadmapCategory(key);
+                  }
+                }}
+                title="Delete Category"
+              >✕</button>
+            </div>
+          ))}
+        </div>
+        <form onSubmit={handleAddCategory} className={styles.addCatForm}>
+          <input 
+            className={styles.builderInput} 
+            placeholder="New Category Name..." 
+            value={newCatLabel}
+            onChange={e => setNewCatLabel(e.target.value)}
+          />
+          <input 
+            type="color" 
+            className={styles.builderColorPicker} 
+            value={newCatColor}
+            onChange={e => setNewCatColor(e.target.value)}
+          />
+          <button type="submit" className={styles.builderBtn}>Add</button>
+        </form>
+      </div>
+
+      {/* Structure Manager (Weeks & Items) */}
+      <div className={styles.builderSection}>
+        <div className={styles.builderSectionHeader}>
+          <h3 className={styles.builderSectionTitle}>Weeks & Items</h3>
+          <div className={styles.builderActions}>
+            <button className={styles.builderBtn} onClick={onAddWeek}>+ Week</button>
+            <button className={styles.builderBtn} onClick={onAddItem}>+ Item</button>
+          </div>
+        </div>
+
+        <div className={styles.builderStructure}>
+          {activeWeeks.length === 0 && <p className={styles.emptyText}>No weeks added yet.</p>}
+          {activeWeeks.map(week => {
+            const weekItems = activeItems.filter(i => i.week === week.key);
+            return (
+              <div key={week.key} className={styles.builderWeekBlock}>
+                <div className={styles.builderWeekHeader}>
+                  <h4>{week.label}</h4>
+                  <button 
+                    className={styles.builderDeleteBtn}
+                    onClick={() => {
+                      if (confirm(`Delete ${week.label} and all its ${weekItems.length} items?`)) {
+                        deleteRoadmapWeek(week.key);
+                      }
+                    }}
+                  >Delete Week</button>
+                </div>
+                <div className={styles.builderWeekItems}>
+                  {weekItems.length === 0 && <span className={styles.emptyText}>Empty week.</span>}
+                  {weekItems.map(item => {
+                    const catInfo = activeCategories[item.cat] || { color: '#94a3b8' };
+                    return (
+                      <div key={item.id} className={styles.builderItemRow}>
+                        <div className={styles.builderItemInfo}>
+                          <span className={styles.builderItemColor} style={{ backgroundColor: catInfo.color }}></span>
+                          <span className={styles.builderItemLabel}>{item.label}</span>
+                        </div>
+                        <div className={styles.builderItemActions}>
+                          <button className={styles.builderEditBtn} onClick={() => onEditItem(item)}>Edit</button>
+                          <button className={styles.builderDeleteBtn} onClick={() => deleteRoadmapItem(item.id)}>✕</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Tasks Page ─────────────────────────────────────────────────────────
 export default function TasksPage() {
   const tasks = useStore(s => s.tasks || []);
@@ -295,6 +489,62 @@ export default function TasksPage() {
   const [taskFilter, setTaskFilter] = useState('active');
   const [selectedWeek, setSelectedWeek] = useState('Wk1');
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Drag and Drop State
+  const reorderTasks = useStore(s => s.reorderTasks);
+  const [draggedTaskId, setDraggedTaskId] = useState(null);
+
+  const handleDragStart = (e, taskId) => {
+    setDraggedTaskId(taskId);
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => e.target.classList.add(styles.dragging), 0);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add(styles.dragOver);
+  };
+
+  const handleDragLeave = (e) => {
+    e.currentTarget.classList.remove(styles.dragOver);
+  };
+
+  const handleDrop = (e, targetTaskId) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove(styles.dragOver);
+    if (!draggedTaskId || draggedTaskId === targetTaskId) return;
+
+    const sourceIndex = tasks.findIndex(t => t.id === draggedTaskId);
+    const targetIndex = tasks.findIndex(t => t.id === targetTaskId);
+
+    if (sourceIndex !== -1 && targetIndex !== -1) {
+      const newTasks = [...tasks];
+      const [removed] = newTasks.splice(sourceIndex, 1);
+      newTasks.splice(targetIndex, 0, removed);
+      reorderTasks(newTasks);
+    }
+    setDraggedTaskId(null);
+  };
+
+  const handleDragEnd = (e) => {
+    e.target.classList.remove(styles.dragging);
+    setDraggedTaskId(null);
+  };
+
+  // Gamification Quota
+  const todayTasksCompleted = tasks.filter(t => t.completed && t.date === todayStr()).length;
+  const quota = 3;
+
+  // Builder UI State
+  const [isManageMode, setIsManageMode] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState(null);
+  
+  // Builder Store Actions
+  const addRoadmapCategory = useStore(s => s.addRoadmapCategory);
+  const deleteRoadmapCategory = useStore(s => s.deleteRoadmapCategory);
+  const deleteRoadmapWeek = useStore(s => s.deleteRoadmapWeek);
+  const editRoadmapItem = useStore(s => s.editRoadmapItem);
 
   // Modals
   const [showAddItemModal, setShowAddItemModal] = useState(false);
@@ -366,6 +616,13 @@ export default function TasksPage() {
 
   // Is this a custom (user-added) item? (id starts with 'custom_')
   const isCustomItem = (item) => item.id?.startsWith('custom_');
+
+  // Helper to extract nice domain names for display
+  const domainName = (urlStr) => {
+    try { return new URL(urlStr).hostname.replace('www.', ''); }
+    catch { return 'Link'; }
+  };
+
 
   return (
     <div className={styles.dashboardViewport}>
@@ -471,6 +728,23 @@ export default function TasksPage() {
             </div>
           </div>
 
+          {/* Daily Quota Visualizer */}
+          <div className={styles.quotaCard}>
+            <div className={styles.quotaHeader}>
+              <span className={styles.quotaTitle}>Daily Target</span>
+              <span className={styles.quotaCount}>{todayTasksCompleted} / {quota}</span>
+            </div>
+            <div className={styles.quotaBarBg}>
+              <div 
+                className={styles.quotaBarFill} 
+                style={{ width: `${Math.min(100, (todayTasksCompleted / quota) * 100)}%` }} 
+              />
+            </div>
+            {todayTasksCompleted >= quota && (
+              <p className={styles.quotaSuccess}>🎉 Target met! You are unstoppable today.</p>
+            )}
+          </div>
+
           {/* Quick Create */}
           <div className={styles.glassCard}>
             <form onSubmit={handleCreateTask} className={styles.taskForm}>
@@ -520,13 +794,30 @@ export default function TasksPage() {
                 return (
                   <div
                     key={task.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, task.id)}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, task.id)}
+                    onDragEnd={handleDragEnd}
                     className={`${styles.taskItem} ${isActive ? styles.taskItemActive : ''} ${task.completed ? styles.taskItemCompleted : ''}`}
                     style={{ '--cat-color': catInfo.color }}
                   >
+                    <div className={styles.dragHandle} title="Drag to reorder">
+                      ⠿
+                    </div>
                     <div className={styles.taskLeft}>
                       <button
                         className={`${styles.checkCircle} ${task.completed ? styles.checkCircleChecked : ''}`}
-                        onClick={() => toggleTaskCompleted(task.id)}
+                        onClick={(e) => {
+                          if (!task.completed) {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const x = (rect.left + rect.width / 2) / window.innerWidth;
+                            const y = (rect.top + rect.height / 2) / window.innerHeight;
+                            confetti({ particleCount: 60, spread: 50, origin: { x, y }, colors: [catInfo.color, '#ffffff'] });
+                          }
+                          toggleTaskCompleted(task.id);
+                        }}
                       >
                         {task.completed && (
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
@@ -595,150 +886,184 @@ export default function TasksPage() {
 
         {/* RIGHT: Roadmap Tracker */}
         <section className={styles.roadmapSection}>
-
-          <WeeklyStatsHub
-            activeCategories={activeCategories}
-            activeItems={activeItems}
-            tasks={tasks}
-            selectedWeek={selectedWeek}
-          />
-
-          {!hasRoadmap ? (
-            /* ── Get Started Panel (shown to users with no roadmap) ──────────── */
-            <div className={styles.getStartedPanel}>
-              <div className={styles.getStartedIcon}>🗺️</div>
-              <h3 className={styles.getStartedTitle}>Set Up Your Roadmap</h3>
-              <p className={styles.getStartedSub}>
-                Your roadmap is personal — add your own courses, plan your weeks, and track your learning progress.
-              </p>
-              <div className={styles.getStartedActions}>
-                <button
-                  className={styles.templateBtn}
-                  onClick={loadDefaultRoadmap}
-                >
-                  <span>⚡</span>
-                  Use DevSecOps Template
-                </button>
-                <button
-                  className={styles.freshBtn}
-                  onClick={() => setCustomRoadmap({ categories: DEFAULT_CATS, items: [], weeks: [], includeDefaults: false })}
-                >
-                  <span>✏️</span>
-                  Start Fresh
-                </button>
-              </div>
-              <p className={styles.getStartedHint}>Or click <strong>Import File</strong> above to load a roadmap file.</p>
-            </div>
-          ) : (
-            <>
-              <div className={styles.cardHeader}>
-                <div>
-                  <h2 className={styles.sectionHeading}>Weekly Roadmap</h2>
-                  <span className={styles.weekImportInfo}>
-                    {weekImportedCount} / {currentWeekItems.length} tasks imported
-                  </span>
-                </div>
-
-                <div className={styles.weekSelectorWrap}>
-                  {activeWeeks.length > 0 ? (
-                    <select value={selectedWeek} onChange={(e) => setSelectedWeek(e.target.value)} className={styles.weekSelect}>
-                      {activeWeeks.map(g => (
-                        <option key={g.key} value={g.key}>{g.label}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <span className={styles.noWeeksText}>No weeks yet — add one below</span>
-                  )}
-
-                  <button
-                    onClick={handleBulkImport}
-                    disabled={currentWeekItems.length === 0 || weekImportedCount === currentWeekItems.length}
-                    className={styles.bulkImportBtn}
-                  >
-                    Bulk Import
-                  </button>
-                </div>
-              </div>
-
-          {/* Roadmap edit toolbar */}
-          <div className={styles.roadmapEditBar}>
-            <button className={styles.addItemBtn} onClick={() => setShowAddItemModal(true)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
-                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              Add Item to Roadmap
-            </button>
-            <button className={styles.addWeekBtn} onClick={() => setShowAddWeekModal(true)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-                <line x1="12" y1="14" x2="12" y2="20" /><line x1="9" y1="17" x2="15" y2="17" />
-              </svg>
-              New Week
-            </button>
-          </div>
-
-          {/* Roadmap list items */}
-          <div className={styles.roadmapList}>
-            {currentWeekItems.length === 0 ? (
-              <div className={styles.emptyState}>
-                <span className={styles.emptyIcon}>📭</span>
-                <p className={styles.emptyText}>No items for this week yet.<br />Click <strong>+ Add Item to Roadmap</strong> above to get started.</p>
-              </div>
-            ) : (
-              currentWeekItems.map(item => {
-                const isAlreadyImported = tasks.some(t => t.roadmapId === item.id || t.title.toLowerCase() === item.label.toLowerCase());
-                const catInfo = activeCategories[item.cat] || { label: item.cat, color: '#a5b4fc' };
-                const custom = isCustomItem(item);
-
-                return (
-                  <div key={item.id} className={`${styles.roadmapCard} ${isAlreadyImported ? styles.roadmapCardImported : ''}`} style={{ borderLeftColor: catInfo.color }}>
-                    <div className={styles.roadmapCardLeft}>
-                      <div className={styles.roadmapCardTitleRow}>
-                        <h4 className={styles.roadmapItemLabel}>{item.label}</h4>
-                        <span className={styles.categoryBadge} style={{ backgroundColor: `${catInfo.color}12`, color: catInfo.color, borderColor: `${catInfo.color}25` }}>
-                          {catInfo.label}
-                        </span>
-                      </div>
-
-                      <div className={styles.roadmapMetaRow}>
-                        <span className={`${styles.sourceBadge} ${styles[`source_${item.src}`] || ''}`}>
-                          {srcLabel(item.src)}
-                        </span>
-                        {item.url && (
-                          <a href={item.url} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>
-                            Reference Course ↗
-                          </a>
-                        )}
-                        {custom && <span className={styles.customTag}>✏️ Custom</span>}
-                      </div>
-                    </div>
-
-                    <div className={styles.roadmapCardRight}>
-                      {isAlreadyImported ? (
-                        <span className={styles.importedTag}>✓ Added</span>
-                      ) : (
-                        <button onClick={() => importSingleTask(item)} className={styles.importBtn}>+ Add</button>
-                      )}
-                      {custom && (
-                        <button onClick={() => deleteRoadmapItem(item.id)} className={styles.deleteRoadmapBtn} title="Remove from roadmap">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="13" height="13">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
+          
+          <div className={styles.roadmapTopControls}>
+            {hasRoadmap && (
+              <button 
+                className={`${styles.manageModeBtn} ${isManageMode ? styles.manageModeActive : ''}`} 
+                onClick={() => setIsManageMode(!isManageMode)}
+              >
+                {isManageMode ? 'Done Editing' : '⚙️ Manage Roadmap'}
+              </button>
             )}
           </div>
+
+          {isManageMode && hasRoadmap ? (
+            <RoadmapBuilderPanel 
+              customRoadmap={customRoadmap}
+              activeCategories={activeCategories}
+              activeWeeks={activeWeeks}
+              activeItems={activeItems}
+              addRoadmapCategory={addRoadmapCategory}
+              deleteRoadmapCategory={deleteRoadmapCategory}
+              deleteRoadmapWeek={deleteRoadmapWeek}
+              deleteRoadmapItem={deleteRoadmapItem}
+              onEditItem={setItemToEdit}
+              onAddWeek={() => setShowAddWeekModal(true)}
+              onAddItem={() => setShowAddItemModal(true)}
+            />
+          ) : (
+            <>
+              <WeeklyStatsHub
+                activeCategories={activeCategories}
+                activeItems={activeItems}
+                tasks={tasks}
+                selectedWeek={selectedWeek}
+              />
+
+              {!hasRoadmap ? (
+                /* ── Get Started Panel (shown to users with no roadmap) ──────────── */
+                <div className={styles.getStartedPanel}>
+                  <div className={styles.getStartedIcon}>🗺️</div>
+                  <h3 className={styles.getStartedTitle}>Set Up Your Roadmap</h3>
+                  <p className={styles.getStartedSub}>
+                    Your roadmap is personal — add your own courses, plan your weeks, and track your learning progress.
+                  </p>
+                  <div className={styles.getStartedActions}>
+                    <button
+                      className={styles.templateBtn}
+                      onClick={loadDefaultRoadmap}
+                    >
+                      <span>⚡</span>
+                      Use DevSecOps Template
+                    </button>
+                    <button
+                      className={styles.freshBtn}
+                      onClick={() => setCustomRoadmap({ categories: DEFAULT_CATS, items: [], weeks: [], includeDefaults: false })}
+                    >
+                      <span>✏️</span>
+                      Start Fresh
+                    </button>
+                  </div>
+                  <p className={styles.getStartedHint}>Or click <strong>Import File</strong> above to load a roadmap file.</p>
+                </div>
+              ) : (
+                <>
+                  <div className={styles.cardHeader}>
+                    <div>
+                      <h2 className={styles.sectionHeading}>Weekly Roadmap</h2>
+                      <span className={styles.weekImportInfo}>
+                        {weekImportedCount} / {currentWeekItems.length} tasks imported
+                      </span>
+                    </div>
+
+                    <div className={styles.weekSelectorWrap}>
+                      {activeWeeks.length > 0 ? (
+                        <select value={selectedWeek} onChange={(e) => setSelectedWeek(e.target.value)} className={styles.weekSelect}>
+                          {activeWeeks.map(g => (
+                            <option key={g.key} value={g.key}>{g.label}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className={styles.noWeeksText}>No weeks yet — add one below</span>
+                      )}
+
+                      <button
+                        onClick={handleBulkImport}
+                        disabled={currentWeekItems.length === 0 || weekImportedCount === currentWeekItems.length}
+                        className={styles.bulkImportBtn}
+                      >
+                        Bulk Import
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Roadmap edit toolbar */}
+                  <div className={styles.roadmapEditBar}>
+                    <button className={styles.addItemBtn} onClick={() => setShowAddItemModal(true)}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
+                        <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                      Add Item to Roadmap
+                    </button>
+                    <button className={styles.addWeekBtn} onClick={() => setShowAddWeekModal(true)}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+                        <line x1="12" y1="14" x2="12" y2="20" /><line x1="9" y1="17" x2="15" y2="17" />
+                      </svg>
+                      New Week
+                    </button>
+                  </div>
+
+                  {/* Roadmap list items */}
+                  <div className={styles.roadmapList}>
+                    {currentWeekItems.length === 0 ? (
+                      <div className={styles.emptyState}>
+                        <span className={styles.emptyIcon}>📭</span>
+                        <p className={styles.emptyText}>No items for this week yet.<br />Click <strong>+ Add Item to Roadmap</strong> above to get started.</p>
+                      </div>
+                    ) : (
+                      currentWeekItems.map(item => {
+                        const isAlreadyImported = tasks.some(t => t.roadmapId === item.id || t.title.toLowerCase() === item.label.toLowerCase());
+                        const catInfo = activeCategories[item.cat] || { label: item.cat, color: '#a5b4fc' };
+                        const custom = isCustomItem(item);
+
+                        return (
+                          <div key={item.id} className={`${styles.roadmapCard} ${isAlreadyImported ? styles.roadmapCardImported : ''}`} style={{ borderLeftColor: catInfo.color }}>
+                            <div className={styles.roadmapCardLeft}>
+                              <div className={styles.roadmapCardTitleRow}>
+                                <h4 className={styles.roadmapItemLabel}>{item.label}</h4>
+                                <span className={styles.categoryBadge} style={{ backgroundColor: `${catInfo.color}12`, color: catInfo.color, borderColor: `${catInfo.color}25` }}>
+                                  {catInfo.label}
+                                </span>
+                              </div>
+
+                              <div className={styles.roadmapMetaRow}>
+                                <span className={`${styles.sourceBadge} ${styles[`source_${item.src}`] || ''}`}>
+                                  {srcLabel(item.src)}
+                                </span>
+                                {item.url && (
+                                  <a href={item.url} target="_blank" rel="noopener noreferrer" className={styles.roadmapUrl} title="Open reference">
+                                    {domainName(item.url)} ↗
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className={styles.roadmapCardRight}>
+                              {isAlreadyImported ? (
+                                <span className={styles.importedTag}>✓ Added</span>
+                              ) : (
+                                <button onClick={() => importSingleTask(item)} className={styles.importBtn}>+ Add</button>
+                              )}
+                              {custom && (
+                                <button onClick={() => deleteRoadmapItem(item.id)} className={styles.deleteRoadmapBtn} title="Remove from roadmap">
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </>
+              )}
             </>
           )}
-        </section>
 
+        </section>
       </div>
+      {itemToEdit && (
+        <EditRoadmapItemModal 
+          item={itemToEdit}
+          activeCategories={activeCategories}
+          activeWeeks={activeWeeks}
+          onClose={() => setItemToEdit(null)}
+          editRoadmapItem={editRoadmapItem}
+        />
+      )}
     </div>
   );
 }

@@ -1519,3 +1519,293 @@
   margin: 0;
 }
 
+/* ── Drag & Drop ── */
+.dragHandle {
+  cursor: grab;
+  padding: 0 8px;
+  color: var(--text-muted);
+  opacity: 0.3;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+}
+.taskItem:hover .dragHandle {
+  opacity: 0.8;
+}
+.dragHandle:active {
+  cursor: grabbing;
+}
+.dragging {
+  opacity: 0.4;
+  transform: scale(0.98);
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+.dragOver {
+  border-top: 2px solid var(--accent) !important;
+  transform: translateY(2px);
+}
+
+/* ── Daily Quota ── */
+.quotaCard {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.quotaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+.quotaTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+}
+.quotaCount {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 800;
+}
+.quotaBarBg {
+  background: rgba(255,255,255,0.05);
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.quotaBarFill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s var(--spring);
+}
+.quotaSuccess {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  color: #34d399;
+  font-weight: 600;
+  animation: fadeIn 0.4s ease;
+}
+
+/* ── Roadmap Builder UI ── */
+.roadmapTopControls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+.manageModeBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.manageModeBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.manageModeActive {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.builderPanel {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 1.5rem;
+  animation: fadeIn 0.3s ease;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.builderTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.builderSection {
+  margin-bottom: 2rem;
+}
+.builderSectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 1rem;
+}
+.builderSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.builderActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.categoryChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+.builderCatChip {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 20px;
+  gap: 8px;
+}
+.builderCatColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.builderCatLabel {
+  font-size: 0.8rem;
+  color: #fff;
+}
+.builderCatDelete {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.9rem;
+}
+.builderCatDelete:hover {
+  color: #ef4444;
+}
+
+.addCatForm {
+  display: flex;
+  gap: 8px;
+  background: rgba(255,255,255,0.02);
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+}
+.builderInput {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.85rem;
+}
+.builderColorPicker {
+  background: none;
+  border: none;
+  width: 38px;
+  height: 38px;
+  cursor: pointer;
+  padding: 0;
+}
+.builderBtn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.builderBtn:hover {
+  opacity: 0.9;
+}
+
+.builderStructure {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.builderWeekBlock {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.builderWeekHeader {
+  background: rgba(255,255,255,0.03);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+.builderWeekHeader h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #fff;
+}
+.builderDeleteBtn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.builderDeleteBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+.builderWeekItems {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.builderItemRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.builderItemInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.builderItemColor {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.builderItemLabel {
+  font-size: 0.85rem;
+  color: #e2e8f0;
+}
+.builderItemActions {
+  display: flex;
+  gap: 6px;
+}
+.builderEditBtn {
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.builderEditBtn:hover {
+  background: rgba(255,255,255,0.1);
+}
