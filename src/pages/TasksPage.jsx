@@ -484,6 +484,7 @@ export default function TasksPage() {
   const [newTitle, setNewTitle] = useState('');
   const [newCat, setNewCat] = useState('study');
   const [newDesc, setNewDesc] = useState('');
+  const [newDeadline, setNewDeadline] = useState('');
 
   // Filters & Week selector
   const [taskFilter, setTaskFilter] = useState('active');
@@ -573,9 +574,10 @@ export default function TasksPage() {
   const handleCreateTask = (e) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-    addTask(newTitle.trim(), newDesc.trim(), newCat);
+    addTask(newTitle.trim(), newDesc.trim(), newCat, newDeadline || null);
     setNewTitle('');
     setNewDesc('');
+    setNewDeadline('');
   };
 
   const currentWeekItems = activeItems.filter(item => item.week === selectedWeek);
@@ -762,6 +764,13 @@ export default function TasksPage() {
                     <option key={key} value={key}>{cat.label}</option>
                   ))}
                 </select>
+                <input
+                  type="date"
+                  value={newDeadline}
+                  onChange={(e) => setNewDeadline(e.target.value)}
+                  className={styles.dateInput}
+                  title="Optional Deadline"
+                />
                 <button type="submit" className={styles.addBtn}>Add Task</button>
               </div>
               <input

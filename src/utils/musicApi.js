@@ -21,6 +21,24 @@ export const LOFI_PLAYLIST = [
     genre: 'Cinematic Space',
     streamUrl: 'https://cdn.pixabay.com/audio/2022/10/25/audio_249db7120a.mp3'
   },
+  {
+    id: 'space_drift',
+    title: 'Drifting Through Nebula',
+    genre: 'Cinematic Space',
+    streamUrl: 'https://cdn.pixabay.com/audio/2022/03/15/audio_4a6e9db3c1.mp3'
+  },
+  {
+    id: 'space_meditation',
+    title: 'Cosmic Meditation',
+    genre: 'Cinematic Space',
+    streamUrl: 'https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3'
+  },
+  {
+    id: 'space_ethereal',
+    title: 'Ethereal Atmospheres',
+    genre: 'Cinematic Space',
+    streamUrl: 'https://cdn.pixabay.com/audio/2022/01/18/audio_d0c6ff1bdd.mp3'
+  },
   // Chill Lofi
   {
     id: 'lofi_chillhop',
@@ -33,6 +51,30 @@ export const LOFI_PLAYLIST = [
     title: 'Focus Beats',
     genre: 'Chill Lofi',
     streamUrl: 'https://cdn.pixabay.com/audio/2022/04/27/audio_82c61e8eb1.mp3'
+  },
+  {
+    id: 'lofi_rain',
+    title: 'Rainy Afternoon',
+    genre: 'Chill Lofi',
+    streamUrl: 'https://cdn.pixabay.com/audio/2022/10/09/audio_313a2695d4.mp3'
+  },
+  {
+    id: 'lofi_sunset',
+    title: 'Sunset Boulevard',
+    genre: 'Chill Lofi',
+    streamUrl: 'https://cdn.pixabay.com/audio/2024/11/07/audio_d36238aff5.mp3'
+  },
+  {
+    id: 'ambient_piano',
+    title: 'Midnight Piano',
+    genre: 'Ambient Piano',
+    streamUrl: 'https://cdn.pixabay.com/audio/2022/08/25/audio_4f3b0a816e.mp3'
+  },
+  {
+    id: 'ambient_dream',
+    title: 'Dreamscape',
+    genre: 'Ambient Dream',
+    streamUrl: 'https://cdn.pixabay.com/audio/2023/07/07/audio_94ef8e0c18.mp3'
   }
 ];
 

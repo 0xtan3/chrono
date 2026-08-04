@@ -51,12 +51,60 @@ export default async function handler(req, res) {
         const nowTime = new Date(today).getTime();
         const daysSinceActive = Math.round((nowTime - lastActive) / msPerDay);
 
-        // If they missed yesterday entirely (days >= 2), reset streak to 0 and DO NOT send email to save quota.
+        // If they missed yesterday entirely (days >= 2), reset streak to 0 and send a "streak lost" email.
         if (daysSinceActive >= 2) {
           try {
             await databases.updateDocument(DB_ID, COL_ID, stat.$id, { streak: 0 });
             streaksReset++;
             console.log(`Reset streak to 0 for user ${userId}`);
+
+            // Send a "streak lost" notification email
+            let user;
+            try { user = await users.get(userId); } catch (e) { continue; }
+            if (user && user.email) {
+              const lostHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head><style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');</style></head>
+                <body style="margin: 0; padding: 0; background-color: #080b12; font-family: 'Inter', -apple-system, sans-serif;">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #080b12; padding: 40px 20px;">
+                    <tr><td align="center">
+                      <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #10131f; border-radius: 16px; border: 1px solid rgba(255,255,255,0.07); overflow: hidden;">
+                        <tr><td style="padding: 40px 40px 20px 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                          <h1 style="margin: 0; color: #a78bfa; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">CHRONO</h1>
+                          <p style="margin: 8px 0 0 0; color: rgba(232,236,255,0.45); font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Focus Timer</p>
+                        </td></tr>
+                        <tr><td style="padding: 40px;">
+                          <div style="text-align: center; margin-bottom: 30px;"><span style="font-size: 48px; line-height: 1;">💔</span></div>
+                          <h2 style="margin: 0 0 15px 0; color: #e8ecff; font-size: 24px; font-weight: 600; text-align: center;">Your ${streak}-day streak was lost</h2>
+                          <p style="margin: 0 0 20px 0; color: rgba(232,236,255,0.7); font-size: 16px; line-height: 1.6; text-align: center;">
+                            Hi ${user.name || 'there'}, you missed ${daysSinceActive} days without a focus session, so your streak has been reset to 0. But don't worry — every great comeback starts with a single session.
+                          </p>
+                          <div style="text-align: center; margin-top: 35px;">
+                            <a href="${process.env.VITE_APP_URL || 'https://chrono.tenazity.com'}"
+                               style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%); color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);">
+                              Start a New Streak 🚀
+                            </a>
+                          </div>
+                        </td></tr>
+                        <tr><td style="padding: 25px 40px; text-align: center; background-color: #0c0f18; border-top: 1px solid rgba(255,255,255,0.03);">
+                          <p style="margin: 0; color: rgba(232,236,255,0.3); font-size: 12px;">Sent by Chrono Focus Timer<br>Every setback is a setup for a comeback.</p>
+                        </td></tr>
+                      </table>
+                    </td></tr>
+                  </table>
+                </body>
+                </html>
+              `;
+              await resend.emails.send({
+                from: 'Chrono <reminders@chrono.tenazity.com>',
+                to: user.email,
+                subject: `💔 Your ${streak}-day streak was lost`,
+                html: lostHtml
+              });
+              emailsSent++;
+              console.log(`Streak-lost email sent to ${user.email} (was ${streak} days)`);
+            }
           } catch (e) {
             console.error(`Failed to reset streak for user ${userId}`, e);
           }
@@ -85,7 +133,13 @@ export default async function handler(req, res) {
               ? `<div style="background-color: #181c2e; padding: 20px; border-radius: 12px; margin: 25px 0; border: 1px solid rgba(255,255,255,0.05);">
                   <h3 style="margin-top: 0; color: #e8ecff; font-size: 16px; font-weight: 600; margin-bottom: 15px;">Your Pending Tasks:</h3>
                   <ul style="margin: 0; padding-left: 20px; color: rgba(232,236,255,0.8); line-height: 1.6;">
-                    ${pendingTasks.map(t => `<li style="margin-bottom: 8px;">${t.title}</li>`).join('')}
+                    ${pendingTasks.map(t => {
+                      const overdue = t.deadline && t.deadline < today;
+                      const deadlineText = t.deadline 
+                        ? `<span style="font-size: 12px; margin-left: 8px; color: ${overdue ? '#fca5a5' : 'rgba(232,236,255,0.5)'};">${overdue ? '⚠️ Overdue: ' : '📅 '}${t.deadline}</span>` 
+                        : '';
+                      return `<li style="margin-bottom: 8px;">${t.title}${deadlineText}</li>`;
+                    }).join('')}
                   </ul>
                  </div>`
               : `<div style="background-color: #181c2e; padding: 20px; border-radius: 12px; margin: 25px 0; border: 1px solid rgba(255,255,255,0.05); text-align: center;">

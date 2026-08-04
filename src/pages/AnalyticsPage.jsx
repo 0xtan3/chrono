@@ -352,6 +352,40 @@ export default function AnalyticsPage() {
         </div>
       </header>
 
+      {/* Streak At Risk Warning */}
+      {atRisk && (
+        <div style={{
+          background: 'linear-gradient(90deg, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0.05) 100%)',
+          border: '1px solid rgba(239,68,68,0.25)',
+          borderRadius: '12px',
+          padding: '14px 20px',
+          margin: '0 0 1.5rem 0',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          animation: 'fadeIn 0.4s ease',
+        }}>
+          <span style={{ fontSize: '1.3rem' }}>🔥</span>
+          <span style={{ color: '#fca5a5', fontSize: '0.9rem', fontWeight: 600 }}>
+            Streak at risk! Complete a focus session before midnight to save your {streak}-day streak.
+          </span>
+          <Link to="/" style={{
+            marginLeft: 'auto',
+            padding: '8px 16px',
+            background: 'rgba(239,68,68,0.2)',
+            border: '1px solid rgba(239,68,68,0.35)',
+            borderRadius: '8px',
+            color: '#fca5a5',
+            textDecoration: 'none',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            whiteSpace: 'nowrap',
+          }}>
+            Go Focus →
+          </Link>
+        </div>
+      )}
+
       {/* Main Dashboard Grid */}
       <main className={styles.dashboardGrid}>
         {/* Row 1: Weekly Focus Chart + Behavioral Insights */}

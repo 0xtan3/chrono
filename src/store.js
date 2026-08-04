@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { playFocusChime, playBreakChime, unlockAudio } from './utils/audio';
 import { playLofi, pauseLofi, setLofiVolume as updateLofiVolume, skipToNextLofiTrack, getCurrentLofiTrack } from './utils/musicApi';
 import { getCurrentUser, logoutUser, fetchUserStats, saveUserStats } from './lib/appwrite';
-import { CATS as DEFAULT_CATS } from './utils/roadmapData';
+import { CATS as DEFAULT_CATS, ITEMS as DEFAULT_ITEMS, WEEK_GROUPS as DEFAULT_WEEK_GROUPS } from './utils/roadmapData';
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 export function todayStr() {
@@ -31,11 +31,13 @@ function loadStreak() {
         tasks: [],
         activeTaskId: null,
         customRoadmap: null,
+        selectedVisualizer: 'liquid_blob',
+        selectedTheme: 'midnight',
         ...parsed
       };
     }
   } catch { }
-  return { days: {}, streak: 0, bestStreak: 0, totalXP: 0, lastActiveDate: null, shownMs: [], tasks: [], activeTaskId: null, customRoadmap: null };
+  return { days: {}, streak: 0, bestStreak: 0, totalXP: 0, lastActiveDate: null, shownMs: [], tasks: [], activeTaskId: null, customRoadmap: null, selectedVisualizer: 'liquid_blob', selectedTheme: 'midnight' };
 }
 function persist(s) {
   try {
@@ -50,7 +52,9 @@ function persist(s) {
       shownMs: s.shownMs,
       tasks: s.tasks ?? current.tasks ?? [],
       activeTaskId: s.activeTaskId !== undefined ? s.activeTaskId : (current.activeTaskId ?? null),
-      customRoadmap: s.customRoadmap !== undefined ? s.customRoadmap : (current.customRoadmap ?? null)
+      customRoadmap: s.customRoadmap !== undefined ? s.customRoadmap : (current.customRoadmap ?? null),
+      selectedVisualizer: s.selectedVisualizer !== undefined ? s.selectedVisualizer : (current.selectedVisualizer ?? 'liquid_blob'),
+      selectedTheme: s.selectedTheme !== undefined ? s.selectedTheme : (current.selectedTheme ?? 'midnight'),
     }));
   } catch { }
 }
@@ -141,8 +145,8 @@ function applySession(s, xpEarned) {
   let streak = s.streak;
   let lastActiveDate = s.lastActiveDate;
 
-  // Streak only advances if user is logged in AND focusing on an active task
-  if (s.user && s.activeTaskId) {
+  // Streak advances for any logged-in user completing a pomodoro
+  if (s.user) {
     if (!lastActiveDate) {
       streak = 1;
     } else if (lastActiveDate === today) {
@@ -319,6 +323,7 @@ export const useStore = create((set, get) => ({
     if (!vis) return;
     if (s.bestStreak >= vis.reqStreak) {
       set({ selectedVisualizer: visId });
+      persist({ ...s, selectedVisualizer: visId });
     }
   },
 
@@ -328,6 +333,7 @@ export const useStore = create((set, get) => ({
     if (!th) return;
     if (s.bestStreak >= th.reqStreak) {
       set({ selectedTheme: themeId });
+      persist({ ...s, selectedTheme: themeId });
     }
   },
 
@@ -498,13 +504,14 @@ export const useStore = create((set, get) => ({
     set({ xpFlash: null });
   },
 
-  addTask(title, description = '', category = 'foundations') {
+  addTask(title, description = '', category = 'foundations', deadline = null) {
     const s = get();
     const newTask = {
       id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
       title,
       description,
       category,
+      deadline,
       sessionsCompleted: 0,
       completed: false,
       date: todayStr(),
@@ -649,6 +656,7 @@ export const useStore = create((set, get) => ({
         description: '',
         referenceUrl: item.url || item.ytUrl || '',
         category: item.cat,
+        deadline: null,
         sessionsCompleted: 0,
         completed: false,
         date: todayStr(),
@@ -678,6 +686,7 @@ export const useStore = create((set, get) => ({
       description: '',
       referenceUrl: item.url || item.ytUrl || '',
       category: item.cat,
+      deadline: null,
       sessionsCompleted: 0,
       completed: false,
       date: todayStr(),
@@ -710,6 +719,20 @@ export const useStore = create((set, get) => ({
       ...s,
       customRoadmap: null
     });
+  },
+
+  // Load the built-in DevSecOps template as the active roadmap
+  loadDefaultRoadmap() {
+    const s = get();
+    const customRoadmap = {
+      categories: { ...DEFAULT_CATS },
+      items: [...DEFAULT_ITEMS],
+      weeks: [...DEFAULT_WEEK_GROUPS],
+      includeDefaults: false,
+    };
+    set({ customRoadmap });
+    persist({ ...s, customRoadmap });
+    s.syncCloudStats();
   },
 
   // Add a new item to the active roadmap (creates custom roadmap from defaults if none yet)

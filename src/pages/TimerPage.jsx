@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore, MODES } from '../store';
-import BlobScene       from '../components/BlobScene';
-import ModeTabs        from '../components/ModeTabs';
-import Controls        from '../components/Controls';
-import SessionDots     from '../components/SessionDots';
-import StreakBadge     from '../components/StreakBadge';
-import DurationPicker  from '../components/DurationPicker';
-import MusicPlayer     from '../components/MusicPlayer';
-import SettingsModal   from '../components/SettingsModal';
+import BlobScene from '../components/BlobScene';
+import ModeTabs from '../components/ModeTabs';
+import Controls from '../components/Controls';
+import SessionDots from '../components/SessionDots';
+import StreakBadge from '../components/StreakBadge';
+import DurationPicker from '../components/DurationPicker';
+import MusicPlayer from '../components/MusicPlayer';
+import SettingsModal from '../components/SettingsModal';
 import styles from './TimerPage.module.css';
 
 
@@ -16,12 +16,12 @@ import styles from './TimerPage.module.css';
 // ── Formatted time ─────────────────────────────────────────────────────────────
 function fmt(secs) {
   const s = Math.max(0, Math.floor(secs));
-  return `${String(Math.floor(s / 60)).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 }
 
 // ── XP float toast ─────────────────────────────────────────────────────────────
 function XpToast() {
-  const xpFlash      = useStore(s => s.xpFlash);
+  const xpFlash = useStore(s => s.xpFlash);
   const clearXpFlash = useStore(s => s.clearXpFlash);
 
   useEffect(() => {
@@ -41,20 +41,20 @@ function XpToast() {
 
 // ── Milestone modal ─────────────────────────────────────────────────────────────
 function MilestoneModal() {
-  const milestone       = useStore(s => s.milestone);
+  const milestone = useStore(s => s.milestone);
   const dismissMilestone = useStore(s => s.dismissMilestone);
   const canvasRef = useRef();
-  const rafRef    = useRef();
+  const rafRef = useRef();
 
   useEffect(() => {
     if (!milestone) return;
-    const cv  = canvasRef.current;
+    const cv = canvasRef.current;
     const ctx = cv.getContext('2d');
-    cv.width  = window.innerWidth;
+    cv.width = window.innerWidth;
     cv.height = window.innerHeight;
-    const COLORS = ['#a78bfa','#60a5fa','#34d399','#fbbf24','#f87171','#f0abfc','#fff'];
+    const COLORS = ['#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#f0abfc', '#fff'];
     const pts = Array.from({ length: 110 }, () => ({
-      x:  Math.random() * cv.width,
+      x: Math.random() * cv.width,
       y: -10 - Math.random() * 160,
       vx: (Math.random() - .5) * 3.5,
       vy: 2 + Math.random() * 3.5,
@@ -73,8 +73,8 @@ function MilestoneModal() {
         p.x += p.vx; p.y += p.vy; p.rot += p.rv; p.vy += .065;
         ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
         ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, 1 - p.y / cv.height);
-        if (p.rect) ctx.fillRect(-p.sz/2, -p.sz/4, p.sz, p.sz/2);
-        else { ctx.beginPath(); ctx.arc(0,0,p.sz/2,0,Math.PI*2); ctx.fill(); }
+        if (p.rect) ctx.fillRect(-p.sz / 2, -p.sz / 4, p.sz, p.sz / 2);
+        else { ctx.beginPath(); ctx.arc(0, 0, p.sz / 2, 0, Math.PI * 2); ctx.fill(); }
         ctx.restore();
       }
       if (alive) rafRef.current = requestAnimationFrame(draw);
@@ -82,7 +82,7 @@ function MilestoneModal() {
     rafRef.current = requestAnimationFrame(draw);
     return () => {
       cancelAnimationFrame(rafRef.current);
-      ctx.clearRect(0,0,cv.width,cv.height);
+      ctx.clearRect(0, 0, cv.width, cv.height);
     };
   }, [milestone]);
 
@@ -105,7 +105,7 @@ function MilestoneModal() {
 
 // ── Badge modal ─────────────────────────────────────────────────────────────
 function BadgeModal() {
-  const badge       = useStore(s => s.newBadgeAlert);
+  const badge = useStore(s => s.newBadgeAlert);
   const dismissBadge = useStore(s => s.dismissBadgeAlert);
 
   if (!badge) return null;
@@ -127,9 +127,9 @@ function BadgeModal() {
 
 // ── Completion Choice Modal (00:00 completion prompt) ─────────────────────────
 function CompletionChoiceModal() {
-  const prompt           = useStore(s => s.completedPrompt);
+  const prompt = useStore(s => s.completedPrompt);
   const chooseFocusAgain = useStore(s => s.chooseFocusAgain);
-  const chooseTakeBreak  = useStore(s => s.chooseTakeBreak);
+  const chooseTakeBreak = useStore(s => s.chooseTakeBreak);
 
   if (!prompt) return null;
 
@@ -163,26 +163,39 @@ function CompletionChoiceModal() {
 
 // ── Timer Page ─────────────────────────────────────────────────────────────────
 export default function TimerPage() {
-  const mode         = useStore(s => s.mode);
-  const elapsed      = useStore(s => s.elapsed);
-  const tick         = useStore(s => s.tick);
-  const dur          = useStore(s => s.durations[s.mode]);
+  const mode = useStore(s => s.mode);
+  const elapsed = useStore(s => s.elapsed);
+  const running = useStore(s => s.running);
+  const tick = useStore(s => s.tick);
+  const dur = useStore(s => s.durations[s.mode]);
   const soundEnabled = useStore(s => s.soundEnabled);
-  const toggleSound    = useStore(s => s.toggleSound);
+  const toggleSound = useStore(s => s.toggleSound);
   const toggleSettings = useStore(s => s.toggleSettings);
-  const user           = useStore(s => s.user);
-  const logout         = useStore(s => s.logout);
-  const tasks        = useStore(s => s.tasks || []);
+  const isSettingsOpen = useStore(s => s.isSettingsOpen);
+  const user = useStore(s => s.user);
+  const logout = useStore(s => s.logout);
+  const tasks = useStore(s => s.tasks || []);
   const activeTaskId = useStore(s => s.activeTaskId);
-  const activeTask   = tasks.find(t => t.id === activeTaskId);
+  const activeTask = tasks.find(t => t.id === activeTaskId);
   const setActiveTaskId = useStore(s => s.setActiveTaskId);
-  
-  const streak         = useStore(s => s.streak);
+  const play = useStore(s => s.play);
+  const pause = useStore(s => s.pause);
+  const reset = useStore(s => s.reset);
+  const skip = useStore(s => s.skip);
+  const toggleLofi = useStore(s => s.toggleLofi);
+  const completedPrompt = useStore(s => s.completedPrompt);
+  const milestone = useStore(s => s.milestone);
+  const dismissMilestone = useStore(s => s.dismissMilestone);
+  const dismissCompletedPrompt = useStore(s => s.dismissCompletedPrompt);
+  const dismissBadgeAlert = useStore(s => s.dismissBadgeAlert);
+  const newBadgeAlert = useStore(s => s.newBadgeAlert);
+
+  const streak = useStore(s => s.streak);
   const lastActiveDate = useStore(s => s.lastActiveDate);
 
   // rAF-driven tick
-  const rafRef   = useRef();
-  const tickCb   = useRef(tick);
+  const rafRef = useRef();
+  const tickCb = useRef(tick);
   tickCb.current = tick;
 
   useEffect(() => {
@@ -196,6 +209,38 @@ export default function TimerPage() {
   useEffect(() => {
     document.title = `${fmt(remaining)} — CHRONO`;
   }, [remaining, mode]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKey = (e) => {
+      // Don't trigger shortcuts when typing in inputs
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+      switch (e.code) {
+        case 'Space':
+          e.preventDefault();
+          running ? pause() : play();
+          break;
+        case 'KeyR':
+          if (!e.ctrlKey && !e.metaKey) reset();
+          break;
+        case 'KeyS':
+          if (!e.ctrlKey && !e.metaKey) skip();
+          break;
+        case 'KeyM':
+          if (!e.ctrlKey && !e.metaKey) toggleLofi();
+          break;
+        case 'Escape':
+          if (isSettingsOpen) toggleSettings();
+          else if (completedPrompt) dismissCompletedPrompt();
+          else if (milestone) dismissMilestone();
+          else if (newBadgeAlert) dismissBadgeAlert();
+          break;
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [running, play, pause, reset, skip, toggleLofi, isSettingsOpen, toggleSettings, completedPrompt, dismissCompletedPrompt, milestone, dismissMilestone, newBadgeAlert, dismissBadgeAlert]);
 
   const today = new Date().toISOString().split('T')[0];
   const hasCompletedToday = lastActiveDate === today;
@@ -244,15 +289,15 @@ export default function TimerPage() {
             </span>
           )}
           {streak > 0 && !hasCompletedToday && (
-            <span 
-              className={styles.miniStreakWarning} 
+            <span
+              className={styles.miniStreakWarning}
               title={user ? `Streak Warning: Complete a task focus session today to save your ${streak}-day streak!` : `Streak Warning: You are not logged in! Log in to protect your streak.`}
             >
               ⚠️
             </span>
           )}
         </div>
-        
+
         <ModeTabs />
 
         <div className={styles.dotsRow}>
@@ -291,14 +336,14 @@ export default function TimerPage() {
           >
             {soundEnabled ? (
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
               </svg>
             ) : (
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                <line x1="23" y1="9" x2="17" y2="15"/>
-                <line x1="17" y1="9" x2="23" y2="15"/>
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <line x1="23" y1="9" x2="17" y2="15" />
+                <line x1="17" y1="9" x2="23" y2="15" />
               </svg>
             )}
           </button>
@@ -312,10 +357,10 @@ export default function TimerPage() {
 
           <Link to="/analytics" className={styles.dockIconBtn} aria-label="Analytics" title="Analytics">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <rect x="3" y="3" width="7" height="7" rx="1"/>
-              <rect x="14" y="3" width="7" height="7" rx="1"/>
-              <rect x="14" y="14" width="7" height="7" rx="1"/>
-              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
             </svg>
           </Link>
 
@@ -327,8 +372,8 @@ export default function TimerPage() {
             title="Customization Settings (Unlockable Visualizers & Backgrounds)"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
             </svg>
           </button>
 

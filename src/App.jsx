@@ -1,5 +1,8 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
+import AuthGuard from './components/AuthGuard';
+import LandingPage from './pages/LandingPage';
 import TimerPage from './pages/TimerPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import AuthPage from './pages/AuthPage';
@@ -39,14 +42,18 @@ export default function App() {
   }, [streak, lastActiveDate, user]);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<TimerPage />} />
-        <Route path="/analytics" element={<AnalyticsPage />} />
-        <Route path="/login" element={<AuthPage />} />
-        <Route path="/verify" element={<VerifyPage />} />
-        <Route path="/tasks" element={<TasksPage />} />
-      </Routes>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/welcome" element={<LandingPage />} />
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/verify" element={<VerifyPage />} />
+          
+          <Route path="/" element={<AuthGuard><TimerPage /></AuthGuard>} />
+          <Route path="/analytics" element={<AuthGuard><AnalyticsPage /></AuthGuard>} />
+          <Route path="/tasks" element={<AuthGuard><TasksPage /></AuthGuard>} />
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
