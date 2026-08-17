@@ -34,40 +34,40 @@ export default function LandingPage() {
 
       {/* Main Content */}
       <main className={styles.mainContent}>
-        <div className={styles.tagline}>Procrastination ends here</div>
+        <div className={styles.tagline}>Radically Simple Focus</div>
         
         <h1 className={styles.heroTitle}>
-          TikTok stole your attention.<br />
-          Let's get it back.
+          Hyperfocus,<br />
+          simplified.
         </h1>
         
         <p className={styles.heroSubtitle}>
-          Chrono isn't just a timer. It's a ruthless accountability system with custom learning roadmaps, harsh streak tracking, and data that exposes exactly where your time goes. 
+          CHRONO is a beautifully minimal focus timer designed specifically for the distracted mind. No clutter, no complex systems. Just a fluid interface, strict accountability, and your deep work.
         </p>
 
         <Link to="/login" className={styles.ctaBtn}>
-          Lock In Now
+          Start Focusing
           <span className={styles.ctaArrow}>→</span>
         </Link>
 
         {/* Features Grid */}
         <div className={styles.featuresGrid}>
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>🧠</div>
-            <h3 className={styles.featureTitle}>Deep Work States</h3>
-            <p className={styles.featureDesc}>Immerse yourself in customizable pomodoro sessions paired with our built-in interstellar lo-fi player.</p>
+            <div className={styles.featureIcon}>✨</div>
+            <h3 className={styles.featureTitle}>Pure Immersion</h3>
+            <p className={styles.featureDesc}>A distraction-free, full-screen fluid visualizer that keeps you grounded without stealing your attention.</p>
           </div>
           
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>🗺️</div>
-            <h3 className={styles.featureTitle}>Custom Roadmaps</h3>
-            <p className={styles.featureDesc}>Don't just work blindly. Import learning roadmaps and track your progress through weeks of structured content.</p>
+            <div className={styles.featureIcon}>📈</div>
+            <h3 className={styles.featureTitle}>Silent Tracking</h3>
+            <p className={styles.featureDesc}>Your focus sessions and intentions are automatically logged behind the scenes into a beautiful activity dashboard.</p>
           </div>
           
           <div className={styles.featureCard}>
             <div className={styles.featureIcon}>🔥</div>
-            <h3 className={styles.featureTitle}>Ruthless Streaks</h3>
-            <p className={styles.featureDesc}>Miss a day? You lose it all. Chrono sends you a reminder email before midnight to save your streak.</p>
+            <h3 className={styles.featureTitle}>Strict Accountability</h3>
+            <p className={styles.featureDesc}>Build momentum day by day. Miss a session, and your streak resets. We'll even remind you so you don't forget.</p>
           </div>
         </div>
       </main>
