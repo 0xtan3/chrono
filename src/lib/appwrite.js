@@ -1,4 +1,4 @@
-import { Client, Account, Databases, ID, Query } from 'appwrite';
+import { Client, Account, Databases, ID, Query, Permission, Role } from 'appwrite';
 
 // ── Appwrite Configuration ────────────────────────────────────────────────────
 export const APPWRITE_CONFIG = {
@@ -153,8 +153,10 @@ export async function fetchUserStats(userId) {
         lastActiveDate: doc.lastActiveDate,
         days: doc.daysData ? JSON.parse(doc.daysData) : {},
         shownMs: doc.shownMs ? JSON.parse(doc.shownMs) : [],
-        tasks: doc.tasksData ? JSON.parse(doc.tasksData) : [],
+        focusLog: doc.tasksData ? JSON.parse(doc.tasksData) : [],
         customRoadmap: doc.roadmapData ? JSON.parse(doc.roadmapData) : null,
+        timezone: doc.timezone || '',
+        streakFreezes: doc.streakFreezes !== undefined ? doc.streakFreezes : 1,
       };
     }
   } catch (e) {
@@ -173,8 +175,10 @@ export async function saveUserStats(userId, statsData, docId = null) {
     lastActiveDate: statsData.lastActiveDate || '',
     daysData: JSON.stringify(statsData.days || {}),
     shownMs: JSON.stringify(statsData.shownMs || []),
-    tasksData: JSON.stringify(statsData.tasks || []),
+    tasksData: JSON.stringify(statsData.focusLog || []),
     roadmapData: JSON.stringify(statsData.customRoadmap || null),
+    timezone: statsData.timezone || '',
+    streakFreezes: statsData.streakFreezes !== undefined ? statsData.streakFreezes : 1,
   };
 
   try {
@@ -190,7 +194,12 @@ export async function saveUserStats(userId, statsData, docId = null) {
         APPWRITE_CONFIG.DATABASE_ID,
         APPWRITE_CONFIG.COLLECTION_ID,
         ID.unique(),
-        payload
+        payload,
+        [
+          Permission.read(Role.user(userId)),
+          Permission.update(Role.user(userId)),
+          Permission.delete(Role.user(userId)),
+        ]
       );
     }
   } catch (e) {

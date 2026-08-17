@@ -21,8 +21,7 @@ export default async function handler(req, res) {
       throw new Error('Missing critical environment variables: PROJECT_ID, APPWRITE_API_KEY, or RESEND_API_KEY.');
     }
 
-    const client = new Client();
-    client
+    const client = new Client()
       .setEndpoint(ENDPOINT)
       .setProject(PROJECT_ID)
       .setKey(API_KEY);
@@ -35,187 +34,110 @@ export default async function handler(req, res) {
     const today = todayDate.toISOString().split('T')[0];
     const msPerDay = 1000 * 60 * 60 * 24;
 
-    const response = await databases.listDocuments(DB_ID, COL_ID, [
-      Query.limit(100) 
-    ]);
+    let offset = 0;
+    const limit = 100;
+    let allStats = [];
 
-    const stats = response.documents;
+    while (true) {
+      const response = await databases.listDocuments(DB_ID, COL_ID, [
+        Query.limit(limit),
+        Query.offset(offset)
+      ]);
+      allStats.push(...response.documents);
+      if (response.documents.length < limit) break;
+      offset += limit;
+    }
+
     let emailsSent = 0;
     let streaksReset = 0;
 
-    for (const stat of stats) {
-      const { userId, streak, lastActiveDate, tasksData } = stat;
+    for (const stat of allStats) {
+      const { userId, streak, lastActiveDate, timezone, streakFreezes } = stat;
       
-      if (streak > 0 && lastActiveDate && lastActiveDate !== today) {
-        const lastActive = new Date(lastActiveDate).getTime();
-        const nowTime = new Date(today).getTime();
-        const daysSinceActive = Math.round((nowTime - lastActive) / msPerDay);
+      if (!lastActiveDate) continue;
 
-        // If they missed yesterday entirely (days >= 2), reset streak to 0 and send a "streak lost" email.
-        if (daysSinceActive >= 2) {
-          try {
-            await databases.updateDocument(DB_ID, COL_ID, stat.$id, { streak: 0 });
-            streaksReset++;
-            console.log(`Reset streak to 0 for user ${userId}`);
+      const userTz = timezone || 'UTC';
+      let userFreezes = streakFreezes !== undefined ? streakFreezes : 1;
+      
+      let userTodayStr = today;
+      try {
+        const formatter = new Intl.DateTimeFormat('en-CA', {
+          timeZone: userTz,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        });
+        userTodayStr = formatter.format(new Date());
+      } catch (e) {
+        userTodayStr = today;
+      }
+      
+      if (lastActiveDate !== userTodayStr) {
+        const lastActiveTime = new Date(lastActiveDate).getTime();
+        const userTodayTime = new Date(userTodayStr).getTime();
+        const daysSinceActive = Math.round((userTodayTime - lastActiveTime) / msPerDay);
 
-            // Send a "streak lost" notification email
-            let user;
-            try { user = await users.get(userId); } catch (e) { continue; }
-            if (user && user.email) {
-              const lostHtml = `
-                <!DOCTYPE html>
-                <html>
-                <head><style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');</style></head>
-                <body style="margin: 0; padding: 0; background-color: #080b12; font-family: 'Inter', -apple-system, sans-serif;">
-                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #080b12; padding: 40px 20px;">
-                    <tr><td align="center">
-                      <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #10131f; border-radius: 16px; border: 1px solid rgba(255,255,255,0.07); overflow: hidden;">
-                        <tr><td style="padding: 40px 40px 20px 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.03);">
-                          <h1 style="margin: 0; color: #a78bfa; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">CHRONO</h1>
-                          <p style="margin: 8px 0 0 0; color: rgba(232,236,255,0.45); font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Focus Timer</p>
-                        </td></tr>
-                        <tr><td style="padding: 40px;">
-                          <div style="text-align: center; margin-bottom: 30px;"><span style="font-size: 48px; line-height: 1;">💔</span></div>
-                          <h2 style="margin: 0 0 15px 0; color: #e8ecff; font-size: 24px; font-weight: 600; text-align: center;">Your ${streak}-day streak was lost</h2>
-                          <p style="margin: 0 0 20px 0; color: rgba(232,236,255,0.7); font-size: 16px; line-height: 1.6; text-align: center;">
-                            Hi ${user.name || 'there'}, you missed ${daysSinceActive} days without a focus session, so your streak has been reset to 0. But don't worry — every great comeback starts with a single session.
-                          </p>
-                          <div style="text-align: center; margin-top: 35px;">
-                            <a href="${process.env.VITE_APP_URL || 'https://chrono.tenazity.com'}"
-                               style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%); color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);">
-                              Start a New Streak 🚀
-                            </a>
-                          </div>
-                        </td></tr>
-                        <tr><td style="padding: 25px 40px; text-align: center; background-color: #0c0f18; border-top: 1px solid rgba(255,255,255,0.03);">
-                          <p style="margin: 0; color: rgba(232,236,255,0.3); font-size: 12px;">Sent by Chrono Focus Timer<br>Every setback is a setup for a comeback.</p>
-                        </td></tr>
-                      </table>
-                    </td></tr>
-                  </table>
-                </body>
-                </html>
-              `;
-              await resend.emails.send({
-                from: 'Chrono <reminders@chrono.tenazity.com>',
-                to: user.email,
-                subject: `💔 Your ${streak}-day streak was lost`,
-                html: lostHtml
-              });
-              emailsSent++;
-              console.log(`Streak-lost email sent to ${user.email} (was ${streak} days)`);
+        let subject = null;
+        let html = null;
+        let shouldSend = false;
+
+        if (streak > 0) {
+          if (daysSinceActive === 1) {
+            // About to lose
+            subject = `🔥 Save your ${streak}-day streak!`;
+            html = `<p>Hi there,</p><p>You're about to lose your ${streak}-day CHRONO focus streak! Complete a quick session today to keep it alive.</p><p>Stay focused,<br>CHRONO Team</p>`;
+            shouldSend = true;
+          } else if (daysSinceActive === 2) {
+            // Lost (Check freezes first)
+            if (userFreezes > 0) {
+              try {
+                const userYesterdayTime = userTodayTime - msPerDay;
+                const userYesterdayStr = new Date(userYesterdayTime).toISOString().split('T')[0];
+                await databases.updateDocument(DB_ID, COL_ID, stat.$id, { 
+                  streakFreezes: userFreezes - 1,
+                  lastActiveDate: userYesterdayStr
+                });
+                subject = `🧊 Streak Freeze Activated!`;
+                html = `<p>Hi there,</p><p>You missed a session yesterday, but your Streak Freeze automatically activated! Your ${streak}-day streak is safe.</p><p>Log a session today!</p><p>CHRONO Team</p>`;
+                shouldSend = true;
+              } catch (e) { console.error('Freeze error', e); }
+            } else {
+              try {
+                await databases.updateDocument(DB_ID, COL_ID, stat.$id, { streak: 0 });
+                streaksReset++;
+                subject = `💔 Your ${streak}-day streak was lost`;
+                html = `<p>Hi there,</p><p>You missed a session yesterday and your ${streak}-day streak was lost.</p><p>Don't worry, you can always start a new one today!</p><p>CHRONO Team</p>`;
+                shouldSend = true;
+              } catch (e) { console.error('Reset error', e); }
             }
-          } catch (e) {
-            console.error(`Failed to reset streak for user ${userId}`, e);
           }
-          continue;
+        } else {
+          // Streak is 0. Check for 2^N days if they missed more than 2 days.
+          if (daysSinceActive > 2) {
+            const isPowerOfTwo = (Math.log2(daysSinceActive) % 1 === 0);
+            if (isPowerOfTwo) {
+              subject = `We miss you at CHRONO`;
+              html = `<p>Hi there,</p><p>It's been ${daysSinceActive} days since your last focus session. We know building habits is tough, but we're here when you're ready to get back into the groove.</p><p>Jump back in and start building a new streak!</p><p>CHRONO Team</p>`;
+              shouldSend = true;
+            }
+          }
         }
 
-        // If days === 1, they missed today so far. Send ONE warning email.
-        if (daysSinceActive === 1) {
-          let user;
+        if (shouldSend && subject && html) {
           try {
-            user = await users.get(userId);
-          } catch (e) {
-            continue;
-          }
-
-          if (user && user.email) {
-            let pendingTasks = [];
-            if (tasksData) {
-              try {
-                const tasks = JSON.parse(tasksData);
-                pendingTasks = tasks.filter(t => !t.completed).slice(0, 3);
-              } catch (e) {}
+            const user = await users.get(userId);
+            if (user && user.email) {
+              await resend.emails.send({
+                from: 'Chrono <reminders@chrono.tenazity.com>', // Or fallback to default resend email if using free tier without domain
+                to: user.email,
+                subject: subject,
+                html: html
+              });
+              emailsSent++;
+              console.log(`Email sent to ${user.email}: ${subject}`);
             }
-
-            const tasksHtml = pendingTasks.length > 0 
-              ? `<div style="background-color: #181c2e; padding: 20px; border-radius: 12px; margin: 25px 0; border: 1px solid rgba(255,255,255,0.05);">
-                  <h3 style="margin-top: 0; color: #e8ecff; font-size: 16px; font-weight: 600; margin-bottom: 15px;">Your Pending Tasks:</h3>
-                  <ul style="margin: 0; padding-left: 20px; color: rgba(232,236,255,0.8); line-height: 1.6;">
-                    ${pendingTasks.map(t => {
-                      const overdue = t.deadline && t.deadline < today;
-                      const deadlineText = t.deadline 
-                        ? `<span style="font-size: 12px; margin-left: 8px; color: ${overdue ? '#fca5a5' : 'rgba(232,236,255,0.5)'};">${overdue ? '⚠️ Overdue: ' : '📅 '}${t.deadline}</span>` 
-                        : '';
-                      return `<li style="margin-bottom: 8px;">${t.title}${deadlineText}</li>`;
-                    }).join('')}
-                  </ul>
-                 </div>`
-              : `<div style="background-color: #181c2e; padding: 20px; border-radius: 12px; margin: 25px 0; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
-                  <p style="margin: 0; color: rgba(232,236,255,0.8); font-size: 15px;">Log a quick 25-minute focus session today to keep the fire alive!</p>
-                 </div>`;
-
-            const html = `
-              <!DOCTYPE html>
-              <html>
-              <head>
-                <style>
-                  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-                </style>
-              </head>
-              <body style="margin: 0; padding: 0; background-color: #080b12; font-family: 'Inter', -apple-system, sans-serif;">
-                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #080b12; padding: 40px 20px;">
-                  <tr>
-                    <td align="center">
-                      <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #10131f; border-radius: 16px; border: 1px solid rgba(255,255,255,0.07); overflow: hidden;">
-                        
-                        <!-- Header -->
-                        <tr>
-                          <td style="padding: 40px 40px 20px 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.03);">
-                            <h1 style="margin: 0; color: #a78bfa; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">CHRONO</h1>
-                            <p style="margin: 8px 0 0 0; color: rgba(232,236,255,0.45); font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Focus Timer</p>
-                          </td>
-                        </tr>
-
-                        <!-- Body -->
-                        <tr>
-                          <td style="padding: 40px;">
-                            <div style="text-align: center; margin-bottom: 30px;">
-                              <span style="font-size: 48px; line-height: 1;">🔥</span>
-                            </div>
-                            <h2 style="margin: 0 0 15px 0; color: #e8ecff; font-size: 24px; font-weight: 600; text-align: center;">Save your ${streak}-day streak!</h2>
-                            <p style="margin: 0 0 20px 0; color: rgba(232,236,255,0.7); font-size: 16px; line-height: 1.6; text-align: center;">
-                              Hi ${user.name || 'there'}, you haven't completed a focus session today. You have a few hours left before midnight to log a session and save your <strong>${streak}-day streak</strong>!
-                            </p>
-                            
-                            ${tasksHtml}
-
-                            <div style="text-align: center; margin-top: 35px;">
-                              <a href="${process.env.VITE_APP_URL || 'https://chrono.tenazity.com'}" 
-                                 style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%); color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);">
-                                Jump In & Focus
-                              </a>
-                            </div>
-                          </td>
-                        </tr>
-
-                        <!-- Footer -->
-                        <tr>
-                          <td style="padding: 25px 40px; text-align: center; background-color: #0c0f18; border-top: 1px solid rgba(255,255,255,0.03);">
-                            <p style="margin: 0; color: rgba(232,236,255,0.3); font-size: 12px;">
-                              Sent by Chrono Focus Timer<br>Keep pushing your limits.
-                            </p>
-                          </td>
-                        </tr>
-
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </body>
-              </html>
-            `;
-
-            await resend.emails.send({
-              from: 'Chrono <reminders@chrono.tenazity.com>',
-              to: user.email,
-              subject: `🔥 Save your ${streak}-day streak!`,
-              html: html
-            });
-            
-            emailsSent++;
-            console.log(`Email sent to ${user.email} (Streak: ${streak})`);
+          } catch (e) {
+            console.error(`Failed to send email to user ${userId}`, e);
           }
         }
       }

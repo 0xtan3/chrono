@@ -1,6 +1,6 @@
 .pageViewport {
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -75,14 +75,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: .8rem;
-  margin: auto 0;
+  gap: 1.5rem;
+  flex: 1;
   position: relative;
   z-index: 5;
 }
 
 .promptText {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #fff;
   letter-spacing: -.01em;
@@ -97,9 +97,9 @@
 /* 3D Liquid Blob Container */
 .blobWrap {
   position: relative;
-  width: 360px;
-  height: 360px;
-  margin: -.5rem 0;
+  width: 500px;
+  height: 500px;
+  margin: -.2rem 0;
 }
 
 .timeOverlay {
@@ -109,7 +109,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: .3rem;
+  gap: .4rem;
   pointer-events: none;
   z-index: 2;
 }
@@ -117,19 +117,19 @@
 .time {
   font-size: 3.8rem;
   font-weight: 700;
-  letter-spacing: .04em;
+  letter-spacing: .05em;
   line-height: 1;
   color: #fff;
   text-shadow: 0 0 32px hsla(252,90%,80%,.55), 0 2px 12px rgba(0,0,0,.4);
 }
 
 .modeLabel {
-  font-size: .68rem;
-  font-weight: 500;
-  letter-spacing: .28em;
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .32em;
   text-transform: uppercase;
   color: var(--accent);
-  opacity: .85;
+  opacity: .9;
 }
 
 /* XP Toast */
@@ -286,21 +286,27 @@
 }
 
 .choiceCard {
-  background: rgba(18, 21, 31, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(20, 24, 35, 0.75), rgba(12, 14, 22, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 28px;
   padding: 2.5rem 2rem;
   text-align: center;
   max-width: 380px;
   width: 90%;
-  box-shadow: 0 16px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(40px) saturate(150%);
   position: relative;
   z-index: 2;
-  animation: popIn .35s cubic-bezier(.34,1.56,.64,1);
+  animation: springPop .6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+@keyframes springPop {
+  0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .choiceEmoji {
@@ -434,8 +440,10 @@
     padding: 1rem 1.5rem;
   }
   .blobWrap {
-    width: 290px;
-    height: 290px;
+    width: 350px;
+    height: 350px;
+    max-width: 85vw;
+    max-height: 85vw;
   }
   .time {
     font-size: 3rem;
@@ -445,17 +453,55 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .pageViewport {
+    padding: 1rem;
+    height: 100dvh;
+    max-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .blobWrap {
+    width: 380px;
+    height: 380px;
+    max-width: 90vw;
+    max-height: 90vw;
+  }
+
+  .time {
+    font-size: 3.5rem;
+  }
+  
   .quoteBox {
     display: none;
   }
-  .pageViewport {
-    padding: 1.2rem 1rem;
+  
+  .hideOnMobile {
+    display: none !important;
   }
+
   .bottomDock {
-    flex-direction: column-reverse;
-    gap: .8rem;
-    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: linear-gradient(to top, rgba(8, 11, 18, 0.95) 40%, rgba(8, 11, 18, 0) 100%);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  /* Create some space at bottom so main content isn't covered by fixed dock */
+  .centerStage {
+    margin-bottom: 80px; 
   }
 }
 

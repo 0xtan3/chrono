@@ -3,11 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { blobVert } from '../shaders/blob.vert';
 import { blobFrag } from '../shaders/blob.frag';
-import { useStore, MODES } from '../store';
-import IceMeltAnimation from './IceMeltAnimation';
-
-
-// ── Colour helpers ────────────────────────────────────────────────────────────
+import { useStore, MODES } from '../store';// ── Colour helpers ────────────────────────────────────────────────────────────
 function modeColors(mode) {
   const { h, s, lb } = MODES[mode];
   const hsl = (l) => new THREE.Color(`hsl(${h},${s}%,${l}%)`);
@@ -68,113 +64,11 @@ function BlobMesh() {
   );
 }
 
-// ── 2. Neon Torus Mesh (Unlocked at 3-day streak) ────────────────────────────
-function NeonTorusMesh() {
-  const meshRef = useRef();
-  const mode    = useStore(s => s.mode);
-  const { h }   = MODES[mode];
-  const color   = useMemo(() => new THREE.Color(`hsl(${h}, 90%, 65%)`), [h]);
-
-  useFrame(({ clock }) => {
-    if (!meshRef.current) return;
-    const t = clock.getElapsedTime();
-    meshRef.current.rotation.x = t * 0.4;
-    meshRef.current.rotation.y = t * 0.6;
-  });
-
-  return (
-    <mesh ref={meshRef}>
-      <torusGeometry args={[0.9, 0.28, 32, 100]} />
-      <meshStandardMaterial
-        color={color}
-        emissive={color}
-        emissiveIntensity={0.6}
-        wireframe={true}
-        roughness={0.2}
-      />
-    </mesh>
-  );
-}
-
-// ── 3. Cosmic Orb Mesh (Unlocked at 7-day streak) ────────────────────────────
-function CosmicOrbMesh() {
-  const pointsRef = useRef();
-  const mode      = useStore(s => s.mode);
-  const { h }     = MODES[mode];
-  const color     = useMemo(() => new THREE.Color(`hsl(${h}, 95%, 70%)`), [h]);
-
-  const [positions] = useMemo(() => {
-    const count = 1200;
-    const pos = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const u = Math.random();
-      const v = Math.random();
-      const theta = u * 2.0 * Math.PI;
-      const phi = Math.acos(2.0 * v - 1.0);
-      const r = 0.95 + (Math.random() - 0.5) * 0.2;
-      pos[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
-      pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      pos[i * 3 + 2] = r * Math.cos(phi);
-    }
-    return [pos];
-  }, []);
-
-  useFrame(({ clock }) => {
-    if (!pointsRef.current) return;
-    const t = clock.getElapsedTime();
-    pointsRef.current.rotation.y = t * 0.2;
-    pointsRef.current.rotation.z = t * 0.15;
-  });
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={positions.length / 3}
-          array={positions}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.035}
-        color={color}
-        transparent
-        opacity={0.85}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
-}
-
 // ── Main exported scene ───────────────────────────────────────────────────────
 export default function BlobScene() {
   const mode               = useStore(s => s.mode);
-  const selectedVisualizer = useStore(s => s.selectedVisualizer);
   const { h, s, lb }       = MODES[mode];
   const glowColor          = `hsla(${h}, ${s}%, ${lb}%, 0.45)`;
-
-  // Blank template -> NO visualizer canvas
-  if (selectedVisualizer === 'blank') {
-    return null;
-  }
-
-  // Ice Melt -> HTML5 Canvas visualizer (no WebGL needed)
-  if (selectedVisualizer === 'ice_melt') {
-    return (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <IceMeltAnimation />
-      </div>
-    );
-  }
 
   return (
     <div
@@ -194,13 +88,7 @@ export default function BlobScene() {
         <ambientLight intensity={0.5} />
         <pointLight position={[5, 5, 5]} intensity={1.2} />
 
-        {selectedVisualizer === 'neon_ring' ? (
-          <NeonTorusMesh />
-        ) : selectedVisualizer === 'cosmic_orb' ? (
-          <CosmicOrbMesh />
-        ) : (
-          <BlobMesh />
-        )}
+        <BlobMesh />
       </Canvas>
     </div>
   );

@@ -1,8 +1,15 @@
 import { create } from 'zustand';
 import { playFocusChime, playBreakChime, unlockAudio } from './utils/audio';
-import { playLofi, pauseLofi, setLofiVolume as updateLofiVolume, skipToNextLofiTrack, getCurrentLofiTrack } from './utils/musicApi';
 import { getCurrentUser, logoutUser, fetchUserStats, saveUserStats } from './lib/appwrite';
-import { CATS as DEFAULT_CATS, ITEMS as DEFAULT_ITEMS, WEEK_GROUPS as DEFAULT_WEEK_GROUPS } from './utils/roadmapData';
+
+// ── Mode config ───────────────────────────────────────────────────────────────
+export const MODES = {
+  focus: { label: 'Focus', h: 252, s: 88, lb: 65, defaultMin: 25 },
+  short: { label: 'Short Break', h: 162, s: 72, lb: 60, defaultMin: 5 },
+  long: { label: 'Long Break', h: 200, s: 78, lb: 62, defaultMin: 15 },
+};
+export const FOCUS_PRESETS = [25, 50, 90];
+export const BREAK_PRESETS = [5, 10, 15];
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 export function todayStr() {
@@ -25,19 +32,12 @@ function loadStreak() {
         days: {},
         streak: 0,
         bestStreak: 0,
-        totalXP: 0,
         lastActiveDate: null,
-        shownMs: [],
-        tasks: [],
-        activeTaskId: null,
-        customRoadmap: null,
-        selectedVisualizer: 'liquid_blob',
-        selectedTheme: 'midnight',
         ...parsed
       };
     }
   } catch { }
-  return { days: {}, streak: 0, bestStreak: 0, totalXP: 0, lastActiveDate: null, shownMs: [], tasks: [], activeTaskId: null, customRoadmap: null, selectedVisualizer: 'liquid_blob', selectedTheme: 'midnight' };
+  return { days: {}, streak: 0, bestStreak: 0, lastActiveDate: null, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, streakFreezes: 1 };
 }
 function persist(s) {
   try {
@@ -46,85 +46,14 @@ function persist(s) {
       ...current,
       streak: s.streak,
       bestStreak: s.bestStreak,
-      totalXP: s.totalXP,
       lastActiveDate: s.lastActiveDate,
       days: s.days,
-      shownMs: s.shownMs,
-      tasks: s.tasks ?? current.tasks ?? [],
-      activeTaskId: s.activeTaskId !== undefined ? s.activeTaskId : (current.activeTaskId ?? null),
-      customRoadmap: s.customRoadmap !== undefined ? s.customRoadmap : (current.customRoadmap ?? null),
-      selectedVisualizer: s.selectedVisualizer !== undefined ? s.selectedVisualizer : (current.selectedVisualizer ?? 'liquid_blob'),
-      selectedTheme: s.selectedTheme !== undefined ? s.selectedTheme : (current.selectedTheme ?? 'midnight'),
+      timezone: s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+      streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : (current.streakFreezes ?? 1),
+      focusLog: s.focusLog || current.focusLog || [],
     }));
   } catch { }
 }
-
-// ── Level table ───────────────────────────────────────────────────────────────
-export const LEVELS = [
-  { xp: 0, name: 'Seedling', n: 1 },
-  { xp: 100, name: 'Student', n: 2 },
-  { xp: 300, name: 'Scholar', n: 3 },
-  { xp: 700, name: 'Expert', n: 4 },
-  { xp: 1500, name: 'Master', n: 5 },
-  { xp: 3000, name: 'Legend', n: 6 },
-  { xp: 6000, name: 'Immortal', n: 7 },
-];
-export function getLevelInfo(xp) {
-  let lvl = LEVELS[0], next = LEVELS[1];
-  for (let i = 0; i < LEVELS.length; i++) {
-    if (xp >= LEVELS[i].xp) { lvl = LEVELS[i]; next = LEVELS[i + 1] ?? null; }
-  }
-  const progress = next ? (xp - lvl.xp) / (next.xp - lvl.xp) : 1;
-  return { lvl, next, progress, toNext: next ? next.xp - xp : 0 };
-}
-
-// ── Milestone config ──────────────────────────────────────────────────────────
-export const MILESTONES = [
-  { days: 3, emoji: '🌱', title: '3-Day Streak!', sub: 'Consistency is everything. Keep it up!' },
-  { days: 7, emoji: '🔥', title: 'One Full Week!', sub: 'Seven days straight. This is becoming a habit.' },
-  { days: 14, emoji: '⚡', title: '14-Day Streak!', sub: 'Two weeks! Your future self thanks you.' },
-  { days: 21, emoji: '🎯', title: '21-Day Streak!', sub: 'Science says habits form at 21 days. You made it!' },
-  { days: 30, emoji: '🏆', title: '30-Day Streak!', sub: 'A full month. Truly unstoppable.' },
-  { days: 60, emoji: '💎', title: '60 Days Strong!', sub: 'Diamond-level dedication.' },
-  { days: 100, emoji: '👑', title: '100-Day Streak!', sub: 'ONE HUNDRED DAYS. You are a legend.' },
-];
-
-// ── Badge config ──────────────────────────────────────────────────────────────
-export const BADGES = [
-  { id: 'first_step', type: 'session', target: 1, emoji: '🔥', title: 'First Step', sub: 'Completed your first Pomodoro today.' },
-  { id: 'double_focus', type: 'session', target: 2, emoji: '🥉', title: 'Double Focus', sub: 'Completed 2 Pomodoros in a single day.' },
-  { id: 'deep_work', type: 'session', target: 4, emoji: '🥈', title: 'Deep Work', sub: 'Completed 4 Pomodoros in a single day.' },
-  { id: 'flow_state', type: 'session', target: 6, emoji: '🥇', title: 'Flow State', sub: 'Completed 6 Pomodoros in a single day.' },
-  { id: 'finisher', type: 'task', target: 1, emoji: '🎯', title: 'Finisher', sub: 'Completed a task today.' },
-  { id: 'overachiever', type: 'task', target: 3, emoji: '🚀', title: 'Overachiever', sub: 'Completed 3 tasks today.' },
-];
-
-// ── Mode config ───────────────────────────────────────────────────────────────
-export const MODES = {
-  focus: { label: 'Focus', h: 252, s: 88, lb: 65, defaultMin: 25 },
-  short: { label: 'Short Break', h: 162, s: 72, lb: 60, defaultMin: 5 },
-  long: { label: 'Long Break', h: 200, s: 78, lb: 62, defaultMin: 15 },
-};
-export const FOCUS_PRESETS = [25, 50, 90];
-export const BREAK_PRESETS = [5, 10, 15];
-
-// ── Visualizers Catalog ────────────────────────────────────────────────────────
-export const VISUALIZERS = [
-  { id: 'liquid_blob', name: 'Liquid Blob',    reqStreak: 0,  emoji: '🔮', desc: '3D fluid wave sphere' },
-  { id: 'blank',       name: 'Blank Minimal',  reqStreak: 0,  emoji: '✨', desc: 'Clean typography (no visualizer)' },
-  { id: 'ice_melt',    name: 'Ice Melt',       reqStreak: 5,  emoji: '🧊', desc: 'Frozen ice block that melts to zero — realistic caustics, drips & steam' },
-  { id: 'neon_ring',   name: 'Neon Torus',     reqStreak: 3,  emoji: '⭕', desc: 'Rotating cyberpunk energy ring' },
-  { id: 'cosmic_orb',  name: 'Cosmic Orb',     reqStreak: 7,  emoji: '🌌', desc: 'Deep space stardust particle sphere' },
-];
-
-// ── Background Themes Catalog ──────────────────────────────────────────────────
-export const THEMES = [
-  { id: 'midnight',    name: 'Midnight Void', reqStreak: 0, emoji: '🌑', bg: '#080b12', accent: '#7c3aed' },
-  { id: 'deep_space',  name: 'Deep Cosmos',   reqStreak: 3, emoji: '🌌', bg: '#030712', accent: '#3b82f6' },
-  { id: 'cyberpunk',   name: 'Neon Cyber',    reqStreak: 7, emoji: '🔮', bg: '#0d021a', accent: '#ec4899' },
-  { id: 'zen_forest',  name: 'Zen Emerald',   reqStreak: 14, emoji: '🌲', bg: '#02140f', accent: '#10b981' },
-  { id: 'solar_amber', name: 'Solar Amber',   reqStreak: 21, emoji: '🌅', bg: '#1a0b02', accent: '#f59e0b' },
-];
 
 // ── Streak helpers (pure) ─────────────────────────────────────────────────────
 function recalcStreak(s) {
@@ -134,13 +63,15 @@ function recalcStreak(s) {
   return s;
 }
 
-function applySession(s, xpEarned) {
+function applySession(s, focusMins = 25) {
   const today = todayStr();
   const days = { ...s.days };
-  if (!days[today]) days[today] = { sessions: 0, xp: 0, badges: [] };
-  // Ensure existing days have badges array
-  if (!days[today].badges) days[today].badges = [];
-  days[today] = { ...days[today], sessions: days[today].sessions + 1, xp: days[today].xp + xpEarned };
+  if (!days[today]) days[today] = { sessions: 0, mins: 0 };
+  days[today] = {
+    ...days[today],
+    sessions: days[today].sessions + 1,
+    mins: (days[today].mins || 0) + focusMins,
+  };
 
   let streak = s.streak;
   let lastActiveDate = s.lastActiveDate;
@@ -160,8 +91,7 @@ function applySession(s, xpEarned) {
   }
 
   const bestStreak = Math.max(streak, s.bestStreak);
-  const totalXP = s.totalXP + xpEarned;
-  return { ...s, days, streak, bestStreak, totalXP, lastActiveDate };
+  return { ...s, days, streak, bestStreak, lastActiveDate };
 }
 
 // ── Zustand store ─────────────────────────────────────────────────────────────
@@ -191,7 +121,7 @@ export const useStore = create((set, get) => ({
             lastActiveDate: cloudStats.lastActiveDate,
             days: cloudStats.days,
             shownMs: cloudStats.shownMs,
-            tasks: cloudStats.tasks || [],
+            focusLog: cloudStats.focusLog || [],
             customRoadmap: cloudStats.customRoadmap || null,
           };
           set(loadedData);
@@ -207,7 +137,7 @@ export const useStore = create((set, get) => ({
             lastActiveDate: null,
             days: {},
             shownMs: [],
-            tasks: [],
+            focusLog: [],
             customRoadmap: null,
             activeTaskId: null,
           };
@@ -237,13 +167,8 @@ export const useStore = create((set, get) => ({
       userDocId: null,
       streak: 0,
       bestStreak: 0,
-      totalXP: 0,
       lastActiveDate: null,
       days: {},
-      shownMs: [],
-      tasks: [],
-      customRoadmap: null,
-      activeTaskId: null,
     };
     set(clearedState);
     persist(clearedState);
@@ -255,12 +180,10 @@ export const useStore = create((set, get) => ({
     const statsData = {
       streak: s.streak,
       bestStreak: s.bestStreak,
-      totalXP: s.totalXP,
       lastActiveDate: s.lastActiveDate,
       days: s.days,
-      shownMs: s.shownMs,
-      tasks: s.tasks || [],
-      customRoadmap: s.customRoadmap || null,
+      timezone: s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+      streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : 1,
     };
     const res = await saveUserStats(s.user.$id, statsData, s.userDocId);
     if (res && res.$id) {
@@ -280,62 +203,11 @@ export const useStore = create((set, get) => ({
   // ── Streak / XP (persisted) ─────────────────────────────────
   ...initialStreak,
 
+  // ── Mode config ─────────────────────────────────────────────
   soundEnabled: true,
-  milestone: null,
   completedPrompt: null, // { nextMode: 'short' | 'long' } | null
-  selectedVisualizer: 'liquid_blob',
-  selectedTheme: 'midnight',
-  isPlayingLofi: false,
-  lofiVolume: 0.5,
-  currentLofiTrack: getCurrentLofiTrack(),
-  isSettingsOpen: false,
 
-  toggleSettings() {
-    set(s => ({ isSettingsOpen: !s.isSettingsOpen }));
-  },
 
-  toggleLofi() {
-    unlockAudio();
-    const s = get();
-    if (s.isPlayingLofi) {
-      pauseLofi();
-      set({ isPlayingLofi: false });
-    } else {
-      const activeTrack = playLofi();
-      set({ isPlayingLofi: true, currentLofiTrack: activeTrack });
-    }
-  },
-
-  skipLofiTrack() {
-    unlockAudio();
-    const nextTrack = skipToNextLofiTrack();
-    set({ isPlayingLofi: true, currentLofiTrack: nextTrack });
-  },
-
-  setLofiVolume(volume) {
-    set({ lofiVolume: volume });
-    updateLofiVolume(volume);
-  },
-
-  setVisualizer(visId) {
-    const s = get();
-    const vis = VISUALIZERS.find(v => v.id === visId);
-    if (!vis) return;
-    if (s.bestStreak >= vis.reqStreak) {
-      set({ selectedVisualizer: visId });
-      persist({ ...s, selectedVisualizer: visId });
-    }
-  },
-
-  setTheme(themeId) {
-    const s = get();
-    const th = THEMES.find(t => t.id === themeId);
-    if (!th) return;
-    if (s.bestStreak >= th.reqStreak) {
-      set({ selectedTheme: themeId });
-      persist({ ...s, selectedTheme: themeId });
-    }
-  },
 
   toggleSound() {
     unlockAudio();
@@ -431,460 +303,38 @@ export const useStore = create((set, get) => ({
     // Focus session complete
     const sessions = Math.min(s.sessions + 1, s.totalSess);
     const focusMins = Math.round(s.durations.focus / 60);
-    const bonus = s.streak >= 30 ? 2 : s.streak >= 7 ? 1.5 : 1;
-    const xp = Math.round(focusMins * bonus);
 
-    const prevLvl = getLevelInfo(s.totalXP).lvl.n;
-    const newState = applySession(s, xp);
-    const newLvl = getLevelInfo(newState.totalXP).lvl.n;
-
-    // Check milestones
-    const found = MILESTONES.find(
-      m => m.days === newState.streak && !newState.shownMs.includes(m.days)
-    );
-    const shownMs = found ? [...newState.shownMs, found.days] : newState.shownMs;
-
-    // Update active task if selected
-    let tasks = s.tasks || [];
-    if (s.activeTaskId) {
-      tasks = tasks.map(t => {
-        if (t.id === s.activeTaskId) {
-          const sessionsCompleted = t.sessionsCompleted + 1;
-          return { ...t, sessionsCompleted };
-        }
-        return t;
-      });
-    }
-
-    // Check new badges
-    const today = todayStr();
-    const todaySessions = newState.days[today]?.sessions || 0;
-    const earnedBadges = newState.days[today]?.badges || [];
-    let newBadge = null;
-
-    BADGES.filter(b => b.type === 'session').forEach(badge => {
-      if (todaySessions >= badge.target && !earnedBadges.includes(badge.id)) {
-        earnedBadges.push(badge.id);
-        newBadge = badge;
-      }
-    });
-
-    if (newBadge) {
-      newState.days[today].badges = earnedBadges;
-    }
-
-    persist({ ...newState, shownMs, tasks, activeTaskId: s.activeTaskId });
+    const newState = applySession(s, focusMins);
 
     const nextMode = sessions % s.totalSess === 0 ? 'long' : 'short';
+    
+    // Add to focus log
+    const logEntry = {
+      id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      intent: s.targetIntent.trim() || 'Deep Focus',
+      duration: focusMins,
+      timestamp: new Date().toISOString()
+    };
+    const focusLog = [logEntry, ...(s.focusLog || [])].slice(0, 100); // keep last 100
 
     set({
       ...newState,
       sessions,
-      shownMs,
-      tasks,
-      xpFlash: { amount: xp, bonus: bonus > 1, levelUp: newLvl > prevLvl, ts: Date.now() },
-      milestone: found ?? null,
-      newBadgeAlert: newBadge,
+      focusLog,
       completedPrompt: { isBreak: false, nextMode },
     });
+
+    persist({ ...newState, focusLog });
 
     // Cloud sync
     get().syncCloudStats();
   },
 
-  dismissMilestone() {
-    set({ milestone: null });
-  },
 
-  dismissBadgeAlert() {
-    set({ newBadgeAlert: null });
-  },
 
-  clearXpFlash() {
-    set({ xpFlash: null });
-  },
-
-  addTask(title, description = '', category = 'foundations', deadline = null) {
-    const s = get();
-    const newTask = {
-      id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-      title,
-      description,
-      category,
-      deadline,
-      sessionsCompleted: 0,
-      completed: false,
-      date: todayStr(),
-    };
-    const tasks = [...(s.tasks || []), newTask];
-    set({ tasks });
-    persist({
-      ...s,
-      tasks,
-      activeTaskId: s.activeTaskId
-    });
-    s.syncCloudStats();
-  },
-
-  toggleTaskCompleted(taskId) {
-    const s = get();
-    let taskCompletedJustNow = false;
-    const tasks = (s.tasks || []).map(t => {
-      if (t.id === taskId) {
-        const nextCompleted = !t.completed;
-        if (nextCompleted) taskCompletedJustNow = true;
-        return {
-          ...t,
-          completed: nextCompleted
-        };
-      }
-      return t;
-    });
-
-    let extraState = {};
-    if (taskCompletedJustNow) {
-      const xpEarned = 50;
-      const today = todayStr();
-      const prevLvl = getLevelInfo(s.totalXP).lvl.n;
-      
-      const days = { ...s.days };
-      if (!days[today]) days[today] = { sessions: 0, xp: 0, badges: [] };
-      if (!days[today].badges) days[today].badges = [];
-      days[today] = { ...days[today], xp: days[today].xp + xpEarned };
-
-      let streak = s.streak;
-      if (!s.lastActiveDate) {
-        streak = 1;
-      } else if (s.lastActiveDate === today) {
-        // already active today
-      } else if (daysBetween(s.lastActiveDate, today) === 1) {
-        streak += 1;
-      } else {
-        streak = 1;
-      }
-      
-      extraState = {
-        days,
-        streak,
-        lastActiveDate: today,
-        bestStreak: Math.max(streak, s.bestStreak),
-        totalXP: s.totalXP + xpEarned,
-      };
-
-      // Check task badges
-      const tasksCompletedToday = tasks.filter(t => t.completed && t.date === today).length;
-      const earnedBadges = extraState.days[today].badges || [];
-      let newBadge = null;
-
-      BADGES.filter(b => b.type === 'task').forEach(badge => {
-        if (tasksCompletedToday >= badge.target && !earnedBadges.includes(badge.id)) {
-          earnedBadges.push(badge.id);
-          newBadge = badge;
-        }
-      });
-
-      if (newBadge) {
-        extraState.days[today].badges = earnedBadges;
-        extraState.newBadgeAlert = newBadge;
-      }
-
-      extraState.xpFlash = { amount: xpEarned, bonus: false, levelUp: getLevelInfo(extraState.totalXP).lvl.n > prevLvl, ts: Date.now() };
-    }
-
-    const nextActiveId = s.activeTaskId === taskId && taskCompletedJustNow ? null : s.activeTaskId;
-
-    const mergedState = {
-      tasks,
-      activeTaskId: nextActiveId,
-      ...extraState
-    };
-
-    set(mergedState);
-
-    const sNew = get();
-    persist({
-      ...sNew,
-      tasks,
-      activeTaskId: nextActiveId
-    });
-    sNew.syncCloudStats();
-  },
-
-  deleteTask(taskId) {
-    const s = get();
-    const tasks = (s.tasks || []).filter(t => t.id !== taskId);
-    const activeTaskId = s.activeTaskId === taskId ? null : s.activeTaskId;
-    set({ tasks, activeTaskId });
-    persist({
-      ...s,
-      tasks,
-      activeTaskId
-    });
-    s.syncCloudStats();
-  },
-
-  reorderTasks(reorderedTasks) {
-    const s = get();
-    set({ tasks: reorderedTasks });
-    persist({
-      ...s,
-      tasks: reorderedTasks,
-      activeTaskId: s.activeTaskId
-    });
-    s.syncCloudStats();
-  },
-
-  setActiveTaskId(taskId) {
-    const s = get();
-    set({ activeTaskId: taskId });
-    persist({
-      ...s,
-      tasks: s.tasks,
-      activeTaskId: taskId
-    });
-  },
-
-  importWeekTasks(weekKey, weekItems) {
-    const s = get();
-    const existingTitles = new Set((s.tasks || []).map(t => t.title.toLowerCase()));
-    
-    const newTasks = weekItems
-      .filter(item => !existingTitles.has(item.label.toLowerCase()))
-      .map(item => ({
-        id: 'task_roadmap_' + item.id + '_' + Date.now(),
-        title: item.label,
-        description: '',
-        referenceUrl: item.url || item.ytUrl || '',
-        category: item.cat,
-        deadline: null,
-        sessionsCompleted: 0,
-        completed: false,
-        date: todayStr(),
-        roadmapId: item.id,
-      }));
-
-    if (newTasks.length === 0) return;
-
-    const tasks = [...(s.tasks || []), ...newTasks];
-    set({ tasks });
-    persist({
-      ...s,
-      tasks,
-      activeTaskId: s.activeTaskId
-    });
-    s.syncCloudStats();
-  },
-
-  importSingleTask(item) {
-    const s = get();
-    const existing = (s.tasks || []).find(t => t.roadmapId === item.id || t.title.toLowerCase() === item.label.toLowerCase());
-    if (existing) return;
-
-    const newTask = {
-      id: 'task_roadmap_' + item.id + '_' + Date.now(),
-      title: item.label,
-      description: '',
-      referenceUrl: item.url || item.ytUrl || '',
-      category: item.cat,
-      deadline: null,
-      sessionsCompleted: 0,
-      completed: false,
-      date: todayStr(),
-      roadmapId: item.id,
-    };
-
-    const tasks = [...(s.tasks || []), newTask];
-    set({ tasks });
-    persist({
-      ...s,
-      tasks,
-      activeTaskId: s.activeTaskId
-    });
-    s.syncCloudStats();
-  },
-
-  setCustomRoadmap(roadmapData) {
-    const s = get();
-    set({ customRoadmap: roadmapData });
-    persist({
-      ...s,
-      customRoadmap: roadmapData
-    });
-  },
-
-  resetCustomRoadmap() {
-    const s = get();
-    set({ customRoadmap: null });
-    persist({
-      ...s,
-      customRoadmap: null
-    });
-  },
-
-  // Load the built-in DevSecOps template as the active roadmap
-  loadDefaultRoadmap() {
-    const s = get();
-    const customRoadmap = {
-      categories: { ...DEFAULT_CATS },
-      items: [...DEFAULT_ITEMS],
-      weeks: [...DEFAULT_WEEK_GROUPS],
-      includeDefaults: false,
-    };
-    set({ customRoadmap });
-    persist({ ...s, customRoadmap });
-    s.syncCloudStats();
-  },
-
-  // Add a new item to the active roadmap (creates custom roadmap from defaults if none yet)
-  addRoadmapItem(item) {
-    const s = get();
-    // Bootstrap from defaults if no custom roadmap yet
-    const base = s.customRoadmap || {
-      categories: { ...s.categories },
-      items: [],
-      weeks: [],
-    };
-    // Avoid collisions – import default items/weeks lazily
-    const updatedItems = [
-      ...(base.items || []),
-      {
-        id: 'custom_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-        cat: item.cat,
-        label: item.label,
-        src: item.src || 'web',
-        url: item.url || '',
-        week: item.week,
-      }
-    ];
-    const customRoadmap = { ...base, items: updatedItems };
-    set({ customRoadmap });
-    persist({ ...s, customRoadmap });
-    s.syncCloudStats();
-  },
-
-  // Add a new week to the active roadmap
-  addRoadmapWeek(weekKey, weekLabel) {
-    const s = get();
-    const base = s.customRoadmap || {
-      categories: { ...s.categories },
-      items: [],
-      weeks: [],
-    };
-    // Prevent duplicate week keys
-    if ((base.weeks || []).some(w => w.key === weekKey)) return;
-    const updatedWeeks = [...(base.weeks || []), { key: weekKey, label: weekLabel }];
-    const customRoadmap = { ...base, weeks: updatedWeeks };
-    set({ customRoadmap });
-    persist({ ...s, customRoadmap });
-    s.syncCloudStats();
-  },
-
-  // Add a custom category to the active roadmap
-  addRoadmapCategory(key, label, color) {
-    const s = get();
-    const base = s.customRoadmap || {
-      categories: {},
-      items: [],
-      weeks: [],
-    };
-    const updatedCats = { ...(base.categories || {}), [key]: { label, color } };
-    const customRoadmap = { ...base, categories: updatedCats };
-    set({ customRoadmap });
-    persist({ ...s, customRoadmap });
-    s.syncCloudStats();
-  },
-
-  // Remove a roadmap item by id
-  deleteRoadmapItem(itemId) {
-    const s = get();
-    if (!s.customRoadmap) return;
-    const updatedItems = (s.customRoadmap.items || []).filter(i => i.id !== itemId);
-    const customRoadmap = { ...s.customRoadmap, items: updatedItems };
-    set({ customRoadmap });
-    persist({ ...s, customRoadmap });
-    s.syncCloudStats();
-  },
-
-  // Edit a roadmap item by id and sync to active tasks
-  editRoadmapItem(itemId, updates) {
-    const s = get();
-    if (!s.customRoadmap) return;
-    const items = [...(s.customRoadmap.items || [])];
-    const index = items.findIndex(i => i.id === itemId);
-    if (index !== -1) {
-      items[index] = { ...items[index], ...updates };
-      const customRoadmap = { ...s.customRoadmap, items };
-      
-      // Sync tasks that were imported from this item
-      const tasks = (s.tasks || []).map(t => {
-        if (t.roadmapId === itemId) {
-          return {
-            ...t,
-            title: updates.label || t.title,
-            category: updates.cat || t.category,
-            referenceUrl: updates.url !== undefined ? updates.url : t.referenceUrl
-          };
-        }
-        return t;
-      });
-
-      set({ customRoadmap, tasks });
-      persist({ ...s, customRoadmap, tasks });
-      s.syncCloudStats();
-    }
-  },
-
-  // Delete a category and fallback orphaned items
-  deleteRoadmapCategory(catKey, fallbackCatKey = 'general') {
-    const s = get();
-    if (!s.customRoadmap) return;
-    const categories = { ...s.customRoadmap.categories };
-    delete categories[catKey];
-    
-    // Ensure fallback category exists
-    if (!categories[fallbackCatKey]) {
-      categories[fallbackCatKey] = { label: 'General', color: '#94a3b8' };
-    }
-
-    const items = (s.customRoadmap.items || []).map(i => {
-      if (i.cat === catKey) return { ...i, cat: fallbackCatKey };
-      return i;
-    });
-
-    const tasks = (s.tasks || []).map(t => {
-      if (t.category === catKey) return { ...t, category: fallbackCatKey };
-      return t;
-    });
-
-    const customRoadmap = { ...s.customRoadmap, categories, items };
-    set({ customRoadmap, tasks });
-    persist({ ...s, customRoadmap, tasks });
-    s.syncCloudStats();
-  },
-
-  // Delete a week and cascade delete items
-  deleteRoadmapWeek(weekKey) {
-    const s = get();
-    if (!s.customRoadmap) return;
-    const weeks = (s.customRoadmap.weeks || []).filter(w => w.key !== weekKey);
-    const items = (s.customRoadmap.items || []).filter(i => i.week !== weekKey);
-    
-    const customRoadmap = { ...s.customRoadmap, weeks, items };
-    set({ customRoadmap });
-    persist({ ...s, customRoadmap });
-    s.syncCloudStats();
-  },
-
-  loadDefaultRoadmap() {
-    const s = get();
-    const defaultRoadmap = {
-      categories: DEFAULT_CATS,
-      items: [],
-      weeks: [],
-      includeDefaults: true
-    };
-    set({ customRoadmap: defaultRoadmap });
-    persist({ ...s, customRoadmap: defaultRoadmap });
-    s.syncCloudStats();
+  focusLog: [],
+  targetIntent: '',
+  setTargetIntent(intent) {
+    set({ targetIntent: intent });
   },
 }));

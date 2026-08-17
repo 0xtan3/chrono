@@ -174,6 +174,29 @@
   animation: fadeInUp 0.8s ease backwards 0.4s;
 }
 
+.heroCard {
+  background: linear-gradient(145deg, rgba(20, 24, 35, 0.75), rgba(12, 14, 22, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 32px;
+  padding: 3rem 2rem;
+  max-width: 480px;
+  width: 100%;
+  backdrop-filter: blur(40px) saturate(150%);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  animation: floatUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(40px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
 .featureCard {
   background: rgba(18, 21, 31, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);

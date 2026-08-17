@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore, MODES } from '../store';
 import BlobScene from '../components/BlobScene';
@@ -7,123 +7,14 @@ import Controls from '../components/Controls';
 import SessionDots from '../components/SessionDots';
 import StreakBadge from '../components/StreakBadge';
 import DurationPicker from '../components/DurationPicker';
-import MusicPlayer from '../components/MusicPlayer';
-import SettingsModal from '../components/SettingsModal';
+import FocusLogModal from '../components/FocusLogModal';
 import styles from './TimerPage.module.css';
-
-
-
 // ── Formatted time ─────────────────────────────────────────────────────────────
 function fmt(secs) {
   const s = Math.max(0, Math.floor(secs));
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 }
 
-// ── XP float toast ─────────────────────────────────────────────────────────────
-function XpToast() {
-  const xpFlash = useStore(s => s.xpFlash);
-  const clearXpFlash = useStore(s => s.clearXpFlash);
-
-  useEffect(() => {
-    if (!xpFlash) return;
-    const t = setTimeout(clearXpFlash, 2000);
-    return () => clearTimeout(t);
-  }, [xpFlash]);
-
-  if (!xpFlash) return null;
-  return (
-    <div className={styles.xpToast}>
-      +{xpFlash.amount} XP{xpFlash.bonus ? ' 🔥' : ''}
-      {xpFlash.levelUp && <span className={styles.lvlUp}> · LEVEL UP!</span>}
-    </div>
-  );
-}
-
-// ── Milestone modal ─────────────────────────────────────────────────────────────
-function MilestoneModal() {
-  const milestone = useStore(s => s.milestone);
-  const dismissMilestone = useStore(s => s.dismissMilestone);
-  const canvasRef = useRef();
-  const rafRef = useRef();
-
-  useEffect(() => {
-    if (!milestone) return;
-    const cv = canvasRef.current;
-    const ctx = cv.getContext('2d');
-    cv.width = window.innerWidth;
-    cv.height = window.innerHeight;
-    const COLORS = ['#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#f0abfc', '#fff'];
-    const pts = Array.from({ length: 110 }, () => ({
-      x: Math.random() * cv.width,
-      y: -10 - Math.random() * 160,
-      vx: (Math.random() - .5) * 3.5,
-      vy: 2 + Math.random() * 3.5,
-      sz: 4 + Math.random() * 5,
-      color: COLORS[Math.random() * COLORS.length | 0],
-      rot: Math.random() * 360,
-      rv: (Math.random() - .5) * 8,
-      rect: Math.random() > .5,
-    }));
-
-    const draw = () => {
-      ctx.clearRect(0, 0, cv.width, cv.height);
-      let alive = false;
-      for (const p of pts) {
-        if (p.y < cv.height + 20) alive = true;
-        p.x += p.vx; p.y += p.vy; p.rot += p.rv; p.vy += .065;
-        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
-        ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, 1 - p.y / cv.height);
-        if (p.rect) ctx.fillRect(-p.sz / 2, -p.sz / 4, p.sz, p.sz / 2);
-        else { ctx.beginPath(); ctx.arc(0, 0, p.sz / 2, 0, Math.PI * 2); ctx.fill(); }
-        ctx.restore();
-      }
-      if (alive) rafRef.current = requestAnimationFrame(draw);
-    };
-    rafRef.current = requestAnimationFrame(draw);
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      ctx.clearRect(0, 0, cv.width, cv.height);
-    };
-  }, [milestone]);
-
-  if (!milestone) return null;
-
-  return (
-    <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && dismissMilestone()}>
-      <canvas ref={canvasRef} className={styles.confetti} />
-      <div className={styles.milestoneCard}>
-        <span className={styles.milestoneEmoji}>{milestone.emoji}</span>
-        <h2 className={styles.milestoneTitle}>{milestone.title}</h2>
-        <p className={styles.milestoneSub}>{milestone.sub}</p>
-        <button className={styles.milestoneBtn} onClick={dismissMilestone}>
-          Keep Going →
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Badge modal ─────────────────────────────────────────────────────────────
-function BadgeModal() {
-  const badge = useStore(s => s.newBadgeAlert);
-  const dismissBadge = useStore(s => s.dismissBadgeAlert);
-
-  if (!badge) return null;
-
-  return (
-    <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && dismissBadge()}>
-      <div className={styles.milestoneCard}>
-        <span className={styles.milestoneEmoji}>{badge.emoji}</span>
-        <h2 className={styles.milestoneTitle}>Badge Unlocked!</h2>
-        <h3 className={styles.badgeTitle}>{badge.title}</h3>
-        <p className={styles.milestoneSub}>{badge.sub}</p>
-        <button className={styles.milestoneBtn} onClick={dismissBadge}>
-          Awesome!
-        </button>
-      </div>
-    </div>
-  );
-}
 
 // ── Completion Choice Modal (00:00 completion prompt) ─────────────────────────
 function CompletionChoiceModal() {
@@ -163,6 +54,7 @@ function CompletionChoiceModal() {
 
 // ── Timer Page ─────────────────────────────────────────────────────────────────
 export default function TimerPage() {
+  const [showFocusLog, setShowFocusLog] = useState(false);
   const mode = useStore(s => s.mode);
   const elapsed = useStore(s => s.elapsed);
   const running = useStore(s => s.running);
@@ -170,38 +62,59 @@ export default function TimerPage() {
   const dur = useStore(s => s.durations[s.mode]);
   const soundEnabled = useStore(s => s.soundEnabled);
   const toggleSound = useStore(s => s.toggleSound);
-  const toggleSettings = useStore(s => s.toggleSettings);
-  const isSettingsOpen = useStore(s => s.isSettingsOpen);
   const user = useStore(s => s.user);
   const logout = useStore(s => s.logout);
-  const tasks = useStore(s => s.tasks || []);
-  const activeTaskId = useStore(s => s.activeTaskId);
-  const activeTask = tasks.find(t => t.id === activeTaskId);
-  const setActiveTaskId = useStore(s => s.setActiveTaskId);
+  const targetIntent = useStore(s => s.targetIntent);
+  const setTargetIntent = useStore(s => s.setTargetIntent);
   const play = useStore(s => s.play);
   const pause = useStore(s => s.pause);
   const reset = useStore(s => s.reset);
   const skip = useStore(s => s.skip);
-  const toggleLofi = useStore(s => s.toggleLofi);
   const completedPrompt = useStore(s => s.completedPrompt);
-  const milestone = useStore(s => s.milestone);
-  const dismissMilestone = useStore(s => s.dismissMilestone);
   const dismissCompletedPrompt = useStore(s => s.dismissCompletedPrompt);
-  const dismissBadgeAlert = useStore(s => s.dismissBadgeAlert);
-  const newBadgeAlert = useStore(s => s.newBadgeAlert);
 
   const streak = useStore(s => s.streak);
   const lastActiveDate = useStore(s => s.lastActiveDate);
 
-  // rAF-driven tick
+  // Hybrid tick: rAF for smooth active visuals, Web Worker for reliable background ticking
   const rafRef = useRef();
   const tickCb = useRef(tick);
   tickCb.current = tick;
 
   useEffect(() => {
-    const loop = () => { tickCb.current(); rafRef.current = requestAnimationFrame(loop); };
+    // 1. Web Worker for background ticking (fires every ~250ms)
+    // This ensures the timer catches completion even if rAF is paused by the browser
+    const workerBlob = new Blob([`
+      let interval;
+      self.onmessage = function(e) {
+        if (e.data === 'start') {
+          interval = setInterval(() => self.postMessage('tick'), 250);
+        } else if (e.data === 'stop') {
+          clearInterval(interval);
+        }
+      };
+    `], { type: 'application/javascript' });
+
+    const workerUrl = URL.createObjectURL(workerBlob);
+    const worker = new Worker(workerUrl);
+    worker.onmessage = () => {
+      tickCb.current();
+    };
+    worker.postMessage('start');
+
+    // 2. rAF for smooth visual updates when tab is active
+    const loop = () => {
+      tickCb.current();
+      rafRef.current = requestAnimationFrame(loop);
+    };
     rafRef.current = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(rafRef.current);
+
+    return () => {
+      worker.postMessage('stop');
+      worker.terminate();
+      URL.revokeObjectURL(workerUrl);
+      cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
   // Document title
@@ -219,7 +132,8 @@ export default function TimerPage() {
       switch (e.code) {
         case 'Space':
           e.preventDefault();
-          running ? pause() : play();
+          if (running) pause();
+          else play();
           break;
         case 'KeyR':
           if (!e.ctrlKey && !e.metaKey) reset();
@@ -228,29 +142,24 @@ export default function TimerPage() {
           if (!e.ctrlKey && !e.metaKey) skip();
           break;
         case 'KeyM':
-          if (!e.ctrlKey && !e.metaKey) toggleLofi();
+          if (!e.ctrlKey && !e.metaKey) toggleSound();
           break;
         case 'Escape':
-          if (isSettingsOpen) toggleSettings();
-          else if (completedPrompt) dismissCompletedPrompt();
-          else if (milestone) dismissMilestone();
-          else if (newBadgeAlert) dismissBadgeAlert();
+          if (completedPrompt) dismissCompletedPrompt();
           break;
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [running, play, pause, reset, skip, toggleLofi, isSettingsOpen, toggleSettings, completedPrompt, dismissCompletedPrompt, milestone, dismissMilestone, newBadgeAlert, dismissBadgeAlert]);
+  }, [running, play, pause, reset, skip, toggleSound, completedPrompt, dismissCompletedPrompt]);
 
   const today = new Date().toISOString().split('T')[0];
   const hasCompletedToday = lastActiveDate === today;
 
   return (
     <div className={styles.pageViewport}>
-      <MilestoneModal />
-      <BadgeModal />
       <CompletionChoiceModal />
-      <SettingsModal />
+      <FocusLogModal isOpen={showFocusLog} onClose={() => setShowFocusLog(false)} />
 
       {/* Top Header Bar */}
       <header className={styles.topHeader}>
@@ -266,28 +175,15 @@ export default function TimerPage() {
       {/* Center Main Focus Container */}
       <main className={styles.centerStage}>
         <div className={styles.taskSelectorContainer}>
-          <span className={styles.selectorLabel}>🎯 Target:</span>
-          <select
-            value={activeTaskId || ''}
-            onChange={(e) => setActiveTaskId(e.target.value || null)}
+          <span className={styles.selectorLabel}>Target:</span>
+          <input
+            type="text"
+            value={targetIntent}
+            onChange={(e) => setTargetIntent(e.target.value)}
             className={styles.taskDropdown}
-            title={activeTask ? activeTask.description : 'Select a study task from your roadmap queue'}
-          >
-            <option value="">-- No active focus task --</option>
-            {tasks.filter(t => !t.completed).map(t => (
-              <option key={t.id} value={t.id}>
-                {t.title}
-              </option>
-            ))}
-            {tasks.filter(t => !t.completed).length === 0 && (
-              <option value="" disabled>No active tasks. Go to Study Hub to import!</option>
-            )}
-          </select>
-          {activeTask && (
-            <span className={styles.activeTaskPomoCount}>
-              ({activeTask.sessionsCompleted} Pomos)
-            </span>
-          )}
+            placeholder="What are you focusing on?"
+            style={{ cursor: 'text' }}
+          />
           {streak > 0 && !hasCompletedToday && (
             <span
               className={styles.miniStreakWarning}
@@ -308,7 +204,6 @@ export default function TimerPage() {
         <div className={styles.blobWrap}>
           <BlobScene />
           <div className={styles.timeOverlay}>
-            <XpToast />
             <span className={styles.time}>{fmt(remaining)}</span>
             <span className={styles.modeLabel}>{MODES[mode].label}</span>
           </div>
@@ -323,13 +218,29 @@ export default function TimerPage() {
           <DurationPicker />
         </div>
 
+
+
         <div className={styles.dockRight}>
           <StreakBadge />
 
-          <MusicPlayer />
+          <button
+            className={styles.dockIconBtn}
+            onClick={() => setShowFocusLog(true)}
+            aria-label="View Activity Log"
+            title="Activity Log"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+          </button>
 
           <button
-            className={`${styles.dockIconBtn} ${!soundEnabled ? styles.muted : ''}`}
+            className={styles.dockIconBtn}
             onClick={toggleSound}
             aria-label={soundEnabled ? 'Mute sound' : 'Unmute sound'}
             title={soundEnabled ? 'Sound Enabled' : 'Sound Muted'}
@@ -346,35 +257,6 @@ export default function TimerPage() {
                 <line x1="17" y1="9" x2="23" y2="15" />
               </svg>
             )}
-          </button>
-
-          <Link to="/tasks" className={styles.dockIconBtn} aria-label="Tasks & Roadmap" title="Tasks & Roadmap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 11l3 3L22 4" />
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-            </svg>
-          </Link>
-
-          <Link to="/analytics" className={styles.dockIconBtn} aria-label="Analytics" title="Analytics">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <rect x="3" y="3" width="7" height="7" rx="1" />
-              <rect x="14" y="3" width="7" height="7" rx="1" />
-              <rect x="14" y="14" width="7" height="7" rx="1" />
-              <rect x="3" y="14" width="7" height="7" rx="1" />
-            </svg>
-          </Link>
-
-          {/* Settings Button (Bottom Right Dock) */}
-          <button
-            className={styles.dockIconBtn}
-            onClick={toggleSettings}
-            aria-label="Settings"
-            title="Customization Settings (Unlockable Visualizers & Backgrounds)"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
           </button>
 
           {user ? (

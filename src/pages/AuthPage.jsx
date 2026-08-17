@@ -34,7 +34,7 @@ export default function AuthPage() {
         setTab('login');
         setPassword('');
       } else {
-        const user = await loginUser(email, password);
+        await loginUser(email, password);
         await initAuth();
         navigate('/');
       }
@@ -73,7 +73,7 @@ export default function AuthPage() {
       <div className={styles.bgGlow2} />
 
       <header className={styles.header}>
-        <Link to="/" className={styles.brand}>
+        <Link to="/welcome" className={styles.brand}>
           <span className={styles.brandDot} /> CHRONO
         </Link>
       </header>

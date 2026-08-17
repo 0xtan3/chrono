@@ -69,6 +69,8 @@ async function autoProvision() {
     { key: 'shownMs',        type: 'string',  size: 4096,  required: false },
     { key: 'tasksData',      type: 'string',  size: 65535, required: false },
     { key: 'roadmapData',    type: 'string',  size: 65535, required: false },
+    { key: 'timezone',       type: 'string',  size: 128,   required: false },
+    { key: 'streakFreezes',  type: 'integer', default: 1,  required: false },
   ];
 
   console.log(`⚙️ Provisioning attributes...`);
