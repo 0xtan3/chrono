@@ -5,10 +5,27 @@ import styles from './FocusLogModal.module.css';
 export default function FocusLogModal({ isOpen, onClose }) {
   const focusLog = useStore((s) => s.focusLog);
 
-  const { grouped, totalHours, sessionCount } = useMemo(() => {
+  const { grouped, totalHours, sessionCount, deepWorkMins, nsdrCount } = useMemo(() => {
+    let dwMins = 0;
+    let nsdrs = 0;
+    let focusMins = 0;
+    let sCount = 0;
+
     const groupedData = focusLog.reduce((acc, entry) => {
       if (!entry.timestamp) return acc;
       const dateKey = entry.timestamp.split('T')[0];
+      
+      if (entry.mode === 'ultradian') {
+        dwMins += entry.duration || 0;
+        focusMins += entry.duration || 0;
+        sCount++;
+      } else if (entry.mode === 'nsdr') {
+        nsdrs++;
+      } else {
+        focusMins += entry.duration || 0;
+        sCount++;
+      }
+
       if (!acc[dateKey]) {
         acc[dateKey] = {
           label: new Date(entry.timestamp).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
@@ -19,11 +36,12 @@ export default function FocusLogModal({ isOpen, onClose }) {
       return acc;
     }, {});
 
-    const totalMinutes = focusLog.reduce((sum, entry) => sum + (entry.duration || 0), 0);
     return {
       grouped: groupedData,
-      totalHours: (totalMinutes / 60).toFixed(1),
-      sessionCount: focusLog.length
+      totalHours: (focusMins / 60).toFixed(1),
+      sessionCount: sCount,
+      deepWorkMins: dwMins,
+      nsdrCount: nsdrs
     };
   }, [focusLog]);
 
@@ -51,6 +69,18 @@ export default function FocusLogModal({ isOpen, onClose }) {
             <span className={styles.statValue}>{sessionCount}</span>
             <span className={styles.statLabel}>Sessions</span>
           </div>
+          {deepWorkMins > 0 && (
+            <div className={styles.statBox}>
+              <span className={styles.statValue}>{(deepWorkMins / 60).toFixed(1)}h</span>
+              <span className={styles.statLabel}>Deep Work</span>
+            </div>
+          )}
+          {nsdrCount > 0 && (
+            <div className={styles.statBox}>
+              <span className={styles.statValue}>{nsdrCount}</span>
+              <span className={styles.statLabel}>NSDRs</span>
+            </div>
+          )}
         </div>
 
         <div className={styles.logList}>
@@ -61,8 +91,12 @@ export default function FocusLogModal({ isOpen, onClose }) {
               <div key={dateKey} className={styles.dateGroup}>
                 <h3 className={styles.dateHeader}>{label}</h3>
                 {entries.map((entry) => (
-                  <div key={entry.id} className={styles.logEntry}>
-                    <div className={styles.entryIntent}>{entry.intent}</div>
+                  <div key={entry.id} className={`${styles.logEntry} ${entry.mode ? styles[entry.mode] : ''}`}>
+                    <div className={styles.entryIntent}>
+                      {entry.mode === 'ultradian' && <span className={styles.modeIcon} title="Ultradian Deep Work">🧠</span>}
+                      {entry.mode === 'nsdr' && <span className={styles.modeIcon} title="Non-Sleep Deep Rest">🌊</span>}
+                      {entry.intent}
+                    </div>
                     <div className={styles.entryMeta}>
                       <span className={styles.entryTime}>
                         {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

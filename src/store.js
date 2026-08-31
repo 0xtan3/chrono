@@ -360,43 +360,51 @@ export const useStore = create((set, get) => ({
       return;
     }
 
-    if (s.mode !== 'focus' && s.mode !== 'ultradian') {
-      // Break complete -> play break chime & prompt return to focus
-      if (s.soundEnabled) {
-        playBreakChime();
-      }
-      set({ completedPrompt: { isBreak: true, nextMode: 'focus' } });
-      return;
-    }
-
-    // Focus session complete -> play focus chime
-    if (s.soundEnabled) {
-      playFocusChime();
-    }
-
-    // Focus session complete
-    const sessions = Math.min(s.sessions + 1, s.totalSess);
+    const isFocus = s.mode === 'focus' || s.mode === 'ultradian';
+    const isNSDR = s.mode === 'nsdr';
     const focusMins = Math.round(s.durations[s.mode] / 60);
 
-    const newState = applySession(s, focusMins);
+    let nextMode = 'focus';
+    if (isFocus) {
+      if (s.soundEnabled) playFocusChime();
+      const sessions = Math.min(s.sessions + 1, s.totalSess);
+      nextMode = s.mode === 'ultradian' ? 'nsdr' : (sessions % s.totalSess === 0 ? 'long' : 'short');
+    } else {
+      if (s.soundEnabled) playBreakChime();
+      nextMode = 'focus';
+    }
 
-    const nextMode = s.mode === 'ultradian' ? 'nsdr' : (sessions % s.totalSess === 0 ? 'long' : 'short');
-    
-    // Add to focus log
-    const logEntry = {
-      id: 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-      intent: (s.targetIntent || '').trim() || 'Deep Focus',
-      duration: focusMins,
-      timestamp: new Date().toISOString()
-    };
-    const focusLog = [logEntry, ...(s.focusLog || [])].slice(0, 100); // keep last 100
+    let focusLog = s.focusLog;
+    if (isFocus || isNSDR) {
+      const logEntry = {
+        id: 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+        intent: isNSDR ? 'Deep Rest (NSDR)' : ((s.targetIntent || '').trim() || 'Deep Focus'),
+        duration: focusMins,
+        timestamp: new Date().toISOString(),
+        mode: s.mode
+      };
+      focusLog = [logEntry, ...(s.focusLog || [])].slice(0, 100);
+    }
 
-    set({
-      ...newState,
-      sessions,
-      focusLog,
-      completedPrompt: { isBreak: false, nextMode },
-    });
+    if (isFocus) {
+      const sessions = Math.min(s.sessions + 1, s.totalSess);
+      const newState = applySession(s, focusMins);
+      set({
+        ...newState,
+        sessions,
+        focusLog,
+        completedPrompt: { isBreak: false, nextMode },
+      });
+    } else if (isNSDR) {
+      set({
+        focusLog,
+        completedPrompt: { isBreak: true, nextMode },
+      });
+    } else {
+      set({
+        completedPrompt: { isBreak: true, nextMode },
+      });
+    }
 
     persist(get());
 
