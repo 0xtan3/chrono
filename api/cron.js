@@ -51,96 +51,104 @@ export default async function handler(req, res) {
     let emailsSent = 0;
     let streaksReset = 0;
 
-    for (const stat of allStats) {
-      const { userId, streak, lastActiveDate, timezone, streakFreezes } = stat;
+    // Process users in chunks to respect rate limits and improve speed
+    const chunkSize = 5;
+    for (let i = 0; i < allStats.length; i += chunkSize) {
+      const chunk = allStats.slice(i, i + chunkSize);
       
-      if (!lastActiveDate) continue;
+      await Promise.allSettled(chunk.map(async (stat) => {
+        const { userId, streak, lastActiveDate, timezone, streakFreezes } = stat;
+        
+        if (!lastActiveDate) return;
 
-      const userTz = timezone || 'UTC';
-      let userFreezes = streakFreezes !== undefined ? streakFreezes : 1;
-      
-      let userTodayStr = today;
-      try {
-        const formatter = new Intl.DateTimeFormat('en-CA', {
-          timeZone: userTz,
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        });
-        userTodayStr = formatter.format(new Date());
-      } catch (e) {
-        userTodayStr = today;
-      }
-      
-      if (lastActiveDate !== userTodayStr) {
-        const lastActiveTime = new Date(lastActiveDate).getTime();
-        const userTodayTime = new Date(userTodayStr).getTime();
-        const daysSinceActive = Math.round((userTodayTime - lastActiveTime) / msPerDay);
+        const userTz = timezone || 'UTC';
+        let userFreezes = streakFreezes !== undefined ? streakFreezes : 1;
+        
+        let userTodayStr = today;
+        try {
+          const formatter = new Intl.DateTimeFormat('en-CA', {
+            timeZone: userTz,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          });
+          userTodayStr = formatter.format(new Date());
+        } catch (e) {
+          userTodayStr = today;
+        }
+        
+        if (lastActiveDate !== userTodayStr) {
+          const lastActiveTime = new Date(lastActiveDate).getTime();
+          const userTodayTime = new Date(userTodayStr).getTime();
+          const daysSinceActive = Math.round((userTodayTime - lastActiveTime) / msPerDay);
 
-        let subject = null;
-        let html = null;
-        let shouldSend = false;
+          let subject = null;
+          let html = null;
+          let shouldSend = false;
 
-        if (streak > 0) {
-          if (daysSinceActive === 1) {
-            // About to lose
-            subject = `🔥 Save your ${streak}-day streak!`;
-            html = `<p>Hi there,</p><p>You're about to lose your ${streak}-day CHRONO focus streak! Complete a quick session today to keep it alive.</p><p>Stay focused,<br>CHRONO Team</p>`;
-            shouldSend = true;
-          } else if (daysSinceActive === 2) {
-            // Lost (Check freezes first)
-            if (userFreezes > 0) {
-              try {
-                const userYesterdayTime = userTodayTime - msPerDay;
-                const userYesterdayStr = new Date(userYesterdayTime).toISOString().split('T')[0];
-                await databases.updateDocument(DB_ID, COL_ID, stat.$id, { 
-                  streakFreezes: userFreezes - 1,
-                  lastActiveDate: userYesterdayStr
-                });
-                subject = `🧊 Streak Freeze Activated!`;
-                html = `<p>Hi there,</p><p>You missed a session yesterday, but your Streak Freeze automatically activated! Your ${streak}-day streak is safe.</p><p>Log a session today!</p><p>CHRONO Team</p>`;
-                shouldSend = true;
-              } catch (e) { console.error('Freeze error', e); }
-            } else {
-              try {
-                await databases.updateDocument(DB_ID, COL_ID, stat.$id, { streak: 0 });
-                streaksReset++;
-                subject = `💔 Your ${streak}-day streak was lost`;
-                html = `<p>Hi there,</p><p>You missed a session yesterday and your ${streak}-day streak was lost.</p><p>Don't worry, you can always start a new one today!</p><p>CHRONO Team</p>`;
-                shouldSend = true;
-              } catch (e) { console.error('Reset error', e); }
-            }
-          }
-        } else {
-          // Streak is 0. Check for 2^N days if they missed more than 2 days.
-          if (daysSinceActive > 2) {
-            const isPowerOfTwo = (Math.log2(daysSinceActive) % 1 === 0);
-            if (isPowerOfTwo) {
-              subject = `We miss you at CHRONO`;
-              html = `<p>Hi there,</p><p>It's been ${daysSinceActive} days since your last focus session. We know building habits is tough, but we're here when you're ready to get back into the groove.</p><p>Jump back in and start building a new streak!</p><p>CHRONO Team</p>`;
+          if (streak > 0) {
+            if (daysSinceActive === 1) {
+              // About to lose
+              subject = `🔥 Save your ${streak}-day streak!`;
+              html = `<p>Hi there,</p><p>You're about to lose your ${streak}-day CHRONO focus streak! Complete a quick session today to keep it alive.</p><p>Stay focused,<br>CHRONO Team</p>`;
               shouldSend = true;
+            } else if (daysSinceActive === 2) {
+              // Lost (Check freezes first)
+              if (userFreezes > 0) {
+                try {
+                  const userYesterdayTime = userTodayTime - msPerDay;
+                  const userYesterdayStr = new Date(userYesterdayTime).toISOString().split('T')[0];
+                  await databases.updateDocument(DB_ID, COL_ID, stat.$id, { 
+                    streakFreezes: userFreezes - 1,
+                    lastActiveDate: userYesterdayStr
+                  });
+                  subject = `🧊 Streak Freeze Activated!`;
+                  html = `<p>Hi there,</p><p>You missed a session yesterday, but your Streak Freeze automatically activated! Your ${streak}-day streak is safe.</p><p>Log a session today!</p><p>CHRONO Team</p>`;
+                  shouldSend = true;
+                } catch (e) { console.error('Freeze error', e); }
+              } else {
+                try {
+                  await databases.updateDocument(DB_ID, COL_ID, stat.$id, { streak: 0 });
+                  streaksReset++;
+                  subject = `💔 Your ${streak}-day streak was lost`;
+                  html = `<p>Hi there,</p><p>You missed a session yesterday and your ${streak}-day streak was lost.</p><p>Don't worry, you can always start a new one today!</p><p>CHRONO Team</p>`;
+                  shouldSend = true;
+                } catch (e) { console.error('Reset error', e); }
+              }
+            }
+          } else {
+            // Streak is 0. Check for 2^N days if they missed more than 2 days.
+            if (daysSinceActive > 2) {
+              const isPowerOfTwo = (Math.log2(daysSinceActive) % 1 === 0);
+              if (isPowerOfTwo) {
+                subject = `We miss you at CHRONO`;
+                html = `<p>Hi there,</p><p>It's been ${daysSinceActive} days since your last focus session. We know building habits is tough, but we're here when you're ready to get back into the groove.</p><p>Jump back in and start building a new streak!</p><p>CHRONO Team</p>`;
+                shouldSend = true;
+              }
             }
           }
-        }
 
-        if (shouldSend && subject && html) {
-          try {
-            const user = await users.get(userId);
-            if (user && user.email) {
-              await resend.emails.send({
-                from: 'Chrono <reminders@chrono.tenazity.com>', // Or fallback to default resend email if using free tier without domain
-                to: user.email,
-                subject: subject,
-                html: html
-              });
-              emailsSent++;
-              console.log(`Email sent to ${user.email}: ${subject}`);
+          if (shouldSend && subject && html) {
+            try {
+              const user = await users.get(userId);
+              if (user && user.email) {
+                await resend.emails.send({
+                  from: 'Chrono <reminders@chrono.tenazity.com>', // Or fallback to default resend email if using free tier without domain
+                  to: user.email,
+                  subject: subject,
+                  html: html
+                });
+                emailsSent++;
+                console.log(`Email sent to ${user.email}: ${subject}`);
+              }
+            } catch (e) {
+              console.error(`Failed to send email to user ${userId}`, e);
             }
-          } catch (e) {
-            console.error(`Failed to send email to user ${userId}`, e);
           }
         }
-      }
+      }));
+      // Add a small delay between chunks to respect rate limits (e.g. 10/sec for Resend)
+      await new Promise(r => setTimeout(r, 600));
     }
 
     res.status(200).json({ success: true, emailsSent, streaksReset });

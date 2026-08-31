@@ -1,12 +1,13 @@
-import { useStore } from '../store';
+import { useStore, todayStr } from '../store';
 import styles from './StreakBadge.module.css';
 
 export default function StreakBadge() {
   const streak = useStore(s => s.streak);
   const lastActiveDate = useStore(s => s.lastActiveDate);
   const user = useStore(s => s.user);
+  const timezone = useStore(s => s.timezone);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayStr(timezone);
   const hasCompletedToday = lastActiveDate === today;
   const atRisk = streak > 0 && (!hasCompletedToday || !user);
 

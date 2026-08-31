@@ -5,16 +5,24 @@ import { getCurrentUser, logoutUser, fetchUserStats, saveUserStats } from './lib
 // ── Mode config ───────────────────────────────────────────────────────────────
 export const MODES = {
   focus: { label: 'Focus', h: 252, s: 88, lb: 65, defaultMin: 25 },
+  ultradian: { label: 'Ultradian', h: 280, s: 80, lb: 60, defaultMin: 90 },
   short: { label: 'Short Break', h: 162, s: 72, lb: 60, defaultMin: 5 },
   long: { label: 'Long Break', h: 200, s: 78, lb: 62, defaultMin: 15 },
+  nsdr: { label: 'NSDR', h: 220, s: 60, lb: 40, defaultMin: 20 },
+  warmup: { label: 'Warm-up', h: 0, s: 0, lb: 95, defaultMin: 1 },
 };
 export const FOCUS_PRESETS = [25, 50, 90];
-export const BREAK_PRESETS = [5, 10, 15];
+export const BREAK_PRESETS = [5, 10, 15, 20];
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
-export function todayStr() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+export function todayStr(tz) {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  return formatter.format(new Date());
 }
 function daysBetween(a, b) {
   return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000);
@@ -23,21 +31,22 @@ function daysBetween(a, b) {
 // ── Persistence ───────────────────────────────────────────────────────────────
 const LS_KEY = 'chronoTimer_v1';
 
+const DEFAULT_STATE = {
+  days: {},
+  streak: 0,
+  bestStreak: 0,
+  lastActiveDate: null,
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  streakFreezes: 1,
+  focusLog: [],
+};
+
 function loadStreak() {
   try {
-    const r = localStorage.getItem(LS_KEY);
-    if (r) {
-      const parsed = JSON.parse(r);
-      return {
-        days: {},
-        streak: 0,
-        bestStreak: 0,
-        lastActiveDate: null,
-        ...parsed
-      };
-    }
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) return { ...DEFAULT_STATE, ...JSON.parse(raw) };
   } catch { }
-  return { days: {}, streak: 0, bestStreak: 0, lastActiveDate: null, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, streakFreezes: 1 };
+  return { ...DEFAULT_STATE };
 }
 function persist(s) {
   try {
@@ -169,6 +178,11 @@ export const useStore = create((set, get) => ({
       bestStreak: 0,
       lastActiveDate: null,
       days: {},
+      focusLog: [],
+      totalXP: 0,
+      targetIntent: '',
+      customRoadmap: null,
+      shownMs: [],
     };
     set(clearedState);
     persist(clearedState);
@@ -184,6 +198,7 @@ export const useStore = create((set, get) => ({
       days: s.days,
       timezone: s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : 1,
+      focusLog: s.focusLog || [],
     };
     const res = await saveUserStats(s.user.$id, statsData, s.userDocId);
     if (res && res.$id) {
@@ -196,9 +211,16 @@ export const useStore = create((set, get) => ({
   running: false,
   elapsed: 0,          // seconds
   startMs: null,
-  durations: { focus: 25 * 60, short: 5 * 60, long: 15 * 60 },
+  durations: { focus: 25 * 60, ultradian: 90 * 60, short: 5 * 60, long: 15 * 60, nsdr: 20 * 60, warmup: 60 },
   sessions: 0,
   totalSess: 4,
+
+  // ── Huberman State ──────────────────────────────────────────
+  soundscapeType: 'none', // 'none', '40hz', 'pink'
+  setSoundscape: (type) => set({ soundscapeType: type }),
+  warmupEnabled: true,
+  toggleWarmup: () => set(s => ({ warmupEnabled: !s.warmupEnabled })),
+  pendingMode: null, // Stores the next mode while in warmup
 
   // ── Streak / XP (persisted) ─────────────────────────────────
   ...initialStreak,
@@ -258,9 +280,15 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  play() {
+  play(overrideMode = null) {
     unlockAudio();
-    set({ running: true, startMs: performance.now() });
+    const s = get();
+    // If starting a focus/ultradian session and warmup is enabled (and we aren't already warming up)
+    if (s.warmupEnabled && (s.mode === 'focus' || s.mode === 'ultradian') && s.elapsed === 0 && !overrideMode) {
+      set({ pendingMode: s.mode, mode: 'warmup', running: true, startMs: performance.now(), elapsed: 0 });
+    } else {
+      set({ running: true, startMs: performance.now() });
+    }
   },
 
   pause() {
@@ -286,7 +314,16 @@ export const useStore = create((set, get) => ({
   onComplete() {
     const s = get();
 
-    if (s.mode !== 'focus') {
+    if (s.mode === 'warmup') {
+      // Transition from warmup to the actual focus mode automatically
+      const next = s.pendingMode || 'focus';
+      if (s.soundEnabled) playFocusChime();
+      set({ mode: next, pendingMode: null, elapsed: 0 });
+      get().play(true); // force play without triggering warmup again
+      return;
+    }
+
+    if (s.mode !== 'focus' && s.mode !== 'ultradian') {
       // Break complete -> play break chime & prompt return to focus
       if (s.soundEnabled) {
         playBreakChime();
@@ -302,16 +339,16 @@ export const useStore = create((set, get) => ({
 
     // Focus session complete
     const sessions = Math.min(s.sessions + 1, s.totalSess);
-    const focusMins = Math.round(s.durations.focus / 60);
+    const focusMins = Math.round(s.durations[s.mode] / 60);
 
     const newState = applySession(s, focusMins);
 
-    const nextMode = sessions % s.totalSess === 0 ? 'long' : 'short';
+    const nextMode = s.mode === 'ultradian' ? 'nsdr' : (sessions % s.totalSess === 0 ? 'long' : 'short');
     
     // Add to focus log
     const logEntry = {
-      id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-      intent: s.targetIntent.trim() || 'Deep Focus',
+      id: 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+      intent: (s.targetIntent || '').trim() || 'Deep Focus',
       duration: focusMins,
       timestamp: new Date().toISOString()
     };
@@ -324,7 +361,7 @@ export const useStore = create((set, get) => ({
       completedPrompt: { isBreak: false, nextMode },
     });
 
-    persist({ ...newState, focusLog });
+    persist(get());
 
     // Cloud sync
     get().syncCloudStats();

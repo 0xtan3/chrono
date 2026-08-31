@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useStore, MODES } from '../store';
+import { useStore, MODES, todayStr } from '../store';
 import BlobScene from '../components/BlobScene';
 import ModeTabs from '../components/ModeTabs';
 import Controls from '../components/Controls';
@@ -8,6 +8,7 @@ import SessionDots from '../components/SessionDots';
 import StreakBadge from '../components/StreakBadge';
 import DurationPicker from '../components/DurationPicker';
 import FocusLogModal from '../components/FocusLogModal';
+import { startBinauralBeats, startPinkNoise, stopSoundscape } from '../utils/audio';
 import styles from './TimerPage.module.css';
 // ── Formatted time ─────────────────────────────────────────────────────────────
 function fmt(secs) {
@@ -75,6 +76,23 @@ export default function TimerPage() {
 
   const streak = useStore(s => s.streak);
   const lastActiveDate = useStore(s => s.lastActiveDate);
+  const timezone = useStore(s => s.timezone);
+
+  const soundscapeType = useStore(s => s.soundscapeType);
+  const setSoundscape = useStore(s => s.setSoundscape);
+  const warmupEnabled = useStore(s => s.warmupEnabled);
+  const toggleWarmup = useStore(s => s.toggleWarmup);
+
+  useEffect(() => {
+    if (running && (mode === 'focus' || mode === 'ultradian')) {
+      if (soundscapeType === '40hz') startBinauralBeats();
+      else if (soundscapeType === 'pink') startPinkNoise();
+      else stopSoundscape();
+    } else {
+      stopSoundscape();
+    }
+    return stopSoundscape;
+  }, [running, mode, soundscapeType]);
 
   // Hybrid tick: rAF for smooth active visuals, Web Worker for reliable background ticking
   const rafRef = useRef();
@@ -104,7 +122,9 @@ export default function TimerPage() {
 
     // 2. rAF for smooth visual updates when tab is active
     const loop = () => {
-      tickCb.current();
+      if (document.visibilityState === 'visible') {
+        tickCb.current();
+      }
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);
@@ -153,7 +173,7 @@ export default function TimerPage() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [running, play, pause, reset, skip, toggleSound, completedPrompt, dismissCompletedPrompt]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayStr(timezone);
   const hasCompletedToday = lastActiveDate === today;
 
   return (
@@ -205,7 +225,9 @@ export default function TimerPage() {
           <BlobScene />
           <div className={styles.timeOverlay}>
             <span className={styles.time}>{fmt(remaining)}</span>
-            <span className={styles.modeLabel}>{MODES[mode].label}</span>
+            <span className={styles.modeLabel}>
+              {mode === 'warmup' ? 'WARM-UP: STARE AT THE DOT' : MODES[mode].label}
+            </span>
           </div>
         </div>
 
@@ -216,6 +238,28 @@ export default function TimerPage() {
       <footer className={styles.bottomDock}>
         <div className={styles.dockLeft}>
           <DurationPicker />
+          
+          <select 
+            value={soundscapeType}
+            onChange={(e) => setSoundscape(e.target.value)}
+            className={styles.soundscapeSelect}
+            title="Focus Soundscape"
+          >
+            <option value="none">No Soundscape</option>
+            <option value="40hz">40Hz Binaural</option>
+            <option value="pink">Pink Noise</option>
+          </select>
+
+          <button 
+            className={`${styles.dockIconBtn} ${warmupEnabled ? styles.activeWarmup : ''}`}
+            onClick={toggleWarmup}
+            title={warmupEnabled ? 'Warm-up Enabled' : 'Warm-up Disabled'}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
         </div>
 
 

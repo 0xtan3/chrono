@@ -94,3 +94,107 @@ export function playBreakChime() {
 
 // Backward compatibility alias
 export const playChime = playFocusChime;
+
+// ── Huberman Soundscapes ──────────────────────────────────────────────────────
+
+let activeSoundscape = null;
+
+export function stopSoundscape() {
+  if (activeSoundscape) {
+    try {
+      activeSoundscape.stop();
+    } catch (e) {}
+    activeSoundscape = null;
+  }
+}
+
+export function startBinauralBeats() {
+  stopSoundscape();
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    // 40Hz binaural beats (e.g. 400Hz and 440Hz)
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const panner1 = ctx.createStereoPanner();
+    const panner2 = ctx.createStereoPanner();
+    const gain = ctx.createGain();
+
+    osc1.frequency.value = 400;
+    osc2.frequency.value = 440;
+
+    panner1.pan.value = -1; // Left ear
+    panner2.pan.value = 1;  // Right ear
+
+    gain.gain.value = 0.05; // Low volume background
+
+    osc1.connect(panner1);
+    osc2.connect(panner2);
+    panner1.connect(gain);
+    panner2.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc1.start();
+    osc2.start();
+
+    activeSoundscape = {
+      stop: () => {
+        osc1.stop();
+        osc2.stop();
+        osc1.disconnect();
+        osc2.disconnect();
+        gain.disconnect();
+      }
+    };
+  } catch (e) {
+    console.warn('Binaural beats error:', e);
+  }
+}
+
+export function startPinkNoise() {
+  stopSoundscape();
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const bufferSize = 2 * ctx.sampleRate;
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + white * 0.0555179;
+      b1 = 0.99332 * b1 + white * 0.0750759;
+      b2 = 0.96900 * b2 + white * 0.1538520;
+      b3 = 0.86650 * b3 + white * 0.3104856;
+      b4 = 0.55000 * b4 + white * 0.5329522;
+      b5 = -0.7616 * b5 - white * 0.0168980;
+      output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+      output[i] *= 0.11; 
+      b6 = white * 0.115926;
+    }
+
+    const noiseSource = ctx.createBufferSource();
+    noiseSource.buffer = noiseBuffer;
+    noiseSource.loop = true;
+
+    const gain = ctx.createGain();
+    gain.gain.value = 0.05;
+
+    noiseSource.connect(gain);
+    gain.connect(ctx.destination);
+    noiseSource.start();
+
+    activeSoundscape = {
+      stop: () => {
+        noiseSource.stop();
+        noiseSource.disconnect();
+        gain.disconnect();
+      }
+    };
+  } catch (e) {
+    console.warn('Pink noise error:', e);
+  }
+}

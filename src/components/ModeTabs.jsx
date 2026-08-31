@@ -1,10 +1,12 @@
 import { useStore, MODES } from '../store';
 import styles from './ModeTabs.module.css';
 
-const TABS = Object.entries(MODES).map(([key, info]) => ({
-  key,
-  label: info.label,
-}));
+const TABS = Object.entries(MODES)
+  .filter(([key]) => key !== 'warmup')
+  .map(([key, info]) => ({
+    key,
+    label: info.label,
+  }));
 
 export default function ModeTabs() {
   const mode    = useStore(s => s.mode);

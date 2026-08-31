@@ -22,6 +22,7 @@ function BlobMesh() {
   const dur     = useStore(s => s.durations[s.mode]);
 
   const matRef = useRef();
+  const meshRef = useRef();
   const progress = Math.min(1, Math.max(0, elapsed / Math.max(dur, 1)));
 
   const uniforms = useMemo(() => ({
@@ -36,9 +37,14 @@ function BlobMesh() {
   const currentFill = useRef(0);
 
   useFrame(({ clock }) => {
+    if (meshRef.current) {
+      const targetScale = mode === 'warmup' ? 0.15 : 1.0;
+      meshRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.02);
+    }
+
     if (!matRef.current) return;
     const u = matRef.current.uniforms;
-    u.u_time.value = clock.getElapsedTime();
+    u.u_time.value = clock.getElapsedTime() * (mode === 'warmup' ? 0.2 : 1.0);
 
     currentFill.current = THREE.MathUtils.lerp(currentFill.current, progress, 0.035);
     u.u_fill.value = currentFill.current;
@@ -51,7 +57,7 @@ function BlobMesh() {
   });
 
   return (
-    <mesh>
+    <mesh ref={meshRef}>
       <sphereGeometry args={[1, 64, 64]} />
       <shaderMaterial
         ref={matRef}
