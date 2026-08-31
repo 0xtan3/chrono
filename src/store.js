@@ -39,6 +39,7 @@ const DEFAULT_STATE = {
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   streakFreezes: 1,
   focusLog: [],
+  hubermanMode: false,
 };
 
 function loadStreak() {
@@ -60,6 +61,7 @@ function persist(s) {
       timezone: s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : (current.streakFreezes ?? 1),
       focusLog: s.focusLog || current.focusLog || [],
+      hubermanMode: s.hubermanMode ?? false,
     }));
   } catch { }
 }
@@ -134,6 +136,7 @@ export const useStore = create((set, get) => ({
             shownMs: cloudStats.shownMs,
             focusLog: cloudStats.focusLog || [],
             customRoadmap: cloudStats.customRoadmap || null,
+            hubermanMode: localS.hubermanMode ?? false,
           };
 
           let finalData = loadedData;
@@ -240,6 +243,16 @@ export const useStore = create((set, get) => ({
   totalSess: 4,
 
   // ── Huberman State ──────────────────────────────────────────
+  hubermanMode: initialStreak.hubermanMode ?? false,
+  toggleHubermanMode: () => {
+    set(s => {
+      const next = !s.hubermanMode;
+      const nextMode = (s.mode === 'ultradian' || s.mode === 'nsdr') && !next ? 'focus' : s.mode;
+      const newState = { hubermanMode: next, mode: nextMode };
+      return newState;
+    });
+    persist(get());
+  },
   soundscapeType: 'none', // 'none', '40hz', 'pink'
   setSoundscape: (type) => set({ soundscapeType: type }),
   warmupEnabled: true,

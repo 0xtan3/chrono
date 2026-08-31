@@ -11,10 +11,15 @@ const TABS = Object.entries(MODES)
 export default function ModeTabs() {
   const mode    = useStore(s => s.mode);
   const setMode = useStore(s => s.setMode);
+  const hubermanMode = useStore(s => s.hubermanMode);
+
+  const activeTabs = TABS.filter(t => 
+    hubermanMode || (t.key !== 'ultradian' && t.key !== 'nsdr')
+  );
 
   return (
     <nav className={styles.tabs} aria-label="Timer mode">
-      {TABS.map(t => (
+      {activeTabs.map(t => (
         <button
           key={t.key}
           className={`${styles.tab} ${mode === t.key ? styles.active : ''}`}

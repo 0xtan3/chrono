@@ -82,6 +82,8 @@ export default function TimerPage() {
   const setSoundscape = useStore(s => s.setSoundscape);
   const warmupEnabled = useStore(s => s.warmupEnabled);
   const toggleWarmup = useStore(s => s.toggleWarmup);
+  const hubermanMode = useStore(s => s.hubermanMode);
+  const toggleHubermanMode = useStore(s => s.toggleHubermanMode);
 
   useEffect(() => {
     if (running && (mode === 'focus' || mode === 'ultradian')) {
@@ -239,33 +241,50 @@ export default function TimerPage() {
         <div className={styles.dockLeft}>
           <DurationPicker />
           
-          <select 
-            value={soundscapeType}
-            onChange={(e) => setSoundscape(e.target.value)}
-            className={styles.soundscapeSelect}
-            title="Focus Soundscape"
-          >
-            <option value="none">No Soundscape</option>
-            <option value="40hz">40Hz Binaural</option>
-            <option value="pink">Pink Noise</option>
-          </select>
+          {hubermanMode && (
+            <>
+              <select 
+                value={soundscapeType}
+                onChange={(e) => setSoundscape(e.target.value)}
+                className={styles.soundscapeSelect}
+                title="Focus Soundscape"
+              >
+                <option value="none">No Soundscape</option>
+                <option value="40hz">40Hz Binaural</option>
+                <option value="pink">Pink Noise</option>
+              </select>
 
-          <button 
-            className={`${styles.dockIconBtn} ${warmupEnabled ? styles.activeWarmup : ''}`}
-            onClick={toggleWarmup}
-            title={warmupEnabled ? 'Warm-up Enabled' : 'Warm-up Disabled'}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </button>
+              <button 
+                className={`${styles.dockIconBtn} ${warmupEnabled ? styles.activeWarmup : ''}`}
+                onClick={toggleWarmup}
+                title={warmupEnabled ? 'Warm-up Enabled' : 'Warm-up Disabled'}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </>
+          )}
         </div>
 
 
 
         <div className={styles.dockRight}>
           <StreakBadge />
+
+          <button
+            className={`${styles.dockIconBtn} ${hubermanMode ? styles.activeHubermanBtn : ''}`}
+            onClick={toggleHubermanMode}
+            aria-label="Toggle Huberman Protocols"
+            title={hubermanMode ? 'Huberman Protocols Enabled' : 'Enable Huberman Protocols'}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2a10 10 0 1 0 10 10H12V2z" />
+              <path d="M12 12 21.1 6.3" />
+              <path d="M12 12 6.3 21.1" />
+            </svg>
+          </button>
 
           <button
             className={styles.dockIconBtn}

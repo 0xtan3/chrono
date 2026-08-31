@@ -683,3 +683,10 @@
   background: hsla(var(--ah), var(--as), var(--al), 0.1);
 }
 
+.activeHubermanBtn {
+  color: #fff;
+  border-color: var(--accent);
+  background: linear-gradient(135deg, hsla(var(--ah), var(--as), var(--al), 0.3), hsla(var(--ah), var(--as), var(--al), 0.1));
+  box-shadow: 0 0 15px hsla(var(--ah), var(--as), var(--al), 0.2);
+}
+
