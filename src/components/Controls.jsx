@@ -20,7 +20,7 @@ export default function Controls() {
       {/* Main Start / Stop Action Button */}
       <button
         className={`${styles.mainBtn} ${running ? styles.runningBtn : ''}`}
-        onClick={running ? pause : play}
+        onClick={() => (running ? pause() : play())}
       >
         {running ? 'Stop' : elapsed > 0 ? 'Resume' : 'Start'}
       </button>

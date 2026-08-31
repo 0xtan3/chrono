@@ -122,6 +122,8 @@ export const useStore = create((set, get) => ({
         // Fetch stats strictly for this authenticated user ID from Appwrite
         const cloudStats = await fetchUserStats(u.$id);
         if (cloudStats) {
+          const localS = get();
+
           const loadedData = {
             userDocId: cloudStats.docId,
             streak: cloudStats.streak,
@@ -133,8 +135,27 @@ export const useStore = create((set, get) => ({
             focusLog: cloudStats.focusLog || [],
             customRoadmap: cloudStats.customRoadmap || null,
           };
-          set(loadedData);
-          persist(loadedData);
+
+          let finalData = loadedData;
+          let needsSyncUp = false;
+
+          // Conflict resolution: trust local state if it has more XP or a more recent active date
+          if (
+            localS.totalXP > cloudStats.totalXP ||
+            (localS.lastActiveDate && cloudStats.lastActiveDate && localS.lastActiveDate > cloudStats.lastActiveDate)
+          ) {
+            finalData = { ...localS, userDocId: cloudStats.docId };
+            needsSyncUp = true;
+          } else {
+            finalData = recalcStreak(loadedData);
+            if (finalData.streak !== cloudStats.streak) needsSyncUp = true;
+          }
+
+          set(finalData);
+          persist(finalData);
+          if (needsSyncUp) {
+            get().syncCloudStats();
+          }
         } else {
           // Newly logged in user has no stats doc in Appwrite yet.
           // Initialize clean default state and sync to create their DB document.
@@ -196,6 +217,9 @@ export const useStore = create((set, get) => ({
       bestStreak: s.bestStreak,
       lastActiveDate: s.lastActiveDate,
       days: s.days,
+      totalXP: s.totalXP,
+      shownMs: s.shownMs || [],
+      customRoadmap: s.customRoadmap || null,
       timezone: s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : 1,
       focusLog: s.focusLog || [],
@@ -284,7 +308,7 @@ export const useStore = create((set, get) => ({
     unlockAudio();
     const s = get();
     // If starting a focus/ultradian session and warmup is enabled (and we aren't already warming up)
-    if (s.warmupEnabled && (s.mode === 'focus' || s.mode === 'ultradian') && s.elapsed === 0 && !overrideMode) {
+    if (s.warmupEnabled && (s.mode === 'focus' || s.mode === 'ultradian') && s.elapsed === 0 && overrideMode !== true) {
       set({ pendingMode: s.mode, mode: 'warmup', running: true, startMs: performance.now(), elapsed: 0 });
     } else {
       set({ running: true, startMs: performance.now() });
