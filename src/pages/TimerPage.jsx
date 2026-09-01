@@ -8,14 +8,13 @@ import SessionDots from '../components/SessionDots';
 import StreakBadge from '../components/StreakBadge';
 import DurationPicker from '../components/DurationPicker';
 import FocusLogModal from '../components/FocusLogModal';
-import { startBinauralBeats, startPinkNoise, stopSoundscape } from '../utils/audio';
 import styles from './TimerPage.module.css';
+
 // ── Formatted time ─────────────────────────────────────────────────────────────
 function fmt(secs) {
   const s = Math.max(0, Math.floor(secs));
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 }
-
 
 // ── Completion Choice Modal (00:00 completion prompt) ─────────────────────────
 function CompletionChoiceModal() {
@@ -77,24 +76,6 @@ export default function TimerPage() {
   const streak = useStore(s => s.streak);
   const lastActiveDate = useStore(s => s.lastActiveDate);
   const timezone = useStore(s => s.timezone);
-
-  const soundscapeType = useStore(s => s.soundscapeType);
-  const setSoundscape = useStore(s => s.setSoundscape);
-  const warmupEnabled = useStore(s => s.warmupEnabled);
-  const toggleWarmup = useStore(s => s.toggleWarmup);
-  const hubermanMode = useStore(s => s.hubermanMode);
-  const toggleHubermanMode = useStore(s => s.toggleHubermanMode);
-
-  useEffect(() => {
-    if (running && (mode === 'focus' || mode === 'ultradian')) {
-      if (soundscapeType === '40hz') startBinauralBeats();
-      else if (soundscapeType === 'pink') startPinkNoise();
-      else stopSoundscape();
-    } else {
-      stopSoundscape();
-    }
-    return stopSoundscape;
-  }, [running, mode, soundscapeType]);
 
   // Hybrid tick: rAF for smooth active visuals, Web Worker for reliable background ticking
   const rafRef = useRef();
@@ -227,9 +208,7 @@ export default function TimerPage() {
           <BlobScene />
           <div className={styles.timeOverlay}>
             <span className={styles.time}>{fmt(remaining)}</span>
-            <span className={styles.modeLabel}>
-              {mode === 'warmup' ? 'WARM-UP: STARE AT THE DOT' : MODES[mode].label}
-            </span>
+            <span className={styles.modeLabel}>{MODES[mode].label}</span>
           </div>
         </div>
 
@@ -240,51 +219,23 @@ export default function TimerPage() {
       <footer className={styles.bottomDock}>
         <div className={styles.dockLeft}>
           <DurationPicker />
-          
-          {hubermanMode && (
-            <>
-              <select 
-                value={soundscapeType}
-                onChange={(e) => setSoundscape(e.target.value)}
-                className={styles.soundscapeSelect}
-                title="Focus Soundscape"
-              >
-                <option value="none">No Soundscape</option>
-                <option value="40hz">40Hz Binaural</option>
-                <option value="pink">Pink Noise</option>
-              </select>
-
-              <button 
-                className={`${styles.dockIconBtn} ${warmupEnabled ? styles.activeWarmup : ''}`}
-                onClick={toggleWarmup}
-                title={warmupEnabled ? 'Warm-up Enabled' : 'Warm-up Disabled'}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              </button>
-            </>
-          )}
         </div>
-
-
 
         <div className={styles.dockRight}>
           <StreakBadge />
 
-          <button
-            className={`${styles.dockIconBtn} ${hubermanMode ? styles.activeHubermanBtn : ''}`}
-            onClick={toggleHubermanMode}
-            aria-label="Toggle Huberman Protocols"
-            title={hubermanMode ? 'Huberman Protocols Enabled' : 'Enable Huberman Protocols'}
+          <Link
+            to="/huberman"
+            className={styles.dockIconBtn}
+            aria-label="Huberman Protocol"
+            title="Huberman Protocol"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2a10 10 0 1 0 10 10H12V2z" />
               <path d="M12 12 21.1 6.3" />
               <path d="M12 12 6.3 21.1" />
             </svg>
-          </button>
+          </Link>
 
           <button
             className={styles.dockIconBtn}

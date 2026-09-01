@@ -174,32 +174,6 @@
   border-radius: 8px;
 }
 
-/* ── Huberman Hub Modes ──────────────────────────────────────────────────────── */
-
-.modeIcon {
-  margin-right: 0.4rem;
-  font-size: 0.95rem;
-}
-
-.ultradian {
-  border-left: 3px solid #8b5cf6;
-  background: linear-gradient(90deg, rgba(139, 92, 246, 0.08) 0%, transparent 100%);
-}
-
-.ultradian .entryDuration {
-  color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.15);
-}
-
-.nsdr {
-  border-left: 3px solid #3b82f6;
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, transparent 100%);
-}
-
-.nsdr .entryDuration {
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.15);
-}
 
 @keyframes fadeIn {
   from { opacity: 0; }

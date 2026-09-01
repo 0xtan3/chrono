@@ -4,6 +4,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import AuthGuard from './components/AuthGuard';
 import LandingPage from './pages/LandingPage';
 import TimerPage from './pages/TimerPage';
+import HubermanPage from './pages/HubermanPage';
 import AuthPage from './pages/AuthPage';
 import VerifyPage from './pages/VerifyPage';
 import { useStore } from './store';
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/welcome" element={<LandingPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/verify" element={<VerifyPage />} />
+          <Route path="/huberman" element={<AuthGuard><HubermanPage /></AuthGuard>} />
           
           <Route path="/" element={<AuthGuard><TimerPage /></AuthGuard>} />
         </Routes>

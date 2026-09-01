@@ -1,0 +1,82 @@
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0.6rem 1.5rem;
+  background: rgba(16, 20, 32, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.connector {
+  width: 40px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 0.3rem;
+  border-radius: 2px;
+  transition: background 0.5s ease;
+}
+
+.connectorActive {
+  background: linear-gradient(90deg, var(--accent), hsla(var(--ah), var(--as), var(--al), 0.4));
+}
+
+.dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all 0.4s ease;
+  flex-shrink: 0;
+}
+
+.upcoming {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  box-shadow: 0 0 20px hsla(var(--ah), var(--as), var(--al), 0.4);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.done {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
+
+.label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.upcomingLabel { color: rgba(255, 255, 255, 0.25); }
+.activeLabel   { color: var(--accent); }
+.doneLabel     { color: #22c55e; }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 20px hsla(var(--ah), var(--as), var(--al), 0.4); }
+  50%      { box-shadow: 0 0 30px hsla(var(--ah), var(--as), var(--al), 0.6); }
+}

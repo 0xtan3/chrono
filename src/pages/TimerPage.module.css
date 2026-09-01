@@ -653,40 +653,6 @@
   white-space: nowrap;
 }
 
-.soundscapeSelect {
-  background: rgba(16, 20, 32, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--text-muted);
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border-radius: 12px;
-  padding: 0.4rem 0.6rem;
-  outline: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
 
-.soundscapeSelect:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
 
-.soundscapeSelect option {
-  background: #0d0f19;
-  color: #fff;
-}
-
-.activeWarmup {
-  color: var(--accent);
-  border-color: hsla(var(--ah), var(--as), var(--al), 0.4);
-  background: hsla(var(--ah), var(--as), var(--al), 0.1);
-}
-
-.activeHubermanBtn {
-  color: #fff;
-  border-color: var(--accent);
-  background: linear-gradient(135deg, hsla(var(--ah), var(--as), var(--al), 0.3), hsla(var(--ah), var(--as), var(--al), 0.1));
-  box-shadow: 0 0 15px hsla(var(--ah), var(--as), var(--al), 0.2);
-}
 

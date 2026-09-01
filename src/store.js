@@ -2,17 +2,22 @@ import { create } from 'zustand';
 import { playFocusChime, playBreakChime, unlockAudio } from './utils/audio';
 import { getCurrentUser, logoutUser, fetchUserStats, saveUserStats } from './lib/appwrite';
 
-// ── Mode config ───────────────────────────────────────────────────────────────
+// ── Pomodoro Mode config ──────────────────────────────────────────────────────
 export const MODES = {
   focus: { label: 'Focus', h: 252, s: 88, lb: 65, defaultMin: 25 },
-  ultradian: { label: 'Ultradian', h: 280, s: 80, lb: 60, defaultMin: 90 },
   short: { label: 'Short Break', h: 162, s: 72, lb: 60, defaultMin: 5 },
   long: { label: 'Long Break', h: 200, s: 78, lb: 62, defaultMin: 15 },
-  nsdr: { label: 'NSDR', h: 220, s: 60, lb: 40, defaultMin: 20 },
-  warmup: { label: 'Warm-up', h: 0, s: 0, lb: 95, defaultMin: 1 },
 };
 export const FOCUS_PRESETS = [25, 50, 90];
-export const BREAK_PRESETS = [5, 10, 15, 20];
+export const BREAK_PRESETS = [5, 10, 15];
+
+// ── Huberman Phase config ─────────────────────────────────────────────────────
+export const HUBERMAN_PHASES = {
+  idle:   { label: 'Ready',    h: 252, s: 88, lb: 65 },
+  warmup: { label: 'Warm-up',  h: 0,   s: 0,  lb: 95 },
+  focus:  { label: 'Deep Work', h: 280, s: 80, lb: 60 },
+  nsdr:   { label: 'NSDR',     h: 220, s: 60, lb: 40 },
+};
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 export function todayStr(tz) {
@@ -39,7 +44,7 @@ const DEFAULT_STATE = {
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   streakFreezes: 1,
   focusLog: [],
-  hubermanMode: false,
+  hubermanLog: [],
 };
 
 function loadStreak() {
@@ -61,7 +66,7 @@ function persist(s) {
       timezone: s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : (current.streakFreezes ?? 1),
       focusLog: s.focusLog || current.focusLog || [],
-      hubermanMode: s.hubermanMode ?? false,
+      hubermanLog: s.hubermanLog || current.hubermanLog || [],
     }));
   } catch { }
 }
@@ -136,7 +141,6 @@ export const useStore = create((set, get) => ({
             shownMs: cloudStats.shownMs,
             focusLog: cloudStats.focusLog || [],
             customRoadmap: cloudStats.customRoadmap || null,
-            hubermanMode: localS.hubermanMode ?? false,
           };
 
           let finalData = loadedData;
@@ -233,31 +237,17 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  // ── Timer state ─────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ██  POMODORO TIMER (standard Focus / Short Break / Long Break)
+  // ═══════════════════════════════════════════════════════════════════════════
+
   mode: 'focus',
   running: false,
   elapsed: 0,          // seconds
   startMs: null,
-  durations: { focus: 25 * 60, ultradian: 90 * 60, short: 5 * 60, long: 15 * 60, nsdr: 20 * 60, warmup: 60 },
+  durations: { focus: 25 * 60, short: 5 * 60, long: 15 * 60 },
   sessions: 0,
   totalSess: 4,
-
-  // ── Huberman State ──────────────────────────────────────────
-  hubermanMode: initialStreak.hubermanMode ?? false,
-  toggleHubermanMode: () => {
-    set(s => {
-      const next = !s.hubermanMode;
-      const nextMode = (s.mode === 'ultradian' || s.mode === 'nsdr') && !next ? 'focus' : s.mode;
-      const newState = { hubermanMode: next, mode: nextMode };
-      return newState;
-    });
-    persist(get());
-  },
-  soundscapeType: 'none', // 'none', '40hz', 'pink'
-  setSoundscape: (type) => set({ soundscapeType: type }),
-  warmupEnabled: true,
-  toggleWarmup: () => set(s => ({ warmupEnabled: !s.warmupEnabled })),
-  pendingMode: null, // Stores the next mode while in warmup
 
   // ── Streak / XP (persisted) ─────────────────────────────────
   ...initialStreak,
@@ -265,8 +255,6 @@ export const useStore = create((set, get) => ({
   // ── Mode config ─────────────────────────────────────────────
   soundEnabled: true,
   completedPrompt: null, // { nextMode: 'short' | 'long' } | null
-
-
 
   toggleSound() {
     unlockAudio();
@@ -317,15 +305,9 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  play(overrideMode = null) {
+  play() {
     unlockAudio();
-    const s = get();
-    // If starting a focus/ultradian session and warmup is enabled (and we aren't already warming up)
-    if (s.warmupEnabled && (s.mode === 'focus' || s.mode === 'ultradian') && s.elapsed === 0 && overrideMode !== true) {
-      set({ pendingMode: s.mode, mode: 'warmup', running: true, startMs: performance.now(), elapsed: 0 });
-    } else {
-      set({ running: true, startMs: performance.now() });
-    }
+    set({ running: true, startMs: performance.now() });
   },
 
   pause() {
@@ -351,72 +333,209 @@ export const useStore = create((set, get) => ({
   onComplete() {
     const s = get();
 
-    if (s.mode === 'warmup') {
-      // Transition from warmup to the actual focus mode automatically
-      const next = s.pendingMode || 'focus';
-      if (s.soundEnabled) playFocusChime();
-      set({ mode: next, pendingMode: null, elapsed: 0 });
-      get().play(true); // force play without triggering warmup again
+    if (s.mode !== 'focus') {
+      // Break complete -> play break chime & prompt return to focus
+      if (s.soundEnabled) playBreakChime();
+      set({ completedPrompt: { isBreak: true, nextMode: 'focus' } });
       return;
     }
 
-    const isFocus = s.mode === 'focus' || s.mode === 'ultradian';
-    const isNSDR = s.mode === 'nsdr';
-    const focusMins = Math.round(s.durations[s.mode] / 60);
+    // Focus session complete -> play focus chime
+    if (s.soundEnabled) playFocusChime();
 
-    let nextMode = 'focus';
-    if (isFocus) {
-      if (s.soundEnabled) playFocusChime();
-      const sessions = Math.min(s.sessions + 1, s.totalSess);
-      nextMode = s.mode === 'ultradian' ? 'nsdr' : (sessions % s.totalSess === 0 ? 'long' : 'short');
-    } else {
-      if (s.soundEnabled) playBreakChime();
-      nextMode = 'focus';
-    }
+    const sessions = Math.min(s.sessions + 1, s.totalSess);
+    const focusMins = Math.round(s.durations.focus / 60);
+    const newState = applySession(s, focusMins);
+    const nextMode = sessions % s.totalSess === 0 ? 'long' : 'short';
 
-    let focusLog = s.focusLog;
-    if (isFocus || isNSDR) {
-      const logEntry = {
-        id: 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-        intent: isNSDR ? 'Deep Rest (NSDR)' : ((s.targetIntent || '').trim() || 'Deep Focus'),
-        duration: focusMins,
-        timestamp: new Date().toISOString(),
-        mode: s.mode
-      };
-      focusLog = [logEntry, ...(s.focusLog || [])].slice(0, 100);
-    }
+    // Add to focus log
+    const logEntry = {
+      id: 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+      intent: (s.targetIntent || '').trim() || 'Deep Focus',
+      duration: focusMins,
+      timestamp: new Date().toISOString()
+    };
+    const focusLog = [logEntry, ...(s.focusLog || [])].slice(0, 100);
 
-    if (isFocus) {
-      const sessions = Math.min(s.sessions + 1, s.totalSess);
-      const newState = applySession(s, focusMins);
-      set({
-        ...newState,
-        sessions,
-        focusLog,
-        completedPrompt: { isBreak: false, nextMode },
-      });
-    } else if (isNSDR) {
-      set({
-        focusLog,
-        completedPrompt: { isBreak: true, nextMode },
-      });
-    } else {
-      set({
-        completedPrompt: { isBreak: true, nextMode },
-      });
-    }
+    set({
+      ...newState,
+      sessions,
+      focusLog,
+      completedPrompt: { isBreak: false, nextMode },
+    });
 
     persist(get());
-
-    // Cloud sync
     get().syncCloudStats();
   },
-
-
 
   focusLog: [],
   targetIntent: '',
   setTargetIntent(intent) {
     set({ targetIntent: intent });
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ██  HUBERMAN PROTOCOL (Warm-up → 90m Deep Work → 20m NSDR)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  huberman: {
+    phase: 'idle',       // 'idle' | 'warmup' | 'focus' | 'nsdr'
+    elapsed: 0,
+    running: false,
+    startMs: null,
+    soundscape: 'none',  // 'none' | '40hz' | 'pink'
+    warmupEnabled: true,
+    focusDuration: 90 * 60,
+    nsdrDuration: 20 * 60,
+    warmupDuration: 60,
+    cyclesCompleted: 0,
+    targetIntent: '',
+    completedPhase: null, // null | 'focus' | 'nsdr' (which phase just finished)
+  },
+  hubermanLog: initialStreak.hubermanLog || [],
+
+  hubermanSetIntent(intent) {
+    set(s => ({ huberman: { ...s.huberman, targetIntent: intent } }));
+  },
+
+  hubermanSetSoundscape(type) {
+    set(s => ({ huberman: { ...s.huberman, soundscape: type } }));
+  },
+
+  hubermanToggleWarmup() {
+    set(s => ({ huberman: { ...s.huberman, warmupEnabled: !s.huberman.warmupEnabled } }));
+  },
+
+  hubermanSetDuration(phase, minutes) {
+    const key = phase + 'Duration';
+    set(s => ({ huberman: { ...s.huberman, [key]: minutes * 60 } }));
+  },
+
+  hubermanPlay() {
+    unlockAudio();
+    const s = get();
+    const h = s.huberman;
+
+    if (h.phase === 'idle') {
+      // Start a new cycle
+      const startPhase = h.warmupEnabled ? 'warmup' : 'focus';
+      set({ huberman: { ...h, phase: startPhase, elapsed: 0, running: true, startMs: performance.now(), completedPhase: null } });
+    } else {
+      // Resume current phase
+      set({ huberman: { ...h, running: true, startMs: performance.now() } });
+    }
+  },
+
+  hubermanPause() {
+    set(s => ({ huberman: { ...s.huberman, running: false, startMs: null } }));
+  },
+
+  hubermanReset() {
+    set(s => ({ huberman: { ...s.huberman, phase: 'idle', elapsed: 0, running: false, startMs: null, completedPhase: null } }));
+  },
+
+  hubermanSkip() {
+    const s = get();
+    const h = s.huberman;
+    if (h.phase === 'idle') return;
+    // Force complete current phase
+    const dur = h.phase === 'warmup' ? h.warmupDuration : h.phase === 'focus' ? h.focusDuration : h.nsdrDuration;
+    set({ huberman: { ...h, elapsed: dur, running: false, startMs: null } });
+    get().hubermanOnPhaseComplete();
+  },
+
+  hubermanTick() {
+    const s = get();
+    const h = s.huberman;
+    if (!h.running) return;
+
+    const now = performance.now();
+    const elapsed = h.elapsed + (now - h.startMs) / 1000;
+    const dur = h.phase === 'warmup' ? h.warmupDuration : h.phase === 'focus' ? h.focusDuration : h.nsdrDuration;
+
+    if (elapsed >= dur) {
+      set({ huberman: { ...h, elapsed: dur, running: false, startMs: null } });
+      get().hubermanOnPhaseComplete();
+    } else {
+      set({ huberman: { ...h, elapsed, startMs: now } });
+    }
+  },
+
+  hubermanOnPhaseComplete() {
+    const s = get();
+    const h = s.huberman;
+
+    if (h.phase === 'warmup') {
+      // Warm-up done -> auto-start focus
+      if (s.soundEnabled) playFocusChime();
+      set({ huberman: { ...h, phase: 'focus', elapsed: 0, running: true, startMs: performance.now(), completedPhase: null } });
+      return;
+    }
+
+    if (h.phase === 'focus') {
+      // Deep work done -> log it, show prompt, prepare NSDR
+      if (s.soundEnabled) playFocusChime();
+      const focusMins = Math.round(h.focusDuration / 60);
+
+      // Also apply to streak/days (Huberman focus counts for streaks too)
+      const newState = applySession(s, focusMins);
+
+      const logEntry = {
+        id: 'hlog_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+        intent: (h.targetIntent || '').trim() || 'Deep Work',
+        phase: 'focus',
+        duration: focusMins,
+        timestamp: new Date().toISOString(),
+      };
+      const hubermanLog = [logEntry, ...(s.hubermanLog || [])].slice(0, 100);
+
+      set({
+        ...newState,
+        hubermanLog,
+        huberman: { ...h, phase: 'nsdr', elapsed: 0, running: false, startMs: null, completedPhase: 'focus' },
+      });
+      persist(get());
+      get().syncCloudStats();
+      return;
+    }
+
+    if (h.phase === 'nsdr') {
+      // NSDR done -> log it, cycle complete
+      if (s.soundEnabled) playBreakChime();
+      const nsdrMins = Math.round(h.nsdrDuration / 60);
+
+      const logEntry = {
+        id: 'hlog_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+        intent: 'Deep Rest (NSDR)',
+        phase: 'nsdr',
+        duration: nsdrMins,
+        timestamp: new Date().toISOString(),
+      };
+      const hubermanLog = [logEntry, ...(s.hubermanLog || [])].slice(0, 100);
+
+      set({
+        hubermanLog,
+        huberman: { ...h, phase: 'idle', elapsed: 0, running: false, startMs: null, cyclesCompleted: h.cyclesCompleted + 1, completedPhase: 'nsdr' },
+      });
+      persist(get());
+      return;
+    }
+  },
+
+  hubermanDismissCompleted() {
+    set(s => ({ huberman: { ...s.huberman, completedPhase: null } }));
+  },
+
+  hubermanStartNsdr() {
+    // User confirms to start NSDR after focus phase
+    unlockAudio();
+    set(s => ({ huberman: { ...s.huberman, completedPhase: null, running: true, startMs: performance.now() } }));
+  },
+
+  hubermanSkipNsdr() {
+    // User skips NSDR, go to idle
+    unlockAudio();
+    const s = get();
+    set({ huberman: { ...s.huberman, phase: 'idle', elapsed: 0, running: false, startMs: null, cyclesCompleted: s.huberman.cyclesCompleted + 1, completedPhase: null } });
   },
 }));

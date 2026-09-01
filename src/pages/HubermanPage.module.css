@@ -1,0 +1,449 @@
+/* ── Page Layout ────────────────────────────────────────────────────────────── */
+.pageViewport {
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem 2.2rem 1.8rem;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* ── Top Header ────────────────────────────────────────────────────────────── */
+.topHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+}
+
+.brandTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.backLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.backLink:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.brandDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.protocolBadge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(139, 92, 246, 0.7);
+  letter-spacing: 0.02em;
+}
+
+/* ── Center Stage ──────────────────────────────────────────────────────────── */
+.centerStage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  flex: 1;
+  position: relative;
+  z-index: 5;
+}
+
+/* ── Intent Input ──────────────────────────────────────────────────────────── */
+.intentContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(16, 20, 32, 0.45);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  max-width: 480px;
+  width: 90%;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+.intentContainer:focus-within,
+.intentContainer:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
+}
+
+.intentLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(139, 92, 246, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.intentInput {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  outline: none;
+  max-width: 280px;
+  text-overflow: ellipsis;
+}
+
+.intentInput::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Blob ───────────────────────────────────────────────────────────────────── */
+.blobWrap {
+  position: relative;
+  width: 440px;
+  height: 440px;
+  margin: -0.5rem 0;
+}
+
+.timeOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.time {
+  font-size: 3.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 32px hsla(280, 80%, 60%, 0.5), 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.phaseLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #8b5cf6;
+  opacity: 0.9;
+}
+
+/* ── Controls ──────────────────────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.mainBtn {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 0.75rem 2.2rem;
+  cursor: pointer;
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.35);
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  letter-spacing: 0.03em;
+}
+
+.mainBtn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 35px rgba(139, 92, 246, 0.5);
+}
+
+.runningBtn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.3);
+}
+
+.runningBtn:hover {
+  box-shadow: 0 0 35px rgba(239, 68, 68, 0.45);
+}
+
+.resetBtn, .skipBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.resetBtn svg, .skipBtn svg { width: 18px; height: 18px; }
+
+.resetBtn:hover, .skipBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  transform: scale(1.08);
+}
+
+/* ── Bottom Dock ───────────────────────────────────────────────────────────── */
+.bottomDock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+}
+
+.dockLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.dockRight {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.soundscapeSelect {
+  background: rgba(16, 20, 32, 0.45);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 0.4rem 0.6rem;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.soundscapeSelect:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  color: #fff;
+}
+
+.soundscapeSelect option {
+  background: #0d0f19;
+  color: #fff;
+}
+
+.dockIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.15s var(--spring);
+}
+
+.dockIconBtn svg { width: 17px; height: 17px; }
+
+.dockIconBtn:hover {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: scale(1.08);
+}
+
+.warmupActive {
+  color: #8b5cf6;
+  border-color: rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.cycleBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 10px;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.cycleCount {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #8b5cf6;
+}
+
+.cycleLabel {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(139, 92, 246, 0.5);
+}
+
+/* ── Completion Modals ─────────────────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(8, 11, 18, 0.88);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.choiceCard {
+  background: linear-gradient(145deg, rgba(20, 24, 35, 0.75), rgba(12, 14, 22, 0.9));
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  border-top: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 28px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(40px) saturate(150%);
+  position: relative;
+  z-index: 2;
+  animation: springPop 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes springPop {
+  0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.choiceEmoji { font-size: 3.2rem; display: block; margin-bottom: 0.6rem; }
+.choiceTitle { font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 0.35rem; }
+.choiceSub { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.4rem; }
+
+.choiceBtnGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.primaryChoiceBtn {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.75rem 1.4rem;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  transition: transform 0.14s var(--spring), box-shadow 0.2s;
+}
+
+.primaryChoiceBtn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 28px rgba(139, 92, 246, 0.6);
+}
+
+.secondaryChoiceBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.secondaryChoiceBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-height: 680px) {
+  .pageViewport { padding: 1rem 1.5rem; }
+  .blobWrap { width: 320px; height: 320px; max-width: 85vw; max-height: 85vw; }
+  .time { font-size: 2.8rem; }
+  .protocolBadge { display: none; }
+}
+
+@media (max-width: 768px) {
+  .pageViewport { padding: 1rem; }
+  .blobWrap { width: 340px; height: 340px; max-width: 90vw; max-height: 90vw; }
+  .time { font-size: 3rem; }
+  .protocolBadge { display: none; }
+  .title { font-size: 0.85rem; letter-spacing: 0.15em; }
+
+  .bottomDock {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: linear-gradient(to top, rgba(8, 11, 18, 0.95) 40%, rgba(8, 11, 18, 0) 100%);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .centerStage { margin-bottom: 80px; }
+}
