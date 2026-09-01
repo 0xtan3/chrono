@@ -110,6 +110,19 @@ export default function LandingPage() {
         </div>
       </header>
 
+      {/* ── Mobile-Only Desktop Advisory Banner ────────────────────────────── */}
+      <div className={styles.mobileAdvisoryWrap}>
+        <div className={styles.mobileAdvisoryCard}>
+          <div className={styles.advisoryHeaderRow}>
+            <span className={styles.advisoryIcon}>🖥️</span>
+            <span className={styles.advisoryTitle}>BEST EXPERIENCED ON DESKTOP</span>
+          </div>
+          <p className={styles.advisoryText}>
+            For 3D liquid focus visualizers, stereo binaural entrainment, and keyboard shortcuts, switch to your laptop or desktop browser.
+          </p>
+        </div>
+      </div>
+
       {/* ── Hero Section ───────────────────────────────────────────────────── */}
       <section className={styles.heroSection}>
         <div className={styles.heroBadgePill}>
@@ -240,8 +253,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Marquee Feature Strip ──────────────────────────────────────────── */}
-      <div className={styles.marqueeStrip}>
+      {/* ── Marquee Feature Strip (Desktop/Tablet Only) ────────────────────── */}
+      <div className={`${styles.marqueeStrip} ${styles.desktopOnlySection}`}>
         <div className={styles.marqueeTrack}>
           <span>● 90M ULTRADIAN PROTOCOL</span>
           <span>● REAL-TIME 40HZ GAMMA ACOUSTIC ENTRAINMENT</span>
@@ -305,8 +318,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── The Science Bento Grid ─────────────────────────────────────────── */}
-      <section className={styles.scienceSection} id="science">
+      {/* ── The Science Bento Grid (Progressively simplified) ──────────────── */}
+      <section className={`${styles.scienceSection} ${styles.desktopOnlySection}`} id="science">
         <div className={styles.sectionHeaderWrap}>
           <span className={styles.sectionEyebrow}>NEUROSCIENCE & GAME THEORY</span>
           <h2 className={styles.sectionTitle}>Engineered for Peak Study Obsession</h2>
@@ -373,8 +386,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Comparison Table: Old Timers vs CHRONO ─────────────────────────── */}
-      <section className={styles.comparisonSection}>
+      {/* ── Comparison Table: Old Timers vs CHRONO (Desktop Only) ─────────── */}
+      <section className={`${styles.comparisonSection} ${styles.desktopOnlySection}`}>
         <div className={styles.sectionHeaderWrap}>
           <span className={styles.sectionEyebrow}>THE EVOLUTION OF FOCUS</span>
           <h2 className={styles.sectionTitle}>Standard Timers vs. CHRONO</h2>
@@ -420,8 +433,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Terminal / Keyboard Shortcuts Strip ────────────────────────────── */}
-      <section className={styles.keyboardSection}>
+      {/* ── Terminal / Keyboard Shortcuts Strip (Desktop Only) ─────────────── */}
+      <section className={`${styles.keyboardSection} ${styles.desktopOnlySection}`}>
         <div className={styles.keyboardStrip}>
           <span className={styles.kbLabel}>KEYBOARD-FIRST COMMANDS:</span>
           <div className={styles.kbItem}><kbd>Space</kbd> <span>Start / Pause</span></div>
