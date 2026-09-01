@@ -3,48 +3,59 @@ import { Link } from 'react-router-dom';
 import { useStore, MODES, todayStr } from '../store';
 import BlobScene from '../components/BlobScene';
 import ModeTabs from '../components/ModeTabs';
+import PhaseStepper from '../components/PhaseStepper';
 import Controls from '../components/Controls';
-import SessionDots from '../components/SessionDots';
 import StreakBadge from '../components/StreakBadge';
+import LevelBadge from '../components/LevelBadge';
+import DailyProgressBar from '../components/DailyProgressBar';
 import DurationPicker from '../components/DurationPicker';
 import FocusLogModal from '../components/FocusLogModal';
+import XPToast from '../components/XPToast';
+import { startBinauralBeats, startPinkNoise, stopSoundscape } from '../utils/audio';
 import styles from './TimerPage.module.css';
 
 // ── Formatted time ─────────────────────────────────────────────────────────────
 function fmt(secs) {
   const s = Math.max(0, Math.floor(secs));
-  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  const hrs = Math.floor(s / 3600);
+  const mins = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (hrs > 0) return `${hrs}:${String(mins).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  return `${String(mins).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 }
 
-// ── Completion Choice Modal (00:00 completion prompt) ─────────────────────────
+// ── Completion Choice Modal (Prompt after session) ────────────────────────────
 function CompletionChoiceModal() {
-  const prompt = useStore(s => s.completedPrompt);
-  const chooseFocusAgain = useStore(s => s.chooseFocusAgain);
-  const chooseTakeBreak = useStore(s => s.chooseTakeBreak);
+  const prompt = useStore((s) => s.completedPrompt);
+  const dismiss = useStore((s) => s.dismissCompletedPrompt);
+  const chooseNextMode = useStore((s) => s.chooseNextMode);
 
   if (!prompt) return null;
 
-  const isBreak = prompt.isBreak;
+  const { title, sub, primaryLabel, secondaryLabel, nextMode, xpEarned, rewardTier } = prompt;
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.choiceCard}>
-        <span className={styles.choiceEmoji}>{isBreak ? '☕' : '🎉'}</span>
-        <h2 className={styles.choiceTitle}>
-          {isBreak ? 'Break Finished!' : 'Session Complete!'}
-        </h2>
-        <p className={styles.choiceSub}>
-          {isBreak
-            ? 'Feeling refreshed? Ready to jump back into focus mode?'
-            : 'Great focus! Would you like to start another focus session or take a break?'}
-        </p>
+      <div className={`${styles.choiceCard} ${styles[rewardTier] || ''}`}>
+        <span className={styles.choiceEmoji}>
+          {rewardTier === 'legendary' ? '👑' : rewardTier === 'critical' ? '⚡' : nextMode === 'recovery' ? '🧠' : '✨'}
+        </span>
+        <h2 className={styles.choiceTitle}>{title}</h2>
+        <p className={styles.choiceSub}>{sub}</p>
+
+        {xpEarned && (
+          <div className={styles.rewardSummaryPill}>
+            <span>XP Earned:</span>
+            <strong className={styles.xpAmount}>+{xpEarned} XP</strong>
+          </div>
+        )}
 
         <div className={styles.choiceBtnGroup}>
-          <button className={styles.primaryChoiceBtn} onClick={chooseFocusAgain}>
-            {isBreak ? 'Start Focus Mode 🎯' : 'Focus Again 🎯'}
+          <button className={styles.primaryChoiceBtn} onClick={() => chooseNextMode(nextMode)}>
+            {primaryLabel}
           </button>
-          <button className={styles.secondaryChoiceBtn} onClick={chooseTakeBreak}>
-            {isBreak ? 'Extend Break ☕' : 'Take a Break ☕'}
+          <button className={styles.secondaryChoiceBtn} onClick={dismiss}>
+            {secondaryLabel}
           </button>
         </div>
       </div>
@@ -52,39 +63,47 @@ function CompletionChoiceModal() {
   );
 }
 
-// ── Timer Page ─────────────────────────────────────────────────────────────────
+// ── Main Unified Timer Page ───────────────────────────────────────────────────
 export default function TimerPage() {
-  const [showFocusLog, setShowFocusLog] = useState(false);
-  const mode = useStore(s => s.mode);
-  const elapsed = useStore(s => s.elapsed);
-  const running = useStore(s => s.running);
-  const tick = useStore(s => s.tick);
-  const dur = useStore(s => s.durations[s.mode]);
-  const soundEnabled = useStore(s => s.soundEnabled);
-  const toggleSound = useStore(s => s.toggleSound);
-  const user = useStore(s => s.user);
-  const logout = useStore(s => s.logout);
-  const targetIntent = useStore(s => s.targetIntent);
-  const setTargetIntent = useStore(s => s.setTargetIntent);
-  const play = useStore(s => s.play);
-  const pause = useStore(s => s.pause);
-  const reset = useStore(s => s.reset);
-  const skip = useStore(s => s.skip);
-  const completedPrompt = useStore(s => s.completedPrompt);
-  const dismissCompletedPrompt = useStore(s => s.dismissCompletedPrompt);
+  const [showCommandCenter, setShowCommandCenter] = useState(false);
 
-  const streak = useStore(s => s.streak);
-  const lastActiveDate = useStore(s => s.lastActiveDate);
-  const timezone = useStore(s => s.timezone);
+  const mode            = useStore((s) => s.mode);
+  const protocolPhase   = useStore((s) => s.protocolPhase);
+  const elapsed         = useStore((s) => s.elapsed);
+  const running         = useStore((s) => s.running);
+  const tick            = useStore((s) => s.tick);
+  const durations       = useStore((s) => s.durations);
+  const warmupEnabled   = useStore((s) => s.warmupEnabled);
+  const toggleWarmup    = useStore((s) => s.toggleWarmup);
+  const soundscapeType  = useStore((s) => s.soundscapeType);
+  const setSoundscape   = useStore((s) => s.setSoundscape);
+  const soundEnabled    = useStore((s) => s.soundEnabled);
+  const toggleSound     = useStore((s) => s.toggleSound);
+  const user            = useStore((s) => s.user);
+  const logout          = useStore((s) => s.logout);
+  const targetIntent    = useStore((s) => s.targetIntent);
+  const setTargetIntent = useStore((s) => s.setTargetIntent);
+  const play            = useStore((s) => s.play);
+  const pause           = useStore((s) => s.pause);
+  const reset           = useStore((s) => s.reset);
+  const skip            = useStore((s) => s.skip);
+  const completedPrompt = useStore((s) => s.completedPrompt);
+  const dismissPrompt   = useStore((s) => s.dismissCompletedPrompt);
 
-  // Hybrid tick: rAF for smooth active visuals, Web Worker for reliable background ticking
+  const streak          = useStore((s) => s.streak);
+  const lastActiveDate  = useStore((s) => s.lastActiveDate);
+  const timezone        = useStore((s) => s.timezone);
+
+  const isWarmup = mode === 'deep' && protocolPhase === 'warmup';
+  const dur = isWarmup ? durations.warmup : (durations[mode] || 1);
+  const remaining = Math.max(0, dur - elapsed);
+
+  // 1. Hybrid Tick Engine (Worker + rAF)
   const rafRef = useRef();
   const tickCb = useRef(tick);
   tickCb.current = tick;
 
   useEffect(() => {
-    // 1. Web Worker for background ticking (fires every ~250ms)
-    // This ensures the timer catches completion even if rAF is paused by the browser
     const workerBlob = new Blob([`
       let interval;
       self.onmessage = function(e) {
@@ -98,16 +117,11 @@ export default function TimerPage() {
 
     const workerUrl = URL.createObjectURL(workerBlob);
     const worker = new Worker(workerUrl);
-    worker.onmessage = () => {
-      tickCb.current();
-    };
+    worker.onmessage = () => tickCb.current();
     worker.postMessage('start');
 
-    // 2. rAF for smooth visual updates when tab is active
     const loop = () => {
-      if (document.visibilityState === 'visible') {
-        tickCb.current();
-      }
+      if (document.visibilityState === 'visible') tickCb.current();
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);
@@ -120,16 +134,27 @@ export default function TimerPage() {
     };
   }, []);
 
-  // Document title
-  const remaining = Math.max(0, dur - elapsed);
+  // 2. Soundscape Audio Lifecycle
   useEffect(() => {
-    document.title = `${fmt(remaining)} — CHRONO`;
-  }, [remaining, mode]);
+    if (running && (mode === 'deep' || mode === 'quick') && !isWarmup) {
+      if (soundscapeType === '40hz') startBinauralBeats();
+      else if (soundscapeType === 'pink') startPinkNoise();
+      else stopSoundscape();
+    } else {
+      stopSoundscape();
+    }
+    return stopSoundscape;
+  }, [running, mode, soundscapeType, isWarmup]);
 
-  // Keyboard shortcuts
+  // 3. Document Title
+  useEffect(() => {
+    const modeLabel = isWarmup ? 'PRIMER' : MODES[mode]?.label || 'CHRONO';
+    document.title = `${fmt(remaining)} — ${modeLabel} — CHRONO`;
+  }, [remaining, mode, isWarmup]);
+
+  // 4. Keyboard Shortcuts
   useEffect(() => {
     const handleKey = (e) => {
-      // Don't trigger shortcuts when typing in inputs
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
 
       switch (e.code) {
@@ -148,21 +173,30 @@ export default function TimerPage() {
           if (!e.ctrlKey && !e.metaKey) toggleSound();
           break;
         case 'Escape':
-          if (completedPrompt) dismissCompletedPrompt();
+          if (completedPrompt) dismissPrompt();
           break;
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [running, play, pause, reset, skip, toggleSound, completedPrompt, dismissCompletedPrompt]);
+  }, [running, play, pause, reset, skip, toggleSound, completedPrompt, dismissPrompt]);
 
   const today = todayStr(timezone);
   const hasCompletedToday = lastActiveDate === today;
 
+  // Sublabel for 3D Blob overlay
+  const getBlobSublabel = () => {
+    if (isWarmup) return 'VISUAL PRIMER: LOCK YOUR EYES';
+    if (mode === 'deep') return 'DEEP WORK PROTOCOL';
+    if (mode === 'recovery') return 'NEURAL RESET';
+    return MODES[mode]?.label?.toUpperCase() || '';
+  };
+
   return (
     <div className={styles.pageViewport}>
       <CompletionChoiceModal />
-      <FocusLogModal isOpen={showFocusLog} onClose={() => setShowFocusLog(false)} />
+      <FocusLogModal isOpen={showCommandCenter} onClose={() => setShowCommandCenter(false)} />
+      <XPToast />
 
       {/* Top Header Bar */}
       <header className={styles.topHeader}>
@@ -170,13 +204,14 @@ export default function TimerPage() {
           <span className={styles.brandDot} />
           <h1 className={styles.title}>CHRONO</h1>
         </div>
-        <div className={styles.quoteBox}>
-          &ldquo;Keep going, your hardest times often lead to great moments&rdquo;
-        </div>
+
+        {/* Level & Rank Badge (Clickable to open Command Center) */}
+        <LevelBadge onClick={() => setShowCommandCenter(true)} />
       </header>
 
       {/* Center Main Focus Container */}
       <main className={styles.centerStage}>
+        {/* Target Intent Input */}
         <div className={styles.taskSelectorContainer}>
           <span className={styles.selectorLabel}>Target:</span>
           <input
@@ -184,80 +219,99 @@ export default function TimerPage() {
             value={targetIntent}
             onChange={(e) => setTargetIntent(e.target.value)}
             className={styles.taskDropdown}
-            placeholder="What are you focusing on?"
+            placeholder={mode === 'deep' ? 'What demands your deep focus?' : 'What are you working on?'}
             style={{ cursor: 'text' }}
           />
           {streak > 0 && !hasCompletedToday && (
             <span
               className={styles.miniStreakWarning}
-              title={user ? `Streak Warning: Complete a task focus session today to save your ${streak}-day streak!` : `Streak Warning: You are not logged in! Log in to protect your streak.`}
+              title={`Save your ${streak}-day streak! Complete a study session today to protect your XP multiplier.`}
             >
               ⚠️
             </span>
           )}
         </div>
 
+        {/* Mode Selector Tabs */}
         <ModeTabs />
 
-        <div className={styles.dotsRow}>
-          <SessionDots />
-        </div>
+        {/* Protocol Phase Stepper (Only active in Deep Work) */}
+        {mode === 'deep' && (
+          <div className={styles.stepperWrap}>
+            <PhaseStepper currentPhase={protocolPhase} warmupEnabled={warmupEnabled} />
+          </div>
+        )}
 
-        {/* 3D Blob Scene & Countdown Display */}
+        {/* 3D Liquid Scene & Countdown Display */}
         <div className={styles.blobWrap}>
           <BlobScene />
           <div className={styles.timeOverlay}>
             <span className={styles.time}>{fmt(remaining)}</span>
-            <span className={styles.modeLabel}>{MODES[mode].label}</span>
+            <span className={`${styles.modeLabel} ${isWarmup ? styles.warmupText : ''}`}>
+              {getBlobSublabel()}
+            </span>
           </div>
         </div>
 
+        {/* Daily Study Target Progress Bar */}
+        <DailyProgressBar />
+
+        {/* Controls (Start, Pause, Reset) */}
         <Controls />
       </main>
 
-      {/* Bottom Floating Dock Bar */}
+      {/* Bottom Floating Command Dock */}
       <footer className={styles.bottomDock}>
         <div className={styles.dockLeft}>
           <DurationPicker />
+
+          {/* Soundscape Selector (40Hz Gamma Beat / Pink Noise) */}
+          <select
+            value={soundscapeType}
+            onChange={(e) => setSoundscape(e.target.value)}
+            className={styles.soundscapeSelect}
+            title="Acoustic Enhancer"
+          >
+            <option value="40hz">🧠 40Hz Gamma Focus</option>
+            <option value="pink">🌊 Pink Noise</option>
+            <option value="none">🔇 Soundscape Off</option>
+          </select>
+
+          {/* Visual Primer Warmup Toggle */}
+          <button
+            className={`${styles.dockIconBtn} ${warmupEnabled ? styles.activeWarmup : ''}`}
+            onClick={toggleWarmup}
+            title={warmupEnabled ? 'Visual Primer (Warm-up): ON' : 'Visual Primer: OFF'}
+            aria-label="Toggle Visual Primer"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
         </div>
 
         <div className={styles.dockRight}>
           <StreakBadge />
 
-          <Link
-            to="/huberman"
-            className={styles.dockIconBtn}
-            aria-label="Huberman Protocol"
-            title="Huberman Protocol"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2a10 10 0 1 0 10 10H12V2z" />
-              <path d="M12 12 21.1 6.3" />
-              <path d="M12 12 6.3 21.1" />
-            </svg>
-          </Link>
-
+          {/* Activity / Study Command Center Modal Button */}
           <button
             className={styles.dockIconBtn}
-            onClick={() => setShowFocusLog(true)}
-            aria-label="View Activity Log"
-            title="Activity Log"
+            onClick={() => setShowCommandCenter(true)}
+            aria-label="Open Study Command Center"
+            title="Study Command Center"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="8" y1="6" x2="21" y2="6"></line>
-              <line x1="8" y1="12" x2="21" y2="12"></line>
-              <line x1="8" y1="18" x2="21" y2="18"></line>
-              <line x1="3" y1="6" x2="3.01" y2="6"></line>
-              <line x1="3" y1="12" x2="3.01" y2="12"></line>
-              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
             </svg>
           </button>
 
+          {/* Audio Chime Mute/Unmute */}
           <button
             className={styles.dockIconBtn}
             onClick={toggleSound}
-            aria-label={soundEnabled ? 'Mute sound' : 'Unmute sound'}
-            title={soundEnabled ? 'Sound Enabled' : 'Sound Muted'}
+            aria-label={soundEnabled ? 'Mute chimes' : 'Unmute chimes'}
+            title={soundEnabled ? 'Chimes Active' : 'Chimes Muted'}
           >
             {soundEnabled ? (
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -273,12 +327,13 @@ export default function TimerPage() {
             )}
           </button>
 
+          {/* User Auth Avatar / Login */}
           {user ? (
-            <button className={styles.userBadge} onClick={logout} title={`Logged in as ${user.name} (${user.email}) - Click to log out`}>
+            <button className={styles.userBadge} onClick={logout} title={`Logged in as ${user.name || 'User'} (${user.email}) - Click to logout`}>
               <span className={styles.userInitial}>{user.name ? user.name[0].toUpperCase() : 'U'}</span>
             </button>
           ) : (
-            <Link to="/login" className={styles.loginBtn} title="Log in or Register to sync streaks">
+            <Link to="/login" className={styles.loginBtn} title="Login or Register to sync XP & Streaks across devices">
               Log In
             </Link>
           )}

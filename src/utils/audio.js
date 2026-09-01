@@ -1,4 +1,5 @@
-// Web Audio API Chimes for CHRONO by TENAZITY
+// Web Audio API Sound System for CHRONO
+// Synthesized in real-time — zero network asset dependencies
 
 let sharedCtx = null;
 
@@ -20,19 +21,18 @@ function getAudioContext() {
   }
 }
 
-// Unlock audio on first user gesture (Start button, Sound toggle, etc.)
+// Unlock audio on first user gesture
 export function unlockAudio() {
   getAudioContext();
 }
 
-// 1. Focus Session Completion Chime (Warm, serene F Major 7th chord: F4, A4, C5, E5)
+// ── 1. Standard Focus Session Completion Chime (F Major 7th arpeggio) ───────────
 export function playFocusChime() {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
 
     const notes = [349.23, 440.00, 523.25, 659.25]; // F4, A4, C5, E5
-
     notes.forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -40,10 +40,9 @@ export function playFocusChime() {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, ctx.currentTime);
 
-      const startTime = ctx.currentTime + i * 0.14; // soft arpeggio stagger
+      const startTime = ctx.currentTime + i * 0.14;
       const duration = 2.4;
 
-      // Audible envelope: gentle attack, smooth exponential decay
       gain.gain.setValueAtTime(0.0001, startTime);
       gain.gain.linearRampToValueAtTime(0.25 / (i * 0.3 + 1), startTime + 0.08);
       gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
@@ -59,14 +58,13 @@ export function playFocusChime() {
   }
 }
 
-// 2. Break Completion Chime (Refreshing, energizing C Major triad: C5, E5, G5, C6)
+// ── 2. Break / Recovery Completion Chime (C Major triad) ───────────────────────
 export function playBreakChime() {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
 
     const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-
     notes.forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -74,7 +72,7 @@ export function playBreakChime() {
       osc.type = i === 3 ? 'sine' : 'triangle';
       osc.frequency.setValueAtTime(freq, ctx.currentTime);
 
-      const startTime = ctx.currentTime + i * 0.11; // crisp ascending bell chime
+      const startTime = ctx.currentTime + i * 0.11;
       const duration = 1.8;
 
       gain.gain.setValueAtTime(0.0001, startTime);
@@ -92,10 +90,110 @@ export function playBreakChime() {
   }
 }
 
-// Backward compatibility alias
-export const playChime = playFocusChime;
+// ── 3. Critical XP Reward Chime (Energetic sparkle) ────────────────────────────
+export function playCriticalChime() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
 
-// ── Huberman Soundscapes ──────────────────────────────────────────────────────
+    const notes = [587.33, 739.99, 880.00, 1174.66, 1479.98]; // D5, F#5, A5, D6, F#6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+      const startTime = ctx.currentTime + i * 0.07;
+      const duration = 2.2;
+
+      gain.gain.setValueAtTime(0.0001, startTime);
+      gain.gain.linearRampToValueAtTime(0.28, startTime + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    });
+  } catch (e) {
+    console.warn('Audio critical chime error:', e);
+  }
+}
+
+// ── 4. Legendary Drop Chime (Epic Fanfare) ─────────────────────────────────────
+export function playLegendaryChime() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const chords = [
+      { time: 0, notes: [440, 554.37, 659.25] },     // A Maj
+      { time: 0.18, notes: [493.88, 622.25, 739.99] }, // B Maj
+      { time: 0.42, notes: [554.37, 698.46, 880.00, 1108.73] }, // C# Maj octave
+    ];
+
+    chords.forEach((chord) => {
+      chord.notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = idx === chord.notes.length - 1 ? 'sine' : 'triangle';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+        const startTime = ctx.currentTime + chord.time;
+        const duration = 2.8;
+
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.linearRampToValueAtTime(0.22 / (idx * 0.2 + 1), startTime + 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      });
+    });
+  } catch (e) {
+    console.warn('Audio legendary chime error:', e);
+  }
+}
+
+// ── 5. Level Up Chime (Ascending triumphant sparkle) ───────────────────────────
+export function playLevelUpChime() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98]; // C5, E5, G5, C6, E6, G6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+      const startTime = ctx.currentTime + i * 0.08;
+      const duration = 2.0;
+
+      gain.gain.setValueAtTime(0.0001, startTime);
+      gain.gain.linearRampToValueAtTime(0.3, startTime + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    });
+  } catch (e) {
+    console.warn('Audio level up chime error:', e);
+  }
+}
+
+// ── Soundscapes (40Hz Gamma Focus Beat & Pink Noise) ──────────────────────────
 
 let activeSoundscape = null;
 
@@ -114,25 +212,30 @@ export function startBinauralBeats() {
     const ctx = getAudioContext();
     if (!ctx) return;
 
-    // 40Hz binaural beats (e.g. 400Hz and 440Hz)
+    // 40Hz Gamma Wave entrainment (400Hz left ear, 440Hz right ear)
     const osc1 = ctx.createOscillator();
     const osc2 = ctx.createOscillator();
-    const panner1 = ctx.createStereoPanner();
-    const panner2 = ctx.createStereoPanner();
+    const panner1 = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+    const panner2 = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
     const gain = ctx.createGain();
 
     osc1.frequency.value = 400;
     osc2.frequency.value = 440;
 
-    panner1.pan.value = -1; // Left ear
-    panner2.pan.value = 1;  // Right ear
+    gain.gain.value = 0.05; // Gentle background bed
 
-    gain.gain.value = 0.05; // Low volume background
+    if (panner1 && panner2) {
+      panner1.pan.value = -1; // Left
+      panner2.pan.value = 1;  // Right
+      osc1.connect(panner1);
+      osc2.connect(panner2);
+      panner1.connect(gain);
+      panner2.connect(gain);
+    } else {
+      osc1.connect(gain);
+      osc2.connect(gain);
+    }
 
-    osc1.connect(panner1);
-    osc2.connect(panner2);
-    panner1.connect(gain);
-    panner2.connect(gain);
     gain.connect(ctx.destination);
 
     osc1.start();
@@ -140,11 +243,13 @@ export function startBinauralBeats() {
 
     activeSoundscape = {
       stop: () => {
-        osc1.stop();
-        osc2.stop();
-        osc1.disconnect();
-        osc2.disconnect();
-        gain.disconnect();
+        try {
+          osc1.stop();
+          osc2.stop();
+          osc1.disconnect();
+          osc2.disconnect();
+          gain.disconnect();
+        } catch (e) {}
       }
     };
   } catch (e) {
@@ -189,9 +294,11 @@ export function startPinkNoise() {
 
     activeSoundscape = {
       stop: () => {
-        noiseSource.stop();
-        noiseSource.disconnect();
-        gain.disconnect();
+        try {
+          noiseSource.stop();
+          noiseSource.disconnect();
+          gain.disconnect();
+        } catch (e) {}
       }
     };
   } catch (e) {

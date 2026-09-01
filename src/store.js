@@ -1,23 +1,94 @@
 import { create } from 'zustand';
-import { playFocusChime, playBreakChime, unlockAudio } from './utils/audio';
+import { 
+  playFocusChime, 
+  playBreakChime, 
+  playCriticalChime, 
+  playLegendaryChime, 
+  playLevelUpChime, 
+  unlockAudio 
+} from './utils/audio';
 import { getCurrentUser, logoutUser, fetchUserStats, saveUserStats } from './lib/appwrite';
 
-// ── Pomodoro Mode config ──────────────────────────────────────────────────────
+// ── Unified Mode config ───────────────────────────────────────────────────────
 export const MODES = {
-  focus: { label: 'Focus', h: 252, s: 88, lb: 65, defaultMin: 25 },
-  short: { label: 'Short Break', h: 162, s: 72, lb: 60, defaultMin: 5 },
-  long: { label: 'Long Break', h: 200, s: 78, lb: 62, defaultMin: 15 },
+  deep:     { key: 'deep',     label: 'Deep Work',    defaultMin: 90, h: 275, s: 85, lb: 65, isProtocol: true, badge: 'Protocol' },
+  quick:    { key: 'quick',    label: 'Quick Focus',  defaultMin: 25, h: 252, s: 88, lb: 65, isProtocol: false },
+  recovery: { key: 'recovery', label: 'Neural Reset', defaultMin: 20, h: 215, s: 75, lb: 55, isProtocol: false },
+  short:    { key: 'short',    label: 'Short Break',  defaultMin: 5,  h: 162, s: 72, lb: 60, isProtocol: false },
 };
-export const FOCUS_PRESETS = [25, 50, 90];
-export const BREAK_PRESETS = [5, 10, 15];
 
-// ── Huberman Phase config ─────────────────────────────────────────────────────
-export const HUBERMAN_PHASES = {
-  idle:   { label: 'Ready',    h: 252, s: 88, lb: 65 },
-  warmup: { label: 'Warm-up',  h: 0,   s: 0,  lb: 95 },
-  focus:  { label: 'Deep Work', h: 280, s: 80, lb: 60 },
-  nsdr:   { label: 'NSDR',     h: 220, s: 60, lb: 40 },
-};
+export const QUICK_PRESETS = [15, 25, 45];
+export const DEEP_PRESETS = [60, 90, 120];
+export const BREAK_PRESETS = [5, 10, 15, 20];
+
+// ── Level & Progression System ───────────────────────────────────────────────
+export const RANK_TITLES = [
+  { minLevel: 1,  title: 'Novice Mind',     color: '#94a3b8', icon: '🌱' },
+  { minLevel: 3,  title: 'Apprentice',      color: '#38bdf8', icon: '⚡' },
+  { minLevel: 6,  title: 'Focused Scholar', color: '#818cf8', icon: '📖' },
+  { minLevel: 10, title: 'Deep Thinker',    color: '#a855f7', icon: '🧠' },
+  { minLevel: 15, title: 'Flow Master',     color: '#c084fc', icon: '🌊' },
+  { minLevel: 20, title: 'Cognitive Elite', color: '#f43f5e', icon: '🔥' },
+  { minLevel: 30, title: 'Grandmaster',     color: '#fbbf24', icon: '👑' },
+  { minLevel: 40, title: 'Living Legend',   color: '#34d399', icon: '🌟' },
+  { minLevel: 50, title: 'Transcendent',    color: '#f472b6', icon: '🪐' },
+];
+
+export function calculateLevel(totalXP = 0) {
+  // Smooth logarithmic-polynomial level curve
+  // Level 1: 0, Level 2: 100, Level 3: 260, Level 5: 750, Level 10: 2700, Level 25: 14000
+  let level = 1;
+  while (xpForLevel(level + 1) <= totalXP) {
+    level++;
+  }
+  const currentLevelXp = xpForLevel(level);
+  const nextLevelXp = xpForLevel(level + 1);
+  const xpInLevel = totalXP - currentLevelXp;
+  const xpNeeded = nextLevelXp - currentLevelXp;
+  const progressPercent = Math.min(100, Math.max(0, (xpInLevel / xpNeeded) * 100));
+
+  let rank = RANK_TITLES[0];
+  for (let r of RANK_TITLES) {
+    if (level >= r.minLevel) rank = r;
+  }
+
+  return {
+    level,
+    title: rank.title,
+    rankColor: rank.color,
+    rankIcon: rank.icon,
+    currentLevelXp,
+    nextLevelXp,
+    xpInLevel,
+    xpNeeded,
+    progressPercent,
+  };
+}
+
+export function xpForLevel(level) {
+  if (level <= 1) return 0;
+  return Math.round(55 * Math.pow(level - 1, 1.85) + (level - 1) * 45);
+}
+
+// ── Streak Multipliers ────────────────────────────────────────────────────────
+export function getStreakMultiplier(streak = 0) {
+  if (streak >= 30) return { mult: 3.0, label: '3.0x Supernova', icon: '🌟' };
+  if (streak >= 14) return { mult: 2.0, label: '2.0x Inferno',   icon: '⚡' };
+  if (streak >= 7)  return { mult: 1.5, label: '1.5x Flame',     icon: '🔥' };
+  return { mult: 1.0, label: '1.0x Base', icon: '✨' };
+}
+
+// ── Milestone Badges ──────────────────────────────────────────────────────────
+export const ALL_BADGES = [
+  { id: 'first_spark',    name: 'First Spark',      desc: 'Complete your first focus block',          icon: '✨', tier: 'bronze' },
+  { id: 'deep_initiate',  name: 'Deep Initiate',    desc: 'Complete a 90m Deep Work Protocol',        icon: '🧠', tier: 'silver' },
+  { id: 'neural_reset',   name: 'Neural Reset',     desc: 'Complete a 20m Recovery session',          icon: '🌊', tier: 'silver' },
+  { id: 'flame_streak',   name: '7-Day Flame',      desc: 'Achieve a 7-day study streak (1.5x XP)',   icon: '🔥', tier: 'gold' },
+  { id: 'inferno_streak', name: '30-Day Inferno',   desc: 'Achieve a 30-day study streak (3.0x XP)',  icon: '⚡', tier: 'platinum' },
+  { id: 'century_mind',   name: 'Century Mind',     desc: 'Log 100 total study blocks',               icon: '🏛️', tier: 'platinum' },
+  { id: 'goal_crusher',   name: 'Goal Crusher',     desc: 'Surpass your daily study goal',            icon: '🎯', tier: 'gold' },
+  { id: 'deep_voyager',   name: 'Deep Voyager',     desc: 'Accumulate 10+ hours in Deep Work',        icon: '🪐', tier: 'platinum' },
+];
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 export function todayStr(tz) {
@@ -29,31 +100,35 @@ export function todayStr(tz) {
   });
   return formatter.format(new Date());
 }
+
 function daysBetween(a, b) {
   return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000);
 }
 
-// ── Persistence ───────────────────────────────────────────────────────────────
-const LS_KEY = 'chronoTimer_v1';
+// ── Local Persistence ─────────────────────────────────────────────────────────
+const LS_KEY = 'chrono_study_engine_v2';
 
 const DEFAULT_STATE = {
   days: {},
   streak: 0,
   bestStreak: 0,
   lastActiveDate: null,
+  totalXP: 0,
+  dailyGoalMinutes: 120,
+  shownMs: [],
+  focusLog: [],
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   streakFreezes: 1,
-  focusLog: [],
-  hubermanLog: [],
 };
 
-function loadStreak() {
+function loadState() {
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (raw) return { ...DEFAULT_STATE, ...JSON.parse(raw) };
   } catch { }
   return { ...DEFAULT_STATE };
 }
+
 function persist(s) {
   try {
     const current = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
@@ -62,16 +137,17 @@ function persist(s) {
       streak: s.streak,
       bestStreak: s.bestStreak,
       lastActiveDate: s.lastActiveDate,
+      totalXP: s.totalXP,
+      dailyGoalMinutes: s.dailyGoalMinutes || 120,
+      shownMs: s.shownMs || [],
       days: s.days,
       timezone: s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : (current.streakFreezes ?? 1),
       focusLog: s.focusLog || current.focusLog || [],
-      hubermanLog: s.hubermanLog || current.hubermanLog || [],
     }));
   } catch { }
 }
 
-// ── Streak helpers (pure) ─────────────────────────────────────────────────────
 function recalcStreak(s) {
   if (!s.lastActiveDate) return { ...s, streak: 0 };
   const gap = daysBetween(s.lastActiveDate, todayStr());
@@ -79,46 +155,14 @@ function recalcStreak(s) {
   return s;
 }
 
-function applySession(s, focusMins = 25) {
-  const today = todayStr();
-  const days = { ...s.days };
-  if (!days[today]) days[today] = { sessions: 0, mins: 0 };
-  days[today] = {
-    ...days[today],
-    sessions: days[today].sessions + 1,
-    mins: (days[today].mins || 0) + focusMins,
-  };
-
-  let streak = s.streak;
-  let lastActiveDate = s.lastActiveDate;
-
-  // Streak advances for any logged-in user completing a pomodoro
-  if (s.user) {
-    if (!lastActiveDate) {
-      streak = 1;
-    } else if (lastActiveDate === today) {
-      // already active today — streak unchanged
-    } else if (daysBetween(lastActiveDate, today) === 1) {
-      streak += 1;
-    } else {
-      streak = 1;
-    }
-    lastActiveDate = today;
-  }
-
-  const bestStreak = Math.max(streak, s.bestStreak);
-  return { ...s, days, streak, bestStreak, lastActiveDate };
-}
-
-// ── Zustand store ─────────────────────────────────────────────────────────────
-const initialStreak = recalcStreak(loadStreak());
+// ── Zustand Store ─────────────────────────────────────────────────────────────
+const initialData = recalcStreak(loadState());
 
 export const useStore = create((set, get) => ({
-  // ── Auth State ──────────────────────────────────────────────
+  // ── Auth & Cloud Sync ───────────────────────────────────────
   user: null,
   authLoading: true,
   userDocId: null,
-  newBadgeAlert: null,
 
   async initAuth() {
     set({ authLoading: true });
@@ -126,29 +170,27 @@ export const useStore = create((set, get) => ({
       const u = await getCurrentUser();
       if (u) {
         set({ user: u });
-        // Fetch stats strictly for this authenticated user ID from Appwrite
         const cloudStats = await fetchUserStats(u.$id);
         if (cloudStats) {
           const localS = get();
-
           const loadedData = {
             userDocId: cloudStats.docId,
             streak: cloudStats.streak,
             bestStreak: cloudStats.bestStreak,
-            totalXP: cloudStats.totalXP,
+            totalXP: cloudStats.totalXP || localS.totalXP || 0,
             lastActiveDate: cloudStats.lastActiveDate,
-            days: cloudStats.days,
-            shownMs: cloudStats.shownMs,
+            days: cloudStats.days || {},
+            shownMs: cloudStats.shownMs || [],
             focusLog: cloudStats.focusLog || [],
-            customRoadmap: cloudStats.customRoadmap || null,
+            dailyGoalMinutes: localS.dailyGoalMinutes || 120,
           };
 
           let finalData = loadedData;
           let needsSyncUp = false;
 
-          // Conflict resolution: trust local state if it has more XP or a more recent active date
+          // Conflict resolution: trust local state if local has more progress/XP
           if (
-            localS.totalXP > cloudStats.totalXP ||
+            localS.totalXP > (cloudStats.totalXP || 0) ||
             (localS.lastActiveDate && cloudStats.lastActiveDate && localS.lastActiveDate > cloudStats.lastActiveDate)
           ) {
             finalData = { ...localS, userDocId: cloudStats.docId };
@@ -164,22 +206,7 @@ export const useStore = create((set, get) => ({
             get().syncCloudStats();
           }
         } else {
-          // Newly logged in user has no stats doc in Appwrite yet.
-          // Initialize clean default state and sync to create their DB document.
-          const freshData = {
-            userDocId: null,
-            streak: 0,
-            bestStreak: 0,
-            totalXP: 0,
-            lastActiveDate: null,
-            days: {},
-            shownMs: [],
-            focusLog: [],
-            customRoadmap: null,
-            activeTaskId: null,
-          };
-          set(freshData);
-          persist(freshData);
+          // Fresh user account setup
           await get().syncCloudStats();
         }
       }
@@ -192,9 +219,7 @@ export const useStore = create((set, get) => ({
 
   setUser(user) {
     set({ user });
-    if (user) {
-      get().syncCloudStats();
-    }
+    if (user) get().syncCloudStats();
   },
 
   async logout() {
@@ -209,7 +234,6 @@ export const useStore = create((set, get) => ({
       focusLog: [],
       totalXP: 0,
       targetIntent: '',
-      customRoadmap: null,
       shownMs: [],
     };
     set(clearedState);
@@ -224,9 +248,9 @@ export const useStore = create((set, get) => ({
       bestStreak: s.bestStreak,
       lastActiveDate: s.lastActiveDate,
       days: s.days,
-      totalXP: s.totalXP,
+      totalXP: s.totalXP || 0,
       shownMs: s.shownMs || [],
-      customRoadmap: s.customRoadmap || null,
+      customRoadmap: null,
       timezone: s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : 1,
       focusLog: s.focusLog || [],
@@ -237,91 +261,63 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ██  POMODORO TIMER (standard Focus / Short Break / Long Break)
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ── Gamification State ──────────────────────────────────────
+  totalXP: initialData.totalXP || 0,
+  dailyGoalMinutes: initialData.dailyGoalMinutes || 120,
+  shownMs: initialData.shownMs || [],
+  streak: initialData.streak || 0,
+  bestStreak: initialData.bestStreak || 0,
+  lastActiveDate: initialData.lastActiveDate || null,
+  days: initialData.days || {},
+  focusLog: initialData.focusLog || [],
+  timezone: initialData.timezone,
+  streakFreezes: initialData.streakFreezes ?? 1,
 
-  mode: 'focus',
+  activeToastReward: null, // { tier, xp, label, isLevelUp, newLevel }
+  clearToastReward: () => set({ activeToastReward: null }),
+
+  setDailyGoalMinutes: (mins) => {
+    set({ dailyGoalMinutes: Math.max(15, Math.min(720, mins)) });
+    persist(get());
+  },
+
+  // ── Timer & Protocol State ──────────────────────────────────
+  mode: 'deep', // 'deep' (Deep Work Protocol), 'quick', 'recovery', 'short'
   running: false,
-  elapsed: 0,          // seconds
+  elapsed: 0, // seconds
   startMs: null,
-  durations: { focus: 25 * 60, short: 5 * 60, long: 15 * 60 },
-  sessions: 0,
-  totalSess: 4,
+  durations: {
+    deep: 90 * 60,
+    quick: 25 * 60,
+    recovery: 20 * 60,
+    short: 5 * 60,
+    warmup: 60,
+  },
+  
+  // Protocol State Machine (for Deep Work)
+  protocolPhase: 'idle', // 'idle' | 'warmup' | 'focus' | 'recovery'
+  warmupEnabled: true,   // Visual Primer 60s
+  toggleWarmup: () => set((s) => ({ warmupEnabled: !s.warmupEnabled })),
+  
+  soundscapeType: '40hz', // 'none' | '40hz' | 'pink'
+  setSoundscape: (type) => set({ soundscapeType: type }),
 
-  // ── Streak / XP (persisted) ─────────────────────────────────
-  ...initialStreak,
-
-  // ── Mode config ─────────────────────────────────────────────
   soundEnabled: true,
-  completedPrompt: null, // { nextMode: 'short' | 'long' } | null
+  targetIntent: '',
+  setTargetIntent: (intent) => set({ targetIntent: intent }),
 
-  toggleSound() {
+  completedPrompt: null, // { isBreak: bool, mode: string, xpEarned: number, rewardTier: string }
+
+  // ── Mode Switching ──────────────────────────────────────────
+  setMode(newMode) {
     unlockAudio();
-    set(s => {
-      const nextSound = !s.soundEnabled;
-      if (nextSound) {
-        if (s.mode === 'focus') playFocusChime();
-        else playBreakChime();
-      }
-      return { soundEnabled: nextSound };
+    set({
+      mode: newMode,
+      protocolPhase: 'idle',
+      running: false,
+      elapsed: 0,
+      startMs: null,
     });
-  },
-
-  dismissCompletedPrompt() {
-    set({ completedPrompt: null });
-  },
-
-  chooseFocusAgain() {
-    unlockAudio();
-    set({ completedPrompt: null, mode: 'focus', elapsed: 0, running: false });
-  },
-
-  chooseTakeBreak() {
-    unlockAudio();
-    const s = get();
-    const nextMode = s.completedPrompt?.nextMode || (s.sessions % s.totalSess === 0 ? 'long' : 'short');
-    set({ completedPrompt: null, mode: nextMode, elapsed: 0, running: false });
-  },
-
-  setMode(mode) {
-    unlockAudio();
-    const s = get();
-    if (s.running) clearInterval(s._interval);
-    set({ mode, running: false, elapsed: 0, startMs: null });
-  },
-
-  tick() {
-    const s = get();
-    if (!s.running) return;
-    const now = performance.now();
-    const elapsed = s.elapsed + (now - s.startMs) / 1000;
-    const dur = s.durations[s.mode];
-    if (elapsed >= dur) {
-      set({ elapsed: dur, running: false, startMs: null });
-      get().onComplete();
-    } else {
-      set({ elapsed, startMs: now });
-    }
-  },
-
-  play() {
-    unlockAudio();
-    set({ running: true, startMs: performance.now() });
-  },
-
-  pause() {
-    set({ running: false, startMs: null });
-  },
-
-  reset() {
-    set({ running: false, elapsed: 0, startMs: null });
-  },
-
-  skip() {
-    const s = get();
-    set({ elapsed: s.durations[s.mode], running: false, startMs: null });
-    get().onComplete();
   },
 
   setDuration(modeKey, minutes) {
@@ -330,212 +326,285 @@ export const useStore = create((set, get) => ({
     set({ durations, elapsed: modeKey === s.mode ? 0 : s.elapsed });
   },
 
-  onComplete() {
+  toggleSound() {
+    unlockAudio();
+    set((s) => {
+      const nextSound = !s.soundEnabled;
+      if (nextSound) playFocusChime();
+      return { soundEnabled: nextSound };
+    });
+  },
+
+  // ── Timer Controls ──────────────────────────────────────────
+  play() {
+    unlockAudio();
     const s = get();
 
-    if (s.mode !== 'focus') {
-      // Break complete -> play break chime & prompt return to focus
-      if (s.soundEnabled) playBreakChime();
-      set({ completedPrompt: { isBreak: true, nextMode: 'focus' } });
+    // If starting Deep Work Protocol from beginning and Warm-up is active
+    if (s.mode === 'deep' && (s.protocolPhase === 'idle' || s.protocolPhase === 'warmup') && s.elapsed === 0 && s.warmupEnabled) {
+      set({
+        protocolPhase: 'warmup',
+        running: true,
+        startMs: performance.now(),
+        elapsed: 0,
+      });
+    } else {
+      const activePhase = s.mode === 'deep' && s.protocolPhase === 'idle' ? 'focus' : s.protocolPhase;
+      set({
+        protocolPhase: s.mode === 'deep' ? activePhase : 'idle',
+        running: true,
+        startMs: performance.now(),
+      });
+    }
+  },
+
+  pause() {
+    set({ running: false, startMs: null });
+  },
+
+  reset() {
+    set({
+      running: false,
+      elapsed: 0,
+      startMs: null,
+      protocolPhase: 'idle',
+    });
+  },
+
+  skip() {
+    const s = get();
+    const isWarmup = s.mode === 'deep' && s.protocolPhase === 'warmup';
+    const dur = isWarmup ? s.durations.warmup : s.durations[s.mode];
+    set({ elapsed: dur, running: false, startMs: null });
+    get().onComplete(true); // true = wasSkipped
+  },
+
+  tick() {
+    const s = get();
+    if (!s.running) return;
+    const now = performance.now();
+    const isWarmup = s.mode === 'deep' && s.protocolPhase === 'warmup';
+    const dur = isWarmup ? s.durations.warmup : s.durations[s.mode];
+    const elapsed = s.elapsed + (now - s.startMs) / 1000;
+
+    if (elapsed >= dur) {
+      set({ elapsed: dur, running: false, startMs: null });
+      get().onComplete(false);
+    } else {
+      set({ elapsed, startMs: now });
+    }
+  },
+
+  // ── Session Completion & XP Calculation Engine ──────────────
+  onComplete(wasSkipped = false) {
+    const s = get();
+
+    // 1. Warm-up Phase Complete -> Auto advance to Deep Focus Phase
+    if (s.mode === 'deep' && s.protocolPhase === 'warmup') {
+      if (s.soundEnabled) playFocusChime();
+      set({
+        protocolPhase: 'focus',
+        elapsed: 0,
+        running: true,
+        startMs: performance.now(),
+      });
       return;
     }
 
-    // Focus session complete -> play focus chime
-    if (s.soundEnabled) playFocusChime();
+    const isDeep = s.mode === 'deep';
+    const isQuick = s.mode === 'quick';
+    const isRecovery = s.mode === 'recovery';
+    const isShort = s.mode === 'short';
 
-    const sessions = Math.min(s.sessions + 1, s.totalSess);
-    const focusMins = Math.round(s.durations.focus / 60);
-    const newState = applySession(s, focusMins);
-    const nextMode = sessions % s.totalSess === 0 ? 'long' : 'short';
+    const focusMins = Math.round(s.durations[s.mode] / 60);
 
-    // Add to focus log
+    // 2. Intermittent Variable Reward Engine
+    let baseXP = 0;
+    if (isDeep) baseXP = 120;
+    else if (isQuick) baseXP = Math.round(focusMins * 1.2);
+    else if (isRecovery) baseXP = 25;
+    else if (isShort) baseXP = 5;
+
+    if (wasSkipped) {
+      baseXP = Math.round(baseXP * 0.3); // Heavy reduction if skipped early
+    }
+
+    const { mult } = getStreakMultiplier(s.streak);
+    const xpWithMultiplier = Math.round(baseXP * mult);
+
+    // Variable Reward Roll (Variable-Ratio Schedule)
+    const roll = Math.random() * 100;
+    let rewardTier = 'normal';
+    let bonusXP = 0;
+    let rewardLabel = `+${xpWithMultiplier} XP`;
+
+    if (!wasSkipped && (isDeep || isQuick)) {
+      if (roll > 98) {
+        rewardTier = 'legendary';
+        bonusXP = 250;
+        rewardLabel = `LEGENDARY COGNITIVE DROP! +${xpWithMultiplier + bonusXP} XP`;
+        if (s.soundEnabled) playLegendaryChime();
+      } else if (roll > 90) {
+        rewardTier = 'critical';
+        bonusXP = 100;
+        rewardLabel = `CRITICAL FOCUS SURGE! +${xpWithMultiplier + bonusXP} XP`;
+        if (s.soundEnabled) playCriticalChime();
+      } else if (roll > 70) {
+        rewardTier = 'bonus';
+        bonusXP = 40;
+        rewardLabel = `BONUS MOMENTUM! +${xpWithMultiplier + bonusXP} XP`;
+        if (s.soundEnabled) playFocusChime();
+      } else {
+        rewardTier = 'normal';
+        if (s.soundEnabled) playFocusChime();
+      }
+    } else {
+      if (s.soundEnabled) {
+        if (isRecovery || isShort) playBreakChime();
+        else playFocusChime();
+      }
+    }
+
+    const totalSessionXP = xpWithMultiplier + bonusXP;
+    const oldLevelInfo = calculateLevel(s.totalXP);
+    const newTotalXP = s.totalXP + totalSessionXP;
+    const newLevelInfo = calculateLevel(newTotalXP);
+    const isLevelUp = newLevelInfo.level > oldLevelInfo.level;
+
+    if (isLevelUp && s.soundEnabled) {
+      setTimeout(() => playLevelUpChime(), 800);
+    }
+
+    // 3. Streak & Daily Progress Updates
+    const today = todayStr(s.timezone);
+    const days = { ...s.days };
+    if (!days[today]) days[today] = { sessions: 0, mins: 0, xp: 0 };
+    days[today] = {
+      ...days[today],
+      sessions: days[today].sessions + 1,
+      mins: (days[today].mins || 0) + focusMins,
+      xp: (days[today].xp || 0) + totalSessionXP,
+    };
+
+    let streak = s.streak;
+    let lastActiveDate = s.lastActiveDate;
+
+    if (s.user && (isDeep || isQuick)) {
+      if (!lastActiveDate) {
+        streak = 1;
+      } else if (lastActiveDate === today) {
+        // already active today
+      } else if (daysBetween(lastActiveDate, today) === 1) {
+        streak += 1;
+      } else {
+        streak = 1;
+      }
+      lastActiveDate = today;
+    }
+
+    const bestStreak = Math.max(streak, s.bestStreak);
+
+    // 4. Milestone Badges Checking
+    const unlocked = new Set(s.shownMs || []);
+    if (isDeep || isQuick) unlocked.add('first_spark');
+    if (isDeep) unlocked.add('deep_initiate');
+    if (isRecovery) unlocked.add('neural_reset');
+    if (streak >= 7) unlocked.add('flame_streak');
+    if (streak >= 30) unlocked.add('inferno_streak');
+    if (Object.values(days).reduce((a, b) => a + (b.sessions || 0), 0) >= 100) unlocked.add('century_mind');
+    if (days[today].mins >= s.dailyGoalMinutes) unlocked.add('goal_crusher');
+
+    // 5. Append to Focus Log
     const logEntry = {
       id: 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-      intent: (s.targetIntent || '').trim() || 'Deep Focus',
+      intent: (s.targetIntent || '').trim() || (isDeep ? 'Deep Work Protocol' : isRecovery ? 'Neural Reset' : 'Focus Session'),
+      mode: s.mode,
       duration: focusMins,
-      timestamp: new Date().toISOString()
+      xpEarned: totalSessionXP,
+      rewardTier,
+      timestamp: new Date().toISOString(),
+      wasSkipped,
     };
-    const focusLog = [logEntry, ...(s.focusLog || [])].slice(0, 100);
+    const focusLog = [logEntry, ...(s.focusLog || [])].slice(0, 150);
+
+    // 6. Set Next Stage / Completion Prompt
+    let nextPrompt = null;
+    if (isDeep) {
+      nextPrompt = {
+        title: 'Deep Work Complete! 🧠',
+        sub: 'Your neural circuits are primed. Take 20 minutes of Neural Reset to consolidate memory and restore peak dopamine.',
+        primaryLabel: 'Start Neural Reset 🌊',
+        secondaryLabel: 'Finish Protocol ✨',
+        nextMode: 'recovery',
+        xpEarned: totalSessionXP,
+        rewardTier,
+      };
+    } else if (isQuick) {
+      nextPrompt = {
+        title: 'Focus Block Done! 🎯',
+        sub: 'Great momentum. Jump into a short recharge break or lock in another session?',
+        primaryLabel: 'Recharge (5m) ☕',
+        secondaryLabel: 'Focus Again 🎯',
+        nextMode: 'short',
+        xpEarned: totalSessionXP,
+        rewardTier,
+      };
+    } else {
+      nextPrompt = {
+        title: 'Recovery Complete! 🌊',
+        sub: 'Your energy is replenished and ready for deep cognitive flow.',
+        primaryLabel: 'Start Deep Work 🧠',
+        secondaryLabel: 'Done For Now ⚡',
+        nextMode: 'deep',
+        xpEarned: totalSessionXP,
+        rewardTier: 'normal',
+      };
+    }
 
     set({
-      ...newState,
-      sessions,
+      totalXP: newTotalXP,
+      streak,
+      bestStreak,
+      lastActiveDate,
+      days,
+      shownMs: Array.from(unlocked),
       focusLog,
-      completedPrompt: { isBreak: false, nextMode },
+      completedPrompt: nextPrompt,
+      protocolPhase: isDeep ? 'recovery' : 'idle',
+      activeToastReward: {
+        tier: rewardTier,
+        xp: totalSessionXP,
+        label: rewardLabel,
+        isLevelUp,
+        newLevel: newLevelInfo.level,
+        newTitle: newLevelInfo.title,
+      },
     });
 
     persist(get());
     get().syncCloudStats();
   },
 
-  focusLog: [],
-  targetIntent: '',
-  setTargetIntent(intent) {
-    set({ targetIntent: intent });
-  },
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ██  HUBERMAN PROTOCOL (Warm-up → 90m Deep Work → 20m NSDR)
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  huberman: {
-    phase: 'idle',       // 'idle' | 'warmup' | 'focus' | 'nsdr'
-    elapsed: 0,
-    running: false,
-    startMs: null,
-    soundscape: 'none',  // 'none' | '40hz' | 'pink'
-    warmupEnabled: true,
-    focusDuration: 90 * 60,
-    nsdrDuration: 20 * 60,
-    warmupDuration: 60,
-    cyclesCompleted: 0,
-    targetIntent: '',
-    completedPhase: null, // null | 'focus' | 'nsdr' (which phase just finished)
-  },
-  hubermanLog: initialStreak.hubermanLog || [],
-
-  hubermanSetIntent(intent) {
-    set(s => ({ huberman: { ...s.huberman, targetIntent: intent } }));
-  },
-
-  hubermanSetSoundscape(type) {
-    set(s => ({ huberman: { ...s.huberman, soundscape: type } }));
-  },
-
-  hubermanToggleWarmup() {
-    set(s => ({ huberman: { ...s.huberman, warmupEnabled: !s.huberman.warmupEnabled } }));
-  },
-
-  hubermanSetDuration(phase, minutes) {
-    const key = phase + 'Duration';
-    set(s => ({ huberman: { ...s.huberman, [key]: minutes * 60 } }));
-  },
-
-  hubermanPlay() {
-    unlockAudio();
-    const s = get();
-    const h = s.huberman;
-
-    if (h.phase === 'idle') {
-      // Start a new cycle
-      const startPhase = h.warmupEnabled ? 'warmup' : 'focus';
-      set({ huberman: { ...h, phase: startPhase, elapsed: 0, running: true, startMs: performance.now(), completedPhase: null } });
-    } else {
-      // Resume current phase
-      set({ huberman: { ...h, running: true, startMs: performance.now() } });
-    }
-  },
-
-  hubermanPause() {
-    set(s => ({ huberman: { ...s.huberman, running: false, startMs: null } }));
-  },
-
-  hubermanReset() {
-    set(s => ({ huberman: { ...s.huberman, phase: 'idle', elapsed: 0, running: false, startMs: null, completedPhase: null } }));
-  },
-
-  hubermanSkip() {
-    const s = get();
-    const h = s.huberman;
-    if (h.phase === 'idle') return;
-    // Force complete current phase
-    const dur = h.phase === 'warmup' ? h.warmupDuration : h.phase === 'focus' ? h.focusDuration : h.nsdrDuration;
-    set({ huberman: { ...h, elapsed: dur, running: false, startMs: null } });
-    get().hubermanOnPhaseComplete();
-  },
-
-  hubermanTick() {
-    const s = get();
-    const h = s.huberman;
-    if (!h.running) return;
-
-    const now = performance.now();
-    const elapsed = h.elapsed + (now - h.startMs) / 1000;
-    const dur = h.phase === 'warmup' ? h.warmupDuration : h.phase === 'focus' ? h.focusDuration : h.nsdrDuration;
-
-    if (elapsed >= dur) {
-      set({ huberman: { ...h, elapsed: dur, running: false, startMs: null } });
-      get().hubermanOnPhaseComplete();
-    } else {
-      set({ huberman: { ...h, elapsed, startMs: now } });
-    }
-  },
-
-  hubermanOnPhaseComplete() {
-    const s = get();
-    const h = s.huberman;
-
-    if (h.phase === 'warmup') {
-      // Warm-up done -> auto-start focus
-      if (s.soundEnabled) playFocusChime();
-      set({ huberman: { ...h, phase: 'focus', elapsed: 0, running: true, startMs: performance.now(), completedPhase: null } });
-      return;
-    }
-
-    if (h.phase === 'focus') {
-      // Deep work done -> log it, show prompt, prepare NSDR
-      if (s.soundEnabled) playFocusChime();
-      const focusMins = Math.round(h.focusDuration / 60);
-
-      // Also apply to streak/days (Huberman focus counts for streaks too)
-      const newState = applySession(s, focusMins);
-
-      const logEntry = {
-        id: 'hlog_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-        intent: (h.targetIntent || '').trim() || 'Deep Work',
-        phase: 'focus',
-        duration: focusMins,
-        timestamp: new Date().toISOString(),
-      };
-      const hubermanLog = [logEntry, ...(s.hubermanLog || [])].slice(0, 100);
-
-      set({
-        ...newState,
-        hubermanLog,
-        huberman: { ...h, phase: 'nsdr', elapsed: 0, running: false, startMs: null, completedPhase: 'focus' },
+  rateSession(logId, stars) {
+    set((s) => {
+      const focusLog = s.focusLog.map((item) => {
+        if (item.id === logId) return { ...item, rating: stars };
+        return item;
       });
-      persist(get());
-      get().syncCloudStats();
-      return;
-    }
-
-    if (h.phase === 'nsdr') {
-      // NSDR done -> log it, cycle complete
-      if (s.soundEnabled) playBreakChime();
-      const nsdrMins = Math.round(h.nsdrDuration / 60);
-
-      const logEntry = {
-        id: 'hlog_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-        intent: 'Deep Rest (NSDR)',
-        phase: 'nsdr',
-        duration: nsdrMins,
-        timestamp: new Date().toISOString(),
-      };
-      const hubermanLog = [logEntry, ...(s.hubermanLog || [])].slice(0, 100);
-
-      set({
-        hubermanLog,
-        huberman: { ...h, phase: 'idle', elapsed: 0, running: false, startMs: null, cyclesCompleted: h.cyclesCompleted + 1, completedPhase: 'nsdr' },
-      });
-      persist(get());
-      return;
-    }
+      return { focusLog };
+    });
+    persist(get());
+    get().syncCloudStats();
   },
 
-  hubermanDismissCompleted() {
-    set(s => ({ huberman: { ...s.huberman, completedPhase: null } }));
+  dismissCompletedPrompt() {
+    set({ completedPrompt: null, protocolPhase: 'idle' });
   },
 
-  hubermanStartNsdr() {
-    // User confirms to start NSDR after focus phase
+  chooseNextMode(targetMode) {
     unlockAudio();
-    set(s => ({ huberman: { ...s.huberman, completedPhase: null, running: true, startMs: performance.now() } }));
-  },
-
-  hubermanSkipNsdr() {
-    // User skips NSDR, go to idle
-    unlockAudio();
-    const s = get();
-    set({ huberman: { ...s.huberman, phase: 'idle', elapsed: 0, running: false, startMs: null, cyclesCompleted: s.huberman.cyclesCompleted + 1, completedPhase: null } });
+    get().setMode(targetMode);
+    set({ completedPrompt: null });
+    get().play();
   },
 }));

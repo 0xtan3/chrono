@@ -8,12 +8,20 @@ const ResetIcon = () => (
   </svg>
 );
 
+const SkipIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="5 4 15 12 5 20 5 4" />
+    <line x1="19" y1="5" x2="19" y2="19" />
+  </svg>
+);
+
 export default function Controls() {
-  const running = useStore(s => s.running);
-  const elapsed = useStore(s => s.elapsed);
-  const play    = useStore(s => s.play);
-  const pause   = useStore(s => s.pause);
-  const reset   = useStore(s => s.reset);
+  const running = useStore((s) => s.running);
+  const elapsed = useStore((s) => s.elapsed);
+  const play    = useStore((s) => s.play);
+  const pause   = useStore((s) => s.pause);
+  const reset   = useStore((s) => s.reset);
+  const skip    = useStore((s) => s.skip);
 
   return (
     <div className={styles.controls}>
@@ -22,18 +30,30 @@ export default function Controls() {
         className={`${styles.mainBtn} ${running ? styles.runningBtn : ''}`}
         onClick={() => (running ? pause() : play())}
       >
-        {running ? 'Stop' : elapsed > 0 ? 'Resume' : 'Start'}
+        {running ? 'Pause' : elapsed > 0 ? 'Resume' : 'Start Focus'}
       </button>
 
       {/* Redo / Reset Button */}
       <button
         className={styles.resetBtn}
         onClick={reset}
-        title="Reset Timer (Redo)"
+        title="Reset Phase (Redo)"
         aria-label="Reset Timer"
       >
         <ResetIcon />
       </button>
+
+      {/* Skip Phase Button (visible if running or elapsed > 0) */}
+      {(running || elapsed > 0) && (
+        <button
+          className={styles.skipBtn}
+          onClick={skip}
+          title="Skip Current Phase"
+          aria-label="Skip Phase"
+        >
+          <SkipIcon />
+        </button>
+      )}
     </div>
   );
 }

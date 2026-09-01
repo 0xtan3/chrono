@@ -1,50 +1,83 @@
 .tabs {
   display: flex;
-  gap: .3rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(16, 20, 32, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
-  padding: .3rem;
+  padding: 0.3rem 0.4rem;
+  backdrop-filter: blur(16px);
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 
 .tab {
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--text-muted);
   font-family: inherit;
-  font-size: .76rem;
-  font-weight: 500;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  padding: .45rem 1.1rem;
-  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: color .2s, background .2s, transform .15s var(--spring);
+  outline: none;
+  transition: all 0.2s var(--spring);
   white-space: nowrap;
 }
 
-.tab:hover:not(.active) { color: var(--text); }
-
-.tab.active {
-  background: var(--accent-dim);
+.tab:hover {
   color: #fff;
-  box-shadow: 0 0 14px var(--accent-glow);
+  background: rgba(255, 255, 255, 0.05);
 }
 
-@media (min-width: 768px) {
+.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.protocolTab {
+  border-color: rgba(168, 85, 247, 0.25);
+}
+
+.protocolTab:hover {
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.protocolTab.active {
+  background: linear-gradient(135deg, #9333ea, #6b21a8);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+}
+
+.protocolBadge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 0.1rem 0.35rem;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
   .tabs {
-    padding: .4rem;
-    gap: .4rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-radius: 20px;
+    padding: 0.4rem;
   }
   .tab {
-    font-size: .88rem;
-    padding: .55rem 1.4rem;
-  }
-}
-
-@media (max-width: 400px) {
-  .tab {
-    font-size: .65rem;
-    padding: .4rem .8rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.72rem;
   }
 }

@@ -1,17 +1,18 @@
+import React from 'react';
 import styles from './PhaseStepper.module.css';
 
 const PHASES = [
-  { key: 'warmup', label: 'Warm-up', icon: '◉' },
-  { key: 'focus',  label: 'Deep Work', icon: '🧠' },
-  { key: 'nsdr',   label: 'NSDR', icon: '🌊' },
+  { key: 'warmup', label: 'Visual Primer', icon: '◉' },
+  { key: 'focus',  label: 'Deep Focus',    icon: '🧠' },
+  { key: 'recovery', label: 'Neural Reset', icon: '🌊' },
 ];
 
 export default function PhaseStepper({ currentPhase, warmupEnabled }) {
-  const activePhases = warmupEnabled ? PHASES : PHASES.filter(p => p.key !== 'warmup');
+  const activePhases = warmupEnabled ? PHASES : PHASES.filter((p) => p.key !== 'warmup');
 
   const getStatus = (phaseKey) => {
     if (currentPhase === 'idle') return 'upcoming';
-    const order = activePhases.map(p => p.key);
+    const order = activePhases.map((p) => p.key);
     const currentIdx = order.indexOf(currentPhase);
     const phaseIdx = order.indexOf(phaseKey);
     if (phaseIdx < currentIdx) return 'done';
@@ -20,7 +21,7 @@ export default function PhaseStepper({ currentPhase, warmupEnabled }) {
   };
 
   return (
-    <div className={styles.stepper}>
+    <div className={styles.stepper} aria-label="Protocol Progression Stepper">
       {activePhases.map((phase, i) => {
         const status = getStatus(phase.key);
         return (
