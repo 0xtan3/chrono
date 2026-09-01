@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerUser, loginUser, resendVerificationEmail } from '../lib/appwrite';
 import { useStore } from '../store';
+import { isPhoneDevice } from '../utils/device';
+import ScreenGate from '../components/ScreenGate';
 import styles from './AuthPage.module.css';
 
 export default function AuthPage() {
@@ -16,13 +18,12 @@ export default function AuthPage() {
   const [resending, setResending] = useState(false);
   const [resendDone, setResendDone] = useState(false);
   
-  // Screen size detection (Tablets >= 768px, Desktops/Laptops >= 1024px)
-  const [isSmallScreen, setIsSmallScreen] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  const [copied, setCopied] = useState(false);
+  // Phone detection (iPhones, Android mobile, small screens)
+  const [isPhone, setIsPhone] = useState(() => isPhoneDevice());
 
   useEffect(() => {
     const handleResize = () => {
-      setIsSmallScreen(window.innerWidth < 768);
+      setIsPhone(isPhoneDevice());
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -31,13 +32,10 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const initAuth = useStore(s => s.initAuth);
 
-  const handleCopyLink = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.origin);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    }
-  };
+  // If detected as a phone, render the ScreenGate
+  if (isPhone) {
+    return <ScreenGate showBackLink={true} />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,155 +97,110 @@ export default function AuthPage() {
         </Link>
       </header>
 
-      {/* ── Screen Gate for Small Mobile Phones ───────────────────────────── */}
-      {isSmallScreen ? (
-        <div className={styles.screenGateCard}>
-          <div className={styles.gateIconWrap}>
-            <span className={styles.gateIcon}>🖥️</span>
-          </div>
-
-          <div className={styles.gateBadgePill}>
-            <span className={styles.gateBadgeDot} />
-            <span>DESKTOP / TABLET REQUIRED</span>
-          </div>
-
-          <h2 className={styles.gateTitle}>Get On A Bigger Screen</h2>
-
-          <p className={styles.gateDesc}>
-            CHRONO is an uncompromising deep work environment designed for intense, distraction-free study. Your phone is a distraction trap—open CHRONO on your laptop, desktop, or tablet to enter the chamber.
+      <div className={styles.authCard}>
+        <div className={styles.cardHeader}>
+          <h2 className={styles.cardTitle}>
+            {tab === 'login' ? 'Welcome Back' : 'Create Account'}
+          </h2>
+          <p className={styles.cardSub}>
+            {tab === 'login'
+              ? 'Log in to sync your focus streaks across devices'
+              : 'Join CHRONO to track your focus streaks and level up'}
           </p>
-
-          <div className={styles.gateBenefitsList}>
-            <div className={styles.gateBenefitItem}>
-              <span>✨</span>
-              <span>Full-screen 3D liquid focus visualizers</span>
-            </div>
-            <div className={styles.gateBenefitItem}>
-              <span>🎧</span>
-              <span>40Hz Gamma & Pink noise stereo soundscapes</span>
-            </div>
-            <div className={styles.gateBenefitItem}>
-              <span>⚡</span>
-              <span>90-minute ultradian study cycles & XP leveling</span>
-            </div>
-          </div>
-
-          <div className={styles.gateActions}>
-            <button className={styles.copyLinkBtn} onClick={handleCopyLink}>
-              {copied ? '✓ Link Copied to Clipboard!' : '📋 Copy Link for Your Computer'}
-            </button>
-            <Link to="/welcome" className={styles.backLandingBtn}>
-              ← Back to Protocol Overview
-            </Link>
-          </div>
         </div>
-      ) : (
-        /* ── Standard Login / Register Form for Desktops & Tablets ───────── */
-        <div className={styles.authCard}>
-          <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>
-              {tab === 'login' ? 'Welcome Back' : 'Create Account'}
-            </h2>
-            <p className={styles.cardSub}>
-              {tab === 'login'
-                ? 'Log in to sync your focus streaks across devices'
-                : 'Join CHRONO to track your focus streaks and level up'}
+
+        {/* Tab Switcher */}
+        <div className={styles.tabGroup}>
+          <button
+            type="button"
+            className={`${styles.tabBtn} ${tab === 'login' ? styles.tabActive : ''}`}
+            onClick={() => { setTab('login'); setError(''); setSuccess(''); }}
+          >
+            Log In
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabBtn} ${tab === 'register' ? styles.tabActive : ''}`}
+            onClick={() => { setTab('register'); setError(''); setSuccess(''); }}
+          >
+            Sign Up
+          </button>
+        </div>
+
+        {/* Feedback Banners */}
+        {error && <div className={styles.errorBanner}>{error}</div>}
+        {success && <div className={styles.successBanner}>{success}</div>}
+
+        {/* Resend Verification Notice */}
+        {unverifiedEmail && (
+          <div className={styles.resendBox}>
+            <p className={styles.resendText}>
+              Didn't get the verification email?
             </p>
+            {resendDone ? (
+              <p className={styles.resendSuccess}>✓ Verification link dispatched via Resend!</p>
+            ) : (
+              <button
+                type="button"
+                className={styles.resendBtn}
+                onClick={handleResend}
+                disabled={resending}
+              >
+                {resending ? 'Sending...' : 'Resend Verification Email via Resend'}
+              </button>
+            )}
           </div>
+        )}
 
-          {/* Tab Switcher */}
-          <div className={styles.tabGroup}>
-            <button
-              type="button"
-              className={`${styles.tabBtn} ${tab === 'login' ? styles.tabActive : ''}`}
-              onClick={() => { setTab('login'); setError(''); setSuccess(''); }}
-            >
-              Log In
-            </button>
-            <button
-              type="button"
-              className={`${styles.tabBtn} ${tab === 'register' ? styles.tabActive : ''}`}
-              onClick={() => { setTab('register'); setError(''); setSuccess(''); }}
-            >
-              Sign Up
-            </button>
-          </div>
-
-          {/* Feedback Banners */}
-          {error && <div className={styles.errorBanner}>{error}</div>}
-          {success && <div className={styles.successBanner}>{success}</div>}
-
-          {/* Resend Verification Notice */}
-          {unverifiedEmail && (
-            <div className={styles.resendBox}>
-              <p className={styles.resendText}>
-                Didn't get the verification email?
-              </p>
-              {resendDone ? (
-                <p className={styles.resendSuccess}>✓ Verification link dispatched via Resend!</p>
-              ) : (
-                <button
-                  type="button"
-                  className={styles.resendBtn}
-                  onClick={handleResend}
-                  disabled={resending}
-                >
-                  {resending ? 'Sending...' : 'Resend Verification Email via Resend'}
-                </button>
-              )}
+        {/* Form */}
+        <form className={styles.form} onSubmit={handleSubmit}>
+          {tab === 'register' && (
+            <div className={styles.inputGroup}>
+              <label htmlFor="name">Full Name</label>
+              <input
+                id="name"
+                type="text"
+                placeholder="Alex Rivera"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
             </div>
           )}
 
-          {/* Form */}
-          <form className={styles.form} onSubmit={handleSubmit}>
-            {tab === 'register' && (
-              <div className={styles.inputGroup}>
-                <label htmlFor="name">Full Name</label>
-                <input
-                  id="name"
-                  type="text"
-                  placeholder="Alex Rivera"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-            )}
+          <div className={styles.inputGroup}>
+            <label htmlFor="email">Email Address</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="alex@university.edu"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-            <div className={styles.inputGroup}>
-              <label htmlFor="email">Email Address</label>
-              <input
-                id="email"
-                type="email"
-                placeholder="alex@university.edu"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+          <div className={styles.inputGroup}>
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-            <div className={styles.inputGroup}>
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <button type="submit" className={styles.submitBtn} disabled={loading}>
-              {loading
-                ? 'Connecting...'
-                : tab === 'login'
-                ? 'Sign In to Chamber →'
-                : 'Create Account & Begin →'}
-            </button>
-          </form>
-        </div>
-      )}
+          <button type="submit" className={styles.submitBtn} disabled={loading}>
+            {loading
+              ? 'Connecting...'
+              : tab === 'login'
+              ? 'Sign In to Chamber →'
+              : 'Create Account & Begin →'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore, getStreakMultiplier, calculateLevel, RANK_TITLES } from '../store';
 import { startBinauralBeats, startPinkNoise, stopSoundscape, playCriticalChime } from '../utils/audio';
+import { isPhoneDevice } from '../utils/device';
 import styles from './LandingPage.module.css';
 
 const PROTOCOL_PHASES = [
@@ -53,9 +54,9 @@ export default function LandingPage() {
   const [selectedStreakDay, setSelectedStreakDay] = useState(14);
   const [soundPlaying, setSoundPlaying] = useState(null); // null | '40hz' | 'pink'
 
-  // Instant redirect if logged in
+  // Instant redirect if logged in on desktop / tablet
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && !isPhoneDevice()) {
       navigate('/', { replace: true });
     }
   }, [user, authLoading, navigate]);

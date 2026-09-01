@@ -1,10 +1,17 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useStore } from '../store';
+import { isPhoneDevice } from '../utils/device';
+import ScreenGate from './ScreenGate';
 
 export default function AuthGuard({ children }) {
   const user = useStore(s => s.user);
   const authLoading = useStore(s => s.authLoading);
+
+  // Strictly block phone devices (iPhone, Android mobile, screen < 768px)
+  if (isPhoneDevice()) {
+    return <ScreenGate showBackLink={true} />;
+  }
 
   if (authLoading) {
     return (
