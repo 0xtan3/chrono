@@ -51,17 +51,18 @@ export default function AuthPage() {
   };
 
   const handleResend = async () => {
-    if (!unverifiedEmail || !password) {
-      setError('Please enter your password above to resend the verification link.');
+    const target = unverifiedEmail || email;
+    if (!target) {
+      setError('Please enter your email address above to resend the verification link.');
       return;
     }
     setResending(true);
     setError('');
     try {
-      await resendVerificationEmail(unverifiedEmail, password);
+      await resendVerificationEmail(target);
       setResendDone(true);
     } catch (err) {
-      setError(err.message || 'Failed to resend verification email.');
+      setError(err.message || 'Failed to resend verification email via Resend.');
     } finally {
       setResending(false);
     }

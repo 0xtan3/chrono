@@ -24,54 +24,65 @@ function ensureConfig() {
   }
 }
 
-// ── Authentication API ───────────────────────────────────────────────────────
+// ── Authentication API with Resend Email Verification ─────────────────────────
 
 export function getVerifyUrl() {
   const envUrl = import.meta.env.VITE_APP_URL;
   if (envUrl) {
     return `${envUrl.replace(/\/$/, '')}/verify`;
   }
-  // Fallback: local dev
   return `${window.location.origin}/verify`;
 }
 
 /**
- * Register a new user with Email, Password & Name.
- * Automatically initiates verification and logs out until verified.
+ * Register a new user and dispatch branded verification email via Resend.
  */
 export async function registerUser(email, password, name) {
   ensureConfig();
-  // 1. Create account
+  // 1. Create Appwrite Account
   const newUser = await account.create(ID.unique(), email, password, name);
   
-  // 2. Create session to authorize verification email
-  await account.createEmailPasswordSession(email, password);
-  
-  // 3. Send verification email pointing to chrono.tenazity.com/verify
+  // 2. Dispatch verification email via Resend API
   const verifyUrl = getVerifyUrl();
-  await account.createVerification(verifyUrl);
+  try {
+    const res = await fetch('/api/send-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: newUser.$id,
+        email,
+        name,
+        verifyUrl,
+      }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      console.warn('Resend verification email notice:', errData.error);
+    }
+  } catch (e) {
+    console.warn('Resend dispatch network error:', e);
+  }
   
   return newUser;
 }
 
 /**
- * Login user. Only allows access if user.emailVerification === true.
- * If not verified, deletes current session and throws an error.
+ * Login user. Verifies email confirmation before granting access.
  */
 export async function loginUser(email, password) {
   ensureConfig();
-  // 1. Delete any lingering session
+  // 1. Clear any stale session
   try { await account.deleteSession('current'); } catch {}
   
-  // 2. Create session
+  // 2. Create authenticated session
   await account.createEmailPasswordSession(email, password);
   
   // 3. Fetch user profile
   const user = await account.get();
   
-  // 4. STRICT VERIFICATION CHECK
+  // 4. Strict verification check
   if (!user.emailVerification) {
-    // Delete session immediately to block access
     await account.deleteSession('current');
     const err = new Error('EMAIL_NOT_VERIFIED');
     err.email = email;
@@ -81,11 +92,30 @@ export async function loginUser(email, password) {
   return user;
 }
 
+/**
+ * Verify user email via Resend/Appwrite Token verification endpoint.
+ */
 export async function verifyUserEmail(userId, secret) {
   try {
-    return await account.updateVerification(userId, secret);
+    const res = await fetch('/api/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, secret }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      // Also try fallback client verification
+      try {
+        return await account.updateVerification(userId, secret);
+      } catch {
+        throw new Error(errData.error || 'Email verification link is invalid or expired.');
+      }
+    }
+
+    return { success: true };
   } catch (err) {
-    // If token was already consumed or user is already verified
+    // If token already consumed or user already verified
     try {
       const u = await account.get();
       if (u && u.emailVerification) {
@@ -97,13 +127,25 @@ export async function verifyUserEmail(userId, secret) {
 }
 
 /**
- * Resend verification email for an unverified user.
+ * Resend verification email via Resend.
  */
 export async function resendVerificationEmail(email, password) {
-  try { await account.deleteSession('current'); } catch {}
-  await account.createEmailPasswordSession(email, password);
   const verifyUrl = getVerifyUrl();
-  await account.createVerification(verifyUrl);
+  const res = await fetch('/api/send-verification', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email,
+      verifyUrl,
+    }),
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'Failed to dispatch verification email via Resend.');
+  }
+
+  return { success: true };
 }
 
 /**
