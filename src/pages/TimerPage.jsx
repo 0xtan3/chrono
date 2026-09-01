@@ -148,9 +148,8 @@ export default function TimerPage() {
 
   // 3. Document Title
   useEffect(() => {
-    const modeLabel = isWarmup ? 'PRIMER' : MODES[mode]?.label || 'CHRONO';
-    document.title = `${fmt(remaining)} — ${modeLabel} — CHRONO`;
-  }, [remaining, mode, isWarmup]);
+    document.title = 'CHRONO';
+  }, []);
 
   // 4. Keyboard Shortcuts
   useEffect(() => {

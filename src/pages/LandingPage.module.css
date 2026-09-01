@@ -1,248 +1,1038 @@
+/* ── Viewport Base ─────────────────────────────────────────────────────────── */
 .landingViewport {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
-  background: var(--bg);
+  overflow-x: hidden;
+  background: #06080f;
+  color: #e8ecff;
+  font-family: 'Jura', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  scroll-behavior: smooth;
 }
 
-.bgGlow1, .bgGlow2 {
+/* ── Dynamic Ambient Mesh Gradients ─────────────────────────────────────────── */
+.meshGlowTop {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  z-index: 0;
+  top: -15vw;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70vw;
+  height: 40vw;
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(139, 92, 246, 0.18) 0%, rgba(79, 70, 229, 0.08) 50%, transparent 80%);
+  filter: blur(80px);
   pointer-events: none;
-  animation: float 20s infinite ease-in-out alternate;
+  z-index: 0;
 }
 
-.bgGlow1 {
+.meshGlowBottom {
+  position: absolute;
+  bottom: 10vw;
+  right: -10vw;
   width: 50vw;
   height: 50vw;
-  background: radial-gradient(circle, hsla(var(--ah), var(--as), 50%, 0.15) 0%, transparent 70%);
-  top: -10vw;
-  left: -10vw;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.bgGlow2 {
-  width: 60vw;
-  height: 60vw;
-  background: radial-gradient(circle, hsla(330, 80%, 50%, 0.1) 0%, transparent 70%);
-  bottom: -20vw;
-  right: -10vw;
-  animation-delay: -10s;
+.meshGridOverlay {
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
 }
 
-@keyframes float {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(5%, 5%) scale(1.05); }
-  100% { transform: translate(-5%, 2%) scale(0.95); }
-}
-
+/* ── Top Navigation Bar ─────────────────────────────────────────────────────── */
 .topNav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 3rem;
-  position: relative;
-  z-index: 10;
+  padding: 1.2rem 3.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(6, 8, 15, 0.75);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .brand {
-  font-family: 'Jura', sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.05em;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  font-family: 'Jura', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: #fff;
+  text-decoration: none;
 }
 
 .brandDot {
   width: 10px;
   height: 10px;
-  background: var(--accent);
+  background: #8b5cf6;
   border-radius: 50%;
-  box-shadow: 0 0 15px var(--accent-glow);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+}
+
+.brandText {
+  letter-spacing: 0.2em;
+}
+
+.versionBadge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.navLink {
+  color: rgba(232, 236, 255, 0.6);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: color 0.15s ease;
+}
+
+.navLink:hover {
+  color: #fff;
 }
 
 .loginBtn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text);
-  padding: 0.6rem 1.5rem;
-  border-radius: 8px;
-  font-family: 'Jura', sans-serif;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e8ecff;
+  padding: 0.5rem 1.2rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .loginBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
-.mainContent {
-  flex: 1;
+.startBtn {
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.5rem 1.3rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+  transition: all 0.2s ease;
+}
+
+.startBtn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 25px rgba(124, 58, 237, 0.6);
+}
+
+/* ── Hero Section ───────────────────────────────────────────────────────────── */
+.heroSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4.5rem 2rem 3rem;
+  position: relative;
+  z-index: 10;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.heroBadgePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 999px;
+  padding: 0.35rem 0.95rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #c084fc;
+  margin-bottom: 1.8rem;
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.15);
+}
+
+.pillDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px #34d399;
+}
+
+.pillDivider {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.pillSub {
+  color: #fbbf24;
+}
+
+.heroTitle {
+  font-size: 4.5rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.4rem;
+  color: #fff;
+}
+
+.heroGradientText {
+  background: linear-gradient(135deg, #ffffff 0%, #c084fc 50%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.heroSubtitle {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: rgba(232, 236, 255, 0.65);
+  max-width: 720px;
+  margin-bottom: 2.2rem;
+}
+
+.heroCtaGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 3.5rem;
+}
+
+.mainCtaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  padding: 1.05rem 2.8rem;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.45);
+  transition: all 0.2s var(--spring);
+}
+
+.mainCtaBtn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 15px 50px rgba(139, 92, 246, 0.65);
+}
+
+.ctaArrow {
+  transition: transform 0.2s ease;
+}
+
+.mainCtaBtn:hover .ctaArrow {
+  transform: translateX(4px);
+}
+
+.soundDemoPills {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.soundDemoLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.soundPill {
+  background: rgba(16, 20, 35, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.soundPill:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(24, 28, 48, 0.8);
+}
+
+.soundPillActive {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: #8b5cf6;
+  color: #c084fc;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.35);
+}
+
+/* ── Interactive Live Protocol Simulator Card ──────────────────────────────── */
+.simulatorCard {
+  width: 100%;
+  max-width: 900px;
+  background: linear-gradient(145deg, rgba(16, 20, 36, 0.85), rgba(9, 12, 22, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 28px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 60px rgba(124, 58, 237, 0.12);
+  backdrop-filter: blur(30px);
+  overflow: hidden;
+  text-align: left;
+}
+
+.simHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.simDots {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.dotRed { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; }
+.dotYellow { width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; }
+.dotGreen { width: 10px; height: 10px; border-radius: 50%; background: #10b981; }
+
+.simTitle {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.simStatus {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #34d399;
+}
+
+.simBody {
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.phaseTabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+}
+
+.phaseTabBtn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.phaseTabBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.phaseTabActive {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+.phaseStepNum {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #a78bfa;
+}
+
+.phaseTabName {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.phaseTabDur {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.phaseContentArea {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 2rem;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  padding: 1.8rem;
+}
+
+.phaseVisualCol {
+  display: flex;
+  justify-content: center;
+}
+
+.liquidOrbPreview {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding: 2rem;
-  position: relative;
-  z-index: 10;
+  background: radial-gradient(circle, rgba(20, 24, 40, 0.9) 0%, rgba(8, 10, 18, 0.95) 100%);
+  transition: all 0.4s ease;
 }
 
-.tagline {
-  background: rgba(167, 139, 250, 0.1);
-  color: #a78bfa;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  border: 1px solid rgba(167, 139, 250, 0.2);
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 2rem;
-  animation: fadeInDown 0.8s ease backwards;
+.orbCore {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(12px);
+  opacity: 0.75;
+  animation: orbPulse 3s infinite alternate ease-in-out;
 }
 
-.heroTitle {
-  font-size: 5rem;
-  font-weight: 700;
-  line-height: 1.1;
-  margin-bottom: 1.5rem;
-  max-width: 900px;
-  background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.6) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: fadeInUp 0.8s ease backwards 0.1s;
+.orb_primer {
+  width: 24px;
+  height: 24px;
+  background: #ffffff;
+  box-shadow: 0 0 20px #ffffff;
 }
 
-.heroSubtitle {
-  font-size: 1.25rem;
-  color: rgba(232, 236, 255, 0.6);
-  max-width: 600px;
-  margin-bottom: 3rem;
-  line-height: 1.6;
-  animation: fadeInUp 0.8s ease backwards 0.2s;
+.orb_focus {
+  width: 110px;
+  height: 110px;
+  background: radial-gradient(circle, #8b5cf6 0%, #4338ca 100%);
+  box-shadow: 0 0 35px rgba(139, 92, 246, 0.6);
 }
 
-.ctaBtn {
-  background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+.orb_reset {
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, #38bdf8 0%, #0369a1 100%);
+  box-shadow: 0 0 35px rgba(56, 189, 248, 0.5);
+  animation-duration: 5s;
+}
+
+@keyframes orbPulse {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  100% { transform: scale(1.08); opacity: 0.9; }
+}
+
+.orbCountdown {
+  font-family: 'Fira Code', monospace;
+  font-size: 1.8rem;
+  font-weight: 800;
   color: #fff;
-  font-family: inherit;
-  font-size: 1.2rem;
-  font-weight: 700;
-  padding: 1rem 2.5rem;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
-  animation: fadeInUp 0.8s ease backwards 0.3s;
+  line-height: 1;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+}
+
+.orbPhaseLabel {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  margin-top: 0.3rem;
+  position: relative;
+  z-index: 2;
+}
+
+.phaseDetailsCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.phaseTag {
   display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
+  align-self: flex-start;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  border: 1px solid;
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
 }
 
-.ctaBtn:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.4);
+.phaseHeading {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #fff;
 }
 
-.ctaArrow {
-  transition: transform 0.3s ease;
+.phaseDescText {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: rgba(232, 236, 255, 0.7);
 }
 
-.ctaBtn:hover .ctaArrow {
-  transform: translateX(4px);
-}
-
-.featuresGrid {
+.rewardStatsRow {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  max-width: 1000px;
-  margin-top: 5rem;
-  animation: fadeInUp 0.8s ease backwards 0.4s;
+  gap: 0.8rem;
+  margin-top: 0.6rem;
 }
 
-.heroCard {
-  background: linear-gradient(145deg, rgba(20, 24, 35, 0.75), rgba(12, 14, 22, 0.9));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 32px;
-  padding: 3rem 2rem;
-  max-width: 480px;
+.rewardStatBox {
+  display: flex;
+  flex-direction: column;
+  padding: 0.6rem 0.8rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
+.rewardStatVal {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.rewardStatLbl {
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+}
+
+/* ── Marquee Feature Strip ─────────────────────────────────────────────────── */
+.marqueeStrip {
   width: 100%;
-  backdrop-filter: blur(40px) saturate(150%);
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+  padding: 1.1rem 0;
+  background: rgba(16, 20, 36, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 4rem 0;
+}
+
+.marqueeTrack {
+  display: flex;
+  gap: 3rem;
+  white-space: nowrap;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: rgba(232, 236, 255, 0.5);
+  animation: marqueeScroll 25s linear infinite;
+}
+
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ── Section Header Wrappers ───────────────────────────────────────────────── */
+.sectionHeaderWrap {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 3rem;
+}
+
+.sectionEyebrow {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #a78bfa;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.sectionTitle {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 0.8rem;
+}
+
+.sectionSub {
+  font-size: 1.05rem;
+  color: rgba(232, 236, 255, 0.6);
+  line-height: 1.55;
+}
+
+/* ── Streak Calculator Section ─────────────────────────────────────────────── */
+.gamificationSection {
+  max-width: 900px;
+  margin: 0 auto 5rem;
+  padding: 0 2rem;
+  width: 100%;
+}
+
+.multiplierCalculatorCard {
+  background: linear-gradient(145deg, rgba(20, 24, 42, 0.7), rgba(12, 14, 26, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 2.2rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.milestoneTabsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+.milestoneBtn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.7rem 0.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.milestoneBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.milestoneActive {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: #fbbf24;
+  color: #fbbf24;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.25);
+}
+
+.calcDisplayGrid {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 1.8rem;
+}
+
+.calcDisplayCol {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-  animation: floatUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
+  gap: 0.3rem;
 }
 
-@keyframes floatUp {
-  0% { transform: translateY(40px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-.featureCard {
-  background: rgba(18, 21, 31, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 2rem;
-  text-align: left;
-  backdrop-filter: blur(10px);
-  transition: transform 0.3s ease;
-}
-
-.featureCard:hover {
-  transform: translateY(-5px);
-  background: rgba(18, 21, 31, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.featureIcon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-.featureTitle {
-  font-size: 1.25rem;
+.calcDisplayLbl {
+  font-size: 0.75rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
-  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
 }
 
-.featureDesc {
-  color: rgba(232, 236, 255, 0.5);
-  font-size: 0.95rem;
-  line-height: 1.5;
+.calcBigNumberRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
 }
 
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+.calcBigFlame {
+  font-size: 2.2rem;
+  line-height: 1;
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.calcBigNum {
+  font-family: 'Fira Code', monospace;
+  font-size: 3rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
+.calcBigUnit {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.calcBuffTag {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.15);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+}
+
+.calcFormulaHint {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.calcArrowCol {
+  font-size: 1.8rem;
+  color: #a78bfa;
+}
+
+/* ── Bento Grid Science Section ────────────────────────────────────────────── */
+.scienceSection {
+  max-width: 1040px;
+  margin: 0 auto 5rem;
+  padding: 0 2rem;
+  width: 100%;
+}
+
+.bentoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+}
+
+.bentoCard {
+  background: linear-gradient(145deg, rgba(18, 22, 38, 0.6), rgba(10, 13, 24, 0.85));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  backdrop-filter: blur(16px);
+  transition: all 0.2s ease;
+}
+
+.bentoCard:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}
+
+.bentoLarge {
+  grid-column: span 2;
+}
+
+.bentoWide {
+  grid-column: span 3;
+}
+
+.bentoIcon {
+  font-size: 2rem;
+}
+
+.bentoCardTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.bentoCardDesc {
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: rgba(232, 236, 255, 0.65);
+}
+
+.bentoVisualPill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  margin-top: 0.6rem;
+}
+
+.simulateDropBtn {
+  align-self: flex-start;
+  margin-top: 0.6rem;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #c084fc;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.simulateDropBtn:hover {
+  background: rgba(168, 85, 247, 0.3);
+  color: #fff;
+  transform: scale(1.03);
+}
+
+.rankPillsRow {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.8rem;
+}
+
+.rankPillItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.rankPillLvl {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  color: var(--text-muted);
+}
+
+/* ── Comparison Table ──────────────────────────────────────────────────────── */
+.comparisonSection {
+  max-width: 900px;
+  margin: 0 auto 5rem;
+  padding: 0 2rem;
+  width: 100%;
+}
+
+.tableCard {
+  background: linear-gradient(145deg, rgba(16, 20, 36, 0.7), rgba(9, 12, 22, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.comparisonTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.comparisonTable th,
+.comparisonTable td {
+  padding: 1rem 1.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.comparisonTable th {
+  background: rgba(0, 0, 0, 0.4);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.chronoCol {
+  background: rgba(139, 92, 246, 0.06);
+  color: #c084fc;
+}
+
+/* ── Keyboard Shortcuts Strip ──────────────────────────────────────────────── */
+.keyboardSection {
+  max-width: 900px;
+  margin: 0 auto 4rem;
+  padding: 0 2rem;
+  width: 100%;
+}
+
+.keyboardStrip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  background: rgba(16, 20, 36, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 0.9rem 1.4rem;
+}
+
+.kbLabel {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+
+.kbItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.kbItem kbd {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 0.15rem 0.45rem;
+  color: #fff;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* ── Bottom CTA ────────────────────────────────────────────────────────────── */
+.bottomCtaSection {
+  max-width: 900px;
+  margin: 0 auto 3rem;
+  padding: 0 2rem;
+  width: 100%;
+}
+
+.ctaBox {
+  background: linear-gradient(135deg, rgba(28, 22, 48, 0.9), rgba(12, 14, 28, 0.95));
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 28px;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 60px rgba(124, 58, 237, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ctaEyebrow {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 0.15em;
+}
+
+.ctaTitle {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.15;
+}
+
+.ctaDesc {
+  font-size: 1.05rem;
+  color: rgba(232, 236, 255, 0.65);
+  max-width: 540px;
+}
+
+.giantCtaBtn {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  padding: 1.1rem 3rem;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.5);
+  transition: all 0.2s var(--spring);
+  margin-top: 0.5rem;
+}
+
+.giantCtaBtn:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 15px 55px rgba(139, 92, 246, 0.7);
+}
+
+.ctaFooterNote {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.footerBottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 2rem;
+  margin-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.footerBrand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .heroTitle { font-size: 3.5rem; }
-  .featuresGrid { grid-template-columns: 1fr; gap: 1rem; margin-top: 3rem; }
+  .heroTitle { font-size: 3.2rem; }
+  .bentoGrid { grid-template-columns: 1fr; }
+  .bentoLarge, .bentoWide { grid-column: span 1; }
+  .phaseContentArea { grid-template-columns: 1fr; text-align: center; }
+  .phaseTag { align-self: center; }
+  .phaseTabs { grid-template-columns: 1fr; }
+  .milestoneTabsRow { grid-template-columns: repeat(2, 1fr); }
+  .calcDisplayGrid { flex-direction: column; gap: 1.2rem; }
   .topNav { padding: 1rem 1.5rem; }
+  .navActions .navLink { display: none; }
 }
