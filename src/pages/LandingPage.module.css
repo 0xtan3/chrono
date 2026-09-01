@@ -1023,9 +1023,18 @@
   color: #fff;
 }
 
-/* ── Responsive ────────────────────────────────────────────────────────────── */
+/* ── Responsive Screen-Friendly Engine ─────────────────────────────────────── */
+.tableCard {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.comparisonTable {
+  min-width: 540px;
+}
+
 @media (max-width: 900px) {
-  .heroTitle { font-size: 3.2rem; }
+  .heroTitle { font-size: clamp(2.4rem, 7vw, 3.6rem); }
   .bentoGrid { grid-template-columns: 1fr; }
   .bentoLarge, .bentoWide { grid-column: span 1; }
   .phaseContentArea { grid-template-columns: 1fr; text-align: center; }
@@ -1033,6 +1042,136 @@
   .phaseTabs { grid-template-columns: 1fr; }
   .milestoneTabsRow { grid-template-columns: repeat(2, 1fr); }
   .calcDisplayGrid { flex-direction: column; gap: 1.2rem; }
-  .topNav { padding: 1rem 1.5rem; }
+  .topNav { padding: 0.9rem 1.2rem; }
   .navActions .navLink { display: none; }
 }
+
+@media (max-width: 640px) {
+  .topNav {
+    padding: 0.75rem 1rem;
+  }
+  .brandText {
+    font-size: 1.15rem;
+    letter-spacing: 0.15em;
+  }
+  .versionBadge {
+    display: none;
+  }
+  .loginBtn {
+    display: none;
+  }
+  .startBtn {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.75rem;
+  }
+  .heroSection {
+    padding: 2.5rem 1rem 2rem;
+  }
+  .heroBadgePill {
+    font-size: 0.62rem;
+    padding: 0.28rem 0.75rem;
+  }
+  .heroTitle {
+    font-size: clamp(2rem, 8vw, 2.8rem);
+    letter-spacing: -0.02em;
+  }
+  .heroSubtitle {
+    font-size: 0.95rem;
+    margin-bottom: 1.8rem;
+  }
+  .mainCtaBtn {
+    font-size: 1rem;
+    padding: 0.9rem 2rem;
+    width: 100%;
+    max-width: 320px;
+    justify-content: center;
+  }
+  .soundDemoPills {
+    flex-direction: column;
+    width: 100%;
+  }
+  .soundPill {
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+  }
+  .simulatorCard {
+    border-radius: 20px;
+  }
+  .simBody {
+    padding: 1.1rem;
+  }
+  .phaseContentArea {
+    padding: 1.2rem;
+  }
+  .liquidOrbPreview {
+    width: 140px;
+    height: 140px;
+  }
+  .orbCountdown {
+    font-size: 1.5rem;
+  }
+  .rewardStatsRow {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+  .gamificationSection,
+  .scienceSection,
+  .comparisonSection,
+  .keyboardSection,
+  .bottomCtaSection {
+    padding: 0 1rem;
+    margin-bottom: 3.5rem;
+  }
+  .multiplierCalculatorCard {
+    padding: 1.2rem;
+    border-radius: 18px;
+  }
+  .milestoneTabsRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+  }
+  .milestoneBtn {
+    padding: 0.55rem 0.3rem;
+    font-size: 0.75rem;
+  }
+  .calcDisplayGrid {
+    padding: 1.2rem 0.8rem;
+  }
+  .calcBigNum {
+    font-size: 2.2rem;
+  }
+  .sectionTitle {
+    font-size: 1.8rem;
+  }
+  .sectionSub {
+    font-size: 0.9rem;
+  }
+  .bentoCard {
+    padding: 1.3rem;
+  }
+  .bentoVisualPill {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+  .ctaBox {
+    padding: 2.4rem 1.2rem;
+    border-radius: 22px;
+  }
+  .ctaTitle {
+    font-size: 1.7rem;
+  }
+  .giantCtaBtn {
+    font-size: 1rem;
+    padding: 0.9rem 1.8rem;
+    width: 100%;
+    max-width: 300px;
+  }
+  .footerBottomRow {
+    flex-direction: column;
+    gap: 0.8rem;
+    text-align: center;
+  }
+}
+
