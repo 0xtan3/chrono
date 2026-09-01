@@ -276,6 +276,139 @@
   cursor: not-allowed;
 }
 
+/* ── Screen Gate for Small Phones ─────────────────────────────────────────── */
+.screenGateCard {
+  width: 100%;
+  max-width: 380px;
+  background: linear-gradient(145deg, rgba(22, 26, 44, 0.88), rgba(12, 14, 26, 0.95));
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-top: 1px solid rgba(168, 85, 247, 0.6);
+  border-radius: 28px;
+  padding: 2.2rem 1.6rem;
+  backdrop-filter: blur(40px) saturate(150%);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), 0 0 60px rgba(139, 92, 246, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: slideUpFade .6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.gateIconWrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1.5px solid rgba(139, 92, 246, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.3);
+}
+
+.gateIcon {
+  font-size: 2rem;
+}
+
+.gateBadgePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.9rem;
+}
+
+.gateBadgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fbbf24;
+  box-shadow: 0 0 8px #fbbf24;
+}
+
+.gateTitle {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 0.75rem;
+}
+
+.gateDesc {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: rgba(232, 236, 255, 0.7);
+  margin-bottom: 1.4rem;
+}
+
+.gateBenefitsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.6rem;
+  text-align: left;
+}
+
+.gateBenefitItem {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.gateActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.copyLinkBtn {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 0 25px rgba(124, 58, 237, 0.4);
+  transition: all 0.2s ease;
+}
+
+.copyLinkBtn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 35px rgba(124, 58, 237, 0.6);
+}
+
+.backLandingBtn {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.backLandingBtn:hover {
+  color: #fff;
+}
+
 @media (min-width: 768px) {
   .authCard {
     max-width: 460px;
