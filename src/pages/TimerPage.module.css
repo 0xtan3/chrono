@@ -203,10 +203,11 @@
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: #fff;
   opacity: 0.95;
   text-align: center;
   padding: 0 0.5rem;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .warmupText {

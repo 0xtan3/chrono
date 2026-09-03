@@ -30,7 +30,7 @@ export default function Controls() {
         className={`${styles.mainBtn} ${running ? styles.runningBtn : ''}`}
         onClick={() => (running ? pause() : play())}
       >
-        {running ? 'Pause' : elapsed > 0 ? 'Resume' : 'Start Focus'}
+        {running ? 'Pause' : elapsed > 0 ? 'Resume' : 'Start'}
       </button>
 
       {/* Redo / Reset Button */}
