@@ -1,7 +1,8 @@
-import { Client, Users } from 'node-appwrite';
+import { Client, Users, Query } from 'node-appwrite';
 import { Resend } from 'resend';
 
 export default async function handler(req, res) {
+  // Allow both GET and POST for flexibility (resend links can be GET)
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -16,10 +17,11 @@ export default async function handler(req, res) {
     const ENDPOINT = process.env.VITE_APPWRITE_ENDPOINT || process.env.APPWRITE_ENDPOINT || 'https://fra.cloud.appwrite.io/v1';
     const PROJECT_ID = process.env.VITE_APPWRITE_PROJECT_ID || process.env.APPWRITE_PROJECT_ID;
     const API_KEY = process.env.APPWRITE_API_KEY;
-    const RESEND_KEY = process.env.RESEND_API_KEY || process.env.VITE_RESEND_API_KEY;
+    const RESEND_KEY = process.env.RESEND_API_KEY;
 
     if (!PROJECT_ID || !API_KEY || !RESEND_KEY) {
-      throw new Error('Missing server credentials: VITE_APPWRITE_PROJECT_ID, APPWRITE_API_KEY, or RESEND_API_KEY.');
+      console.error('Missing env vars:', { PROJECT_ID: !!PROJECT_ID, API_KEY: !!API_KEY, RESEND_KEY: !!RESEND_KEY });
+      throw new Error('Missing server credentials. Check VITE_APPWRITE_PROJECT_ID, APPWRITE_API_KEY, and RESEND_API_KEY.');
     }
 
     const client = new Client()
@@ -35,23 +37,55 @@ export default async function handler(req, res) {
 
     // If userId not provided (e.g. on resend), search user by email
     if (!targetUserId) {
-      const userList = await users.list([`equal("email", ["${email}"])`]);
+      const userList = await users.list([Query.equal("email", email)]);
       if (userList.users && userList.users.length > 0) {
         targetUserId = userList.users[0].$id;
         targetName = userList.users[0].name || targetName;
+
+        // If user is already verified, don't send again
+        if (userList.users[0].emailVerification) {
+          return res.status(200).json({ success: true, message: 'Email is already verified.', alreadyVerified: true });
+        }
       } else {
         return res.status(404).json({ error: 'No user found with the provided email address.' });
       }
     }
 
-    // Generate secure 24-hour verification token
+    // Rate limiting: Check user prefs for last verification email timestamp
+    try {
+      const prefs = await users.getPrefs(targetUserId);
+      const lastSent = prefs.lastVerificationSent || 0;
+      const now = Date.now();
+      const cooldownMs = 60 * 1000; // 60 second cooldown
+
+      if (now - lastSent < cooldownMs) {
+        const waitSec = Math.ceil((cooldownMs - (now - lastSent)) / 1000);
+        return res.status(429).json({
+          error: `Please wait ${waitSec} seconds before requesting another verification email.`,
+          retryAfter: waitSec,
+        });
+      }
+    } catch (e) {
+      // If prefs fail, continue anyway — don't block verification
+      console.warn('Rate limit check failed (non-blocking):', e.message);
+    }
+
+    // Generate a verification token via Appwrite's createToken API
+    // This creates a secure server-side token with a 24-hour expiry
     const tokenObj = await users.createToken(targetUserId, 64, 86400);
     const secret = tokenObj.secret;
 
-    const baseUrl = verifyUrl || 'https://chrono.tenazity.com/verify';
-    const cleanVerifyUrl = `${baseUrl.replace(/\/$/, '')}?userId=${encodeURIComponent(targetUserId)}&secret=${encodeURIComponent(secret)}`;
+    if (!secret) {
+      throw new Error('Token creation succeeded but no secret was returned. This may be an Appwrite version issue.');
+    }
 
-    // Branded High-Conversion HTML Template
+    // Build verification URL
+    const baseUrl = verifyUrl || process.env.VITE_APP_URL
+      ? `${(verifyUrl || process.env.VITE_APP_URL).replace(/\/$/, '')}/verify`
+      : 'https://chrono.tenazity.com/verify';
+    const cleanVerifyUrl = `${baseUrl}?userId=${encodeURIComponent(targetUserId)}&secret=${encodeURIComponent(secret)}`;
+
+    // Branded HTML Email Template
     const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -110,25 +144,67 @@ export default async function handler(req, res) {
     `;
 
     // Send verification email via Resend
-    let fromAddress = 'CHRONO <verify@chrono.tenazity.com>';
+    // Try custom domain first, fall back to onboarding@resend.dev (free tier)
+    let emailSent = false;
+    let sendError = null;
+
+    const customFrom = 'CHRONO <verify@chrono.tenazity.com>';
+    const fallbackFrom = 'CHRONO <onboarding@resend.dev>';
+
     try {
-      await resend.emails.send({
-        from: fromAddress,
+      const result = await resend.emails.send({
+        from: customFrom,
         to: email,
         subject: 'Verify your email for CHRONO ⚡',
         html: emailHtml,
       });
+
+      if (result.error) {
+        throw new Error(result.error.message || 'Resend API returned an error');
+      }
+
+      emailSent = true;
+      console.log('Verification email sent via custom domain to:', email);
     } catch (e) {
-      console.warn('Custom domain from failed, falling back to onboarding address:', e.message);
-      await resend.emails.send({
-        from: 'CHRONO <onboarding@resend.dev>',
-        to: email,
-        subject: 'Verify your email for CHRONO ⚡',
-        html: emailHtml,
-      });
+      console.warn('Custom domain send failed, trying fallback:', e.message);
+      sendError = e;
     }
 
-    return res.status(200).json({ success: true, message: 'Verification email sent successfully via Resend.' });
+    if (!emailSent) {
+      try {
+        const result = await resend.emails.send({
+          from: fallbackFrom,
+          to: email,
+          subject: 'Verify your email for CHRONO ⚡',
+          html: emailHtml,
+        });
+
+        if (result.error) {
+          throw new Error(result.error.message || 'Resend fallback also failed');
+        }
+
+        emailSent = true;
+        console.log('Verification email sent via fallback (onboarding@resend.dev) to:', email);
+      } catch (e2) {
+        console.error('Both custom and fallback email sends failed.');
+        console.error('Custom domain error:', sendError?.message);
+        console.error('Fallback error:', e2.message);
+        throw new Error(`Failed to send verification email: ${e2.message}`);
+      }
+    }
+
+    // Update rate limit timestamp in user prefs
+    try {
+      const existingPrefs = await users.getPrefs(targetUserId);
+      await users.updatePrefs(targetUserId, {
+        ...existingPrefs,
+        lastVerificationSent: Date.now(),
+      });
+    } catch (e) {
+      console.warn('Failed to update rate limit prefs (non-blocking):', e.message);
+    }
+
+    return res.status(200).json({ success: true, message: 'Verification email sent successfully.' });
   } catch (err) {
     console.error('send-verification error:', err);
     return res.status(500).json({ error: err.message || 'Failed to dispatch verification email.' });

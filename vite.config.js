@@ -1,8 +1,33 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import sendVerificationHandler from './api/send-verification.js';
 import verifyHandler from './api/verify.js';
 import cronHandler from './api/cron.js';
+import fs from 'fs';
+import path from 'path';
+
+// Load .env variables into process.env for server-side API handlers
+// (Vite only loads .env for client-side import.meta.env, not process.env)
+try {
+  const envPath = path.resolve(process.cwd(), '.env');
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    for (const line of envContent.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const idx = trimmed.indexOf('=');
+      if (idx > 0) {
+        const key = trimmed.substring(0, idx).trim();
+        const value = trimmed.substring(idx + 1).trim();
+        if (!process.env[key]) {
+          process.env[key] = value;
+        }
+      }
+    }
+  }
+} catch (e) {
+  console.warn('Failed to load .env for dev API handlers:', e.message);
+}
 
 // Local development serverless API adapter for Vite
 function devApiPlugin() {

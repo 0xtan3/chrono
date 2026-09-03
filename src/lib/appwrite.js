@@ -93,43 +93,28 @@ export async function loginUser(email, password) {
 }
 
 /**
- * Verify user email via Resend/Appwrite Token verification endpoint.
+ * Verify user email via server-side token validation endpoint.
  */
 export async function verifyUserEmail(userId, secret) {
-  try {
-    const res = await fetch('/api/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, secret }),
-    });
+  const res = await fetch('/api/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, secret }),
+  });
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      // Also try fallback client verification
-      try {
-        return await account.updateVerification(userId, secret);
-      } catch {
-        throw new Error(errData.error || 'Email verification link is invalid or expired.');
-      }
-    }
+  const data = await res.json().catch(() => ({}));
 
-    return { success: true };
-  } catch (err) {
-    // If token already consumed or user already verified
-    try {
-      const u = await account.get();
-      if (u && u.emailVerification) {
-        return u;
-      }
-    } catch {}
-    throw err;
+  if (!res.ok) {
+    throw new Error(data.error || 'Email verification link is invalid or expired.');
   }
+
+  return data;
 }
 
 /**
  * Resend verification email via Resend.
  */
-export async function resendVerificationEmail(email, password) {
+export async function resendVerificationEmail(email) {
   const verifyUrl = getVerifyUrl();
   const res = await fetch('/api/send-verification', {
     method: 'POST',
@@ -140,12 +125,19 @@ export async function resendVerificationEmail(email, password) {
     }),
   });
 
+  const data = await res.json().catch(() => ({}));
+
   if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error || 'Failed to dispatch verification email via Resend.');
+    // Surface rate limit info
+    if (res.status === 429 && data.retryAfter) {
+      const err = new Error(data.error);
+      err.retryAfter = data.retryAfter;
+      throw err;
+    }
+    throw new Error(data.error || 'Failed to send verification email.');
   }
 
-  return { success: true };
+  return data;
 }
 
 /**

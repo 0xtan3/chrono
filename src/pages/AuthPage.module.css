@@ -213,6 +213,12 @@
   font-weight: 600;
 }
 
+.resendCooldown {
+  font-size: .74rem;
+  color: #34d399;
+  font-weight: 600;
+}
+
 /* Form */
 .form {
   display: flex;

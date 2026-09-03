@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerUser, loginUser, resendVerificationEmail } from '../lib/appwrite';
 import { useStore } from '../store';
@@ -14,9 +14,12 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [showResend, setShowResend] = useState(false); // Show resend for both register + unverified login
+  const [resendEmail, setResendEmail] = useState('');   // The email to resend to
   const [resending, setResending] = useState(false);
   const [resendDone, setResendDone] = useState(false);
+  const [cooldown, setCooldown] = useState(0);          // Cooldown seconds remaining
+  const cooldownRef = useRef(null);
   
   // Phone detection (iPhones, Android mobile, small screens)
   const [isPhone, setIsPhone] = useState(() => isPhoneDevice());
@@ -29,6 +32,24 @@ export default function AuthPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Cooldown countdown timer
+  useEffect(() => {
+    if (cooldown <= 0) {
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+      return;
+    }
+    cooldownRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) {
+          clearInterval(cooldownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(cooldownRef.current);
+  }, [cooldown]);
+
   const navigate = useNavigate();
   const initAuth = useStore(s => s.initAuth);
 
@@ -37,18 +58,27 @@ export default function AuthPage() {
     return <ScreenGate showBackLink={true} />;
   }
 
+  const startCooldown = (seconds = 60) => {
+    setCooldown(seconds);
+    setResendDone(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setUnverifiedEmail('');
+    setShowResend(false);
+    setResendDone(false);
     setLoading(true);
 
     try {
       if (tab === 'register') {
         if (!name.trim()) throw new Error('Please enter your name.');
         await registerUser(email, password, name);
-        setSuccess('Account created! We sent a verification email to your address. Please verify your email before logging in.');
+        setSuccess('Account created! We sent a verification email to your inbox. Please verify before logging in.');
+        setResendEmail(email);
+        setShowResend(true);
+        startCooldown(60);
         setTab('login');
         setPassword('');
       } else {
@@ -58,7 +88,8 @@ export default function AuthPage() {
       }
     } catch (err) {
       if (err.message === 'EMAIL_NOT_VERIFIED') {
-        setUnverifiedEmail(email);
+        setResendEmail(err.email || email);
+        setShowResend(true);
         setError('Your email is not verified yet. Please check your inbox and click the verification link.');
       } else {
         setError(err.message || 'Authentication failed. Please check your credentials.');
@@ -69,7 +100,7 @@ export default function AuthPage() {
   };
 
   const handleResend = async () => {
-    const target = unverifiedEmail || email;
+    const target = resendEmail || email;
     if (!target) {
       setError('Please enter your email address above to resend the verification link.');
       return;
@@ -78,9 +109,14 @@ export default function AuthPage() {
     setError('');
     try {
       await resendVerificationEmail(target);
-      setResendDone(true);
+      startCooldown(60);
     } catch (err) {
-      setError(err.message || 'Failed to resend verification email via Resend.');
+      // Handle rate limit with server-provided retry time
+      if (err.retryAfter) {
+        setCooldown(err.retryAfter);
+        setResendDone(true);
+      }
+      setError(err.message || 'Failed to resend verification email.');
     } finally {
       setResending(false);
     }
@@ -131,14 +167,16 @@ export default function AuthPage() {
         {error && <div className={styles.errorBanner}>{error}</div>}
         {success && <div className={styles.successBanner}>{success}</div>}
 
-        {/* Resend Verification Notice */}
-        {unverifiedEmail && (
+        {/* Resend Verification Notice — shown after registration OR unverified login */}
+        {showResend && (
           <div className={styles.resendBox}>
             <p className={styles.resendText}>
-              Didn't get the verification email?
+              Didn't get the verification email? Check spam/junk too.
             </p>
-            {resendDone ? (
-              <p className={styles.resendSuccess}>✓ Verification link dispatched via Resend!</p>
+            {cooldown > 0 ? (
+              <p className={styles.resendCooldown}>
+                ✓ Email sent! You can resend in {cooldown}s
+              </p>
             ) : (
               <button
                 type="button"
@@ -146,7 +184,7 @@ export default function AuthPage() {
                 onClick={handleResend}
                 disabled={resending}
               >
-                {resending ? 'Sending...' : 'Resend Verification Email via Resend'}
+                {resending ? 'Sending...' : 'Resend Verification Email'}
               </button>
             )}
           </div>
