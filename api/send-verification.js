@@ -80,9 +80,14 @@ export default async function handler(req, res) {
     }
 
     // Build verification URL
-    const baseUrl = verifyUrl || process.env.VITE_APP_URL
-      ? `${(verifyUrl || process.env.VITE_APP_URL).replace(/\/$/, '')}/verify`
-      : 'https://chrono.tenazity.com/verify';
+    let baseUrl;
+    if (verifyUrl) {
+      baseUrl = verifyUrl;
+    } else if (process.env.VITE_APP_URL) {
+      baseUrl = `${process.env.VITE_APP_URL.replace(/\/$/, '')}/verify`;
+    } else {
+      baseUrl = 'https://chrono.tenazity.com/verify';
+    }
     const cleanVerifyUrl = `${baseUrl}?userId=${encodeURIComponent(targetUserId)}&secret=${encodeURIComponent(secret)}`;
 
     // Branded HTML Email Template
@@ -189,7 +194,7 @@ export default async function handler(req, res) {
         console.error('Both custom and fallback email sends failed.');
         console.error('Custom domain error:', sendError?.message);
         console.error('Fallback error:', e2.message);
-        throw new Error(`Failed to send verification email: ${e2.message}`);
+        throw new Error(`Custom domain failed: ${sendError?.message}. Fallback also failed: ${e2.message}`);
       }
     }
 
