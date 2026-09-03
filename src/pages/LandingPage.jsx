@@ -139,7 +139,7 @@ export default function LandingPage() {
         </h1>
 
         <p className={styles.heroSubtitle}>
-          Ditch 25-minute baby timers. CHRONO fuses structured 90-minute Deep Work cycles with an addictive RPG progression system. Earn XP, stack streak multipliers, and turn brutal study sessions into a daily obsession.
+          Ditch 25-minute baby timers. CHRONO fuses structured 90-minute Deep Work cycles with an addictive RPG progression system. Earn XP, stack streak multipliers, and climb the Global Leaderboard to turn brutal study sessions into a daily obsession.
         </p>
 
         <div className={styles.heroCtaGroup}>
@@ -261,7 +261,7 @@ export default function LandingPage() {
           <span>● REAL-TIME 40HZ GAMMA ACOUSTIC ENTRAINMENT</span>
           <span>● 3.0X STREAK MULTIPLIER ENGINE</span>
           <span>● VARIABLE-RATIO DOPAMINE DROPS</span>
-          <span>● 50+ COGNITIVE PRESTIGE RANKS</span>
+          <span>● GLOBAL LEADERBOARD & PRESTIGE RANKS</span>
           <span>● ZERO DISTRACTIONS // MAXIMUM RETENTION</span>
           <span>● 90M ULTRADIAN PROTOCOL</span>
           <span>● REAL-TIME 40HZ GAMMA ACOUSTIC ENTRAINMENT</span>
