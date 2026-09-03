@@ -11,6 +11,7 @@ import DailyProgressBar from '../components/DailyProgressBar';
 import DurationPicker from '../components/DurationPicker';
 import FocusLogModal from '../components/FocusLogModal';
 import XPToast from '../components/XPToast';
+import Avatar from '../components/Avatar';
 import { startBinauralBeats, startPinkNoise, stopSoundscape } from '../utils/audio';
 import styles from './TimerPage.module.css';
 
@@ -204,8 +205,21 @@ export default function TimerPage() {
           <h1 className={styles.title}>CHRONO</h1>
         </div>
 
-        {/* Level & Rank Badge (Clickable to open Command Center) */}
-        <LevelBadge onClick={() => setShowCommandCenter(true)} />
+        <div className={styles.headerRight}>
+          <Link to="/leaderboard" className={styles.leaderboardIconBtn} title="View Leaderboard" aria-label="Leaderboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+              <path d="M4 22h16"></path>
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+              <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+            </svg>
+          </Link>
+          <StreakBadge />
+          {/* Level & Rank Badge (Clickable to open Command Center) */}
+          <LevelBadge onClick={() => setShowCommandCenter(true)} />
+        </div>
       </header>
 
       {/* Center Main Focus Container */}
@@ -263,19 +277,9 @@ export default function TimerPage() {
       <footer className={styles.bottomDock}>
         <div className={styles.dockLeft}>
           <DurationPicker />
+        </div>
 
-          {/* Soundscape Selector (40Hz Gamma Beat / Pink Noise) */}
-          <select
-            value={soundscapeType}
-            onChange={(e) => setSoundscape(e.target.value)}
-            className={styles.soundscapeSelect}
-            title="Acoustic Enhancer"
-          >
-            <option value="40hz">🧠 40Hz Gamma Focus</option>
-            <option value="pink">🌊 Pink Noise</option>
-            <option value="none">🔇 Soundscape Off</option>
-          </select>
-
+        <div className={styles.dockRight}>
           {/* Visual Primer Warmup Toggle */}
           <button
             className={`${styles.dockIconBtn} ${warmupEnabled ? styles.activeWarmup : ''}`}
@@ -288,22 +292,19 @@ export default function TimerPage() {
               <circle cx="12" cy="12" r="3" />
             </svg>
           </button>
-        </div>
 
-        <div className={styles.dockRight}>
-          <StreakBadge />
-
-          {/* Activity / Study Command Center Modal Button */}
-          <button
-            className={styles.dockIconBtn}
-            onClick={() => setShowCommandCenter(true)}
-            aria-label="Open Study Command Center"
-            title="Study Command Center"
+          {/* Soundscape Selector (40Hz Gamma Beat / Pink Noise) */}
+          <select
+            value={soundscapeType}
+            onChange={(e) => setSoundscape(e.target.value)}
+            className={styles.soundscapeSelect}
+            title="Acoustic Enhancer"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
-          </button>
+            <option value="40hz">🧠 40Hz Gamma</option>
+            <option value="pink">🌊 Pink Noise</option>
+            <option value="none">🔇 Soundscape Off</option>
+          </select>
+
 
           {/* Audio Chime Mute/Unmute */}
           <button
@@ -326,16 +327,6 @@ export default function TimerPage() {
             )}
           </button>
 
-          {/* User Auth Avatar / Login */}
-          {user ? (
-            <button className={styles.userBadge} onClick={logout} title={`Logged in as ${user.name || 'User'} (${user.email}) - Click to logout`}>
-              <span className={styles.userInitial}>{user.name ? user.name[0].toUpperCase() : 'U'}</span>
-            </button>
-          ) : (
-            <Link to="/login" className={styles.loginBtn} title="Login or Register to sync XP & Streaks across devices">
-              Log In
-            </Link>
-          )}
         </div>
       </footer>
     </div>

@@ -25,9 +25,6 @@ async function sendEmailWithFallback(resend, { to, subject, html }) {
   }
 }
 
-/**
- * Build a branded HTML email for streak notifications.
- */
 function buildStreakEmail({ subject, bodyHtml }) {
   return `
 <!DOCTYPE html>
@@ -37,32 +34,33 @@ function buildStreakEmail({ subject, bodyHtml }) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${subject}</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#111827;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;padding:40px 20px;">
+<body style="margin:0;padding:0;background-color:#06080F;font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e8ecff;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#06080F;padding:40px 20px;">
     <tr>
       <td align="center">
-        <table width="100%" style="max-width:520px;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:40px 32px;text-align:left;">
+        <table width="100%" style="max-width:480px;background:linear-gradient(145deg, #101424, #0b0d18);border:1px solid rgba(124, 58, 237, 0.2);border-radius:16px;padding:40px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.5), inset 0 0 40px rgba(124, 58, 237, 0.05);">
           <tr>
-            <td style="padding-bottom:24px;border-bottom:1px solid #f3f4f6;">
-              <span style="font-size:18px;font-weight:800;letter-spacing:0.1em;color:#111827;">CHRONO</span>
+            <td style="padding-bottom:30px;">
+              <span style="font-size:22px;font-weight:900;letter-spacing:0.15em;color:#fff;text-shadow:0 0 20px rgba(124, 58, 237, 0.8);">CHRONO</span>
             </td>
           </tr>
           <tr>
-            <td style="padding-top:32px;">
+            <td style="padding-top:10px;text-align:center;font-size:16px;line-height:1.6;color:#a1a1aa;">
               ${bodyHtml}
             </td>
           </tr>
           <tr>
-            <td style="padding-top:32px;">
-              <a href="https://chrono.tenazity.com" style="display:inline-block;background-color:#111827;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;padding:12px 24px;border-radius:6px;">
-                Open Chrono
+            <td style="padding-top:40px;">
+              <a href="https://chrono.tenazity.com" style="display:inline-block;background:linear-gradient(135deg, #7c3aed, #a855f7);color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 32px;border-radius:8px;letter-spacing:0.02em;box-shadow:0 4px 15px rgba(124, 58, 237, 0.4);">
+                ENTER THE MATRIX
               </a>
             </td>
           </tr>
           <tr>
-            <td style="padding-top:32px;border-top:1px solid #f3f4f6;margin-top:32px;">
-              <p style="font-size:12px;color:#9ca3af;margin:0;">
-                You are receiving this because you have an active account. Manage your notifications in your account settings.
+            <td style="padding-top:40px;border-top:1px solid rgba(255,255,255,0.05);margin-top:40px;">
+              <p style="font-size:12px;color:#52525b;margin:0;line-height:1.5;">
+                You're receiving this because you're actively building a focus habit on Chrono.<br>
+                Keep the momentum going.
               </p>
             </td>
           </tr>
@@ -140,16 +138,28 @@ export default async function handler(req, res) {
         let userFreezes = streakFreezes !== undefined ? streakFreezes : 1;
         
         let userTodayStr = today;
+        let localHour = 0;
         try {
           const formatter = new Intl.DateTimeFormat('en-CA', {
             timeZone: userTz,
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
+            hour: '2-digit',
+            hourCycle: 'h23'
           });
-          userTodayStr = formatter.format(new Date());
+          const parts = formatter.formatToParts(new Date());
+          let y, m, d;
+          for (const part of parts) {
+            if (part.type === 'year') y = part.value;
+            if (part.type === 'month') m = part.value;
+            if (part.type === 'day') d = part.value;
+            if (part.type === 'hour') localHour = parseInt(part.value, 10);
+          }
+          userTodayStr = `${y}-${m}-${d}`;
         } catch (e) {
           userTodayStr = today;
+          localHour = new Date().getUTCHours();
         }
         
         if (lastActiveDate !== userTodayStr) {
@@ -162,7 +172,7 @@ export default async function handler(req, res) {
           let shouldSend = false;
 
           if (streak > 0) {
-            if (daysSinceActive === 1) {
+            if (daysSinceActive === 1 && localHour === 20) {
               // About to lose streak
               subject = `Keep your ${streak}-day streak alive`;
               bodyHtml = `
@@ -175,7 +185,7 @@ export default async function handler(req, res) {
                 </p>
               `;
               shouldSend = true;
-            } else if (daysSinceActive === 2) {
+            } else if (daysSinceActive === 2 && localHour === 1) {
               // Lost (Check freezes first)
               if (userFreezes > 0) {
                 try {

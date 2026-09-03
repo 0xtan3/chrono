@@ -144,6 +144,7 @@ function persist(s) {
       timezone: s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : (current.streakFreezes ?? 1),
       focusLog: s.focusLog || current.focusLog || [],
+      avatarId: s.avatarId || current.avatarId || 'avatar-1',
     }));
   } catch { }
 }
@@ -183,6 +184,7 @@ export const useStore = create((set, get) => ({
             shownMs: cloudStats.shownMs || [],
             focusLog: cloudStats.focusLog || [],
             dailyGoalMinutes: localS.dailyGoalMinutes || 120,
+            avatarId: cloudStats.avatarId || 'avatar-1',
           };
 
           let finalData = loadedData;
@@ -217,6 +219,12 @@ export const useStore = create((set, get) => ({
     }
   },
 
+  setAvatar: (avatarId) => {
+    set({ avatarId });
+    persist(get());
+    get().syncCloudStats();
+  },
+
   setUser(user) {
     set({ user });
     if (user) get().syncCloudStats();
@@ -235,6 +243,7 @@ export const useStore = create((set, get) => ({
       totalXP: 0,
       targetIntent: '',
       shownMs: [],
+      avatarId: 'avatar-1',
     };
     set(clearedState);
     persist(clearedState);
@@ -254,6 +263,8 @@ export const useStore = create((set, get) => ({
       timezone: s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : 1,
       focusLog: s.focusLog || [],
+      displayName: s.user?.name || '',
+      avatarId: s.avatarId || 'avatar-1',
     };
     const res = await saveUserStats(s.user.$id, statsData, s.userDocId);
     if (res && res.$id) {
@@ -272,6 +283,7 @@ export const useStore = create((set, get) => ({
   focusLog: initialData.focusLog || [],
   timezone: initialData.timezone,
   streakFreezes: initialData.streakFreezes ?? 1,
+  avatarId: initialData.avatarId || 'avatar-1',
 
   activeToastReward: null, // { tier, xp, label, isLevelUp, newLevel }
   clearToastReward: () => set({ activeToastReward: null }),
@@ -485,6 +497,13 @@ export const useStore = create((set, get) => ({
       mins: (days[today].mins || 0) + focusMins,
       xp: (days[today].xp || 0) + totalSessionXP,
     };
+
+    // Cap days history to last 365 days to prevent hitting Appwrite 64KB limit
+    const dayKeys = Object.keys(days).sort();
+    if (dayKeys.length > 365) {
+      const keysToRemove = dayKeys.slice(0, dayKeys.length - 365);
+      keysToRemove.forEach((k) => delete days[k]);
+    }
 
     let streak = s.streak;
     let lastActiveDate = s.lastActiveDate;

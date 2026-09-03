@@ -1,18 +1,18 @@
 import React from 'react';
 import { useStore, calculateLevel, getStreakMultiplier } from '../store';
+import Avatar from './Avatar';
 import styles from './LevelBadge.module.css';
 
 export default function LevelBadge({ onClick }) {
   const totalXP = useStore((s) => s.totalXP);
   const streak = useStore((s) => s.streak);
-  const { level, title, rankIcon, rankColor, xpInLevel, xpNeeded, progressPercent } = calculateLevel(totalXP);
+  const avatarId = useStore((s) => s.avatarId);
+  const { level, title, rankColor, xpInLevel, xpNeeded, progressPercent } = calculateLevel(totalXP);
   const multiplier = getStreakMultiplier(streak);
 
   return (
-    <button className={styles.badgeContainer} onClick={onClick} title="Click to view Study Rank & Level Progress">
-      <div className={styles.rankIconWrap} style={{ borderColor: rankColor }}>
-        <span className={styles.rankIcon}>{rankIcon}</span>
-      </div>
+    <button className={styles.badgeContainer} onClick={onClick} title="Click to open Command Center">
+      <Avatar id={avatarId || 'avatar-1'} size="md" />
 
       <div className={styles.infoCol}>
         <div className={styles.topRow}>

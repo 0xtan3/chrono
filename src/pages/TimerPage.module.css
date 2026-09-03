@@ -45,6 +45,38 @@
   color: #fff;
 }
 
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.leaderboardIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(232, 236, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+.leaderboardIconBtn svg {
+  width: 20px;
+  height: 20px;
+}
+.leaderboardIconBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+  transform: translateY(-1px);
+}
+
 /* ── Center Stage Container ─────────────────────────────────────────────────── */
 .centerStage {
   display: flex;

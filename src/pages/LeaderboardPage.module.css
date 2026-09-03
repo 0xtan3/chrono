@@ -1,0 +1,254 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem;
+}
+
+.bgGlow1, .bgGlow2 {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  z-index: -1;
+  opacity: 0.15;
+}
+
+.bgGlow1 {
+  top: -10%; left: -10%;
+  width: 50vw; height: 50vw;
+  background: var(--accent);
+}
+
+.bgGlow2 {
+  bottom: -20%; right: -10%;
+  width: 60vw; height: 60vw;
+  background: #3b82f6;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  max-width: 800px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.25em;
+  color: #fff;
+  text-decoration: none;
+}
+
+.brandDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.backLink {
+  color: rgba(232, 236, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: #fff;
+}
+
+.mainContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.leaderboardCard {
+  width: 100%;
+  max-width: 800px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  min-height: 500px;
+}
+
+.cardHeader {
+  padding: 2rem 2rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 0.4rem 0;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: rgba(232, 236, 255, 0.6);
+  margin: 0;
+}
+
+.loadingState, .emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(232, 236, 255, 0.5);
+  font-weight: 500;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.listContainer {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background 0.2s;
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.isMe {
+  background: rgba(124, 58, 237, 0.08);
+  border-left: 3px solid var(--accent);
+}
+
+.isMe:hover {
+  background: rgba(124, 58, 237, 0.12);
+}
+
+.rankCol {
+  width: 50px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: rgba(232, 236, 255, 0.4);
+  text-align: center;
+}
+
+.userCol {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 1rem;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.userName {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.youBadge {
+  font-size: 0.7rem;
+  background: rgba(124, 58, 237, 0.3);
+  color: #c084fc;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.userLevel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.statsCol {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.statBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+}
+
+.statLabel {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(232, 236, 255, 0.4);
+}
+
+.statVal {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.statValXP {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+}
+
+@media (max-width: 600px) {
+  .row {
+    padding: 1rem;
+  }
+  .statsCol {
+    gap: 1rem;
+  }
+  .rankCol {
+    width: 30px;
+    font-size: 1rem;
+  }
+}

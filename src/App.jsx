@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage';
 import TimerPage from './pages/TimerPage';
 import AuthPage from './pages/AuthPage';
 import VerifyPage from './pages/VerifyPage';
+import LeaderboardPage from './pages/LeaderboardPage';
 import { useStore } from './store';
 import { requestNotificationPermission, sendStreakWarningNotification } from './utils/notifications';
 
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/welcome" element={<LandingPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/verify" element={<VerifyPage />} />
+          <Route path="/leaderboard" element={<AuthGuard><LeaderboardPage /></AuthGuard>} />
           <Route path="/" element={<AuthGuard><TimerPage /></AuthGuard>} />
         </Routes>
       </BrowserRouter>

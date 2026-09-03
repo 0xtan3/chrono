@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   useStore, 
   calculateLevel, 
@@ -6,6 +7,8 @@ import {
   ALL_BADGES, 
   todayStr 
 } from '../store';
+import { AVATARS } from './Avatar';
+import Avatar from './Avatar';
 import styles from './FocusLogModal.module.css';
 
 export default function FocusLogModal({ isOpen, onClose }) {
@@ -19,6 +22,10 @@ export default function FocusLogModal({ isOpen, onClose }) {
   const timezone         = useStore((s) => s.timezone);
   const dailyGoalMinutes = useStore((s) => s.dailyGoalMinutes) || 120;
   const rateSession      = useStore((s) => s.rateSession);
+  const avatarId         = useStore((s) => s.avatarId);
+  const setAvatar        = useStore((s) => s.setAvatar);
+  const user             = useStore((s) => s.user);
+  const logout           = useStore((s) => s.logout);
 
   const levelInfo = calculateLevel(totalXP);
   const multiplier = getStreakMultiplier(streak);
@@ -76,12 +83,23 @@ export default function FocusLogModal({ isOpen, onClose }) {
             <span className={styles.commandIcon}>⚡</span>
             <h2 className={styles.title}>Study Command Center</h2>
           </div>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Close command center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+          <div className={styles.headerActions}>
+            {user ? (
+              <button className={styles.authBtn} onClick={logout} title={`Logged in as ${user.name || 'User'}`}>
+                Log Out
+              </button>
+            ) : (
+              <Link to="/login" className={styles.authBtnPrimary}>
+                Log In
+              </Link>
+            )}
+            <button className={styles.closeBtn} onClick={onClose} aria-label="Close command center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Level & Rank Showcase Hero Card */}
@@ -148,6 +166,12 @@ export default function FocusLogModal({ isOpen, onClose }) {
             onClick={() => setActiveTab('badges')}
           >
             🏆 Milestone Badges ({shownMs.length}/{ALL_BADGES.length})
+          </button>
+          <button 
+            className={`${styles.viewTabBtn} ${activeTab === 'profile' ? styles.activeViewTab : ''}`}
+            onClick={() => setActiveTab('profile')}
+          >
+            👤 Identity
           </button>
         </div>
 
@@ -230,6 +254,26 @@ export default function FocusLogModal({ isOpen, onClose }) {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {activeTab === 'profile' && (
+            <div className={styles.profileView}>
+              <h3 className={styles.sectionTitle}>Select Identity Matrix</h3>
+              <p className={styles.sectionSub}>Choose your visual signature for the Chrono leaderboard.</p>
+              
+              <div className={styles.avatarGrid}>
+                {AVATARS.map((a) => (
+                  <button 
+                    key={a.id} 
+                    className={`${styles.avatarSelectBtn} ${avatarId === a.id ? styles.avatarActive : ''}`}
+                    onClick={() => setAvatar(a.id)}
+                  >
+                    <Avatar id={a.id} size="lg" />
+                    <span className={styles.avatarName} style={{ color: a.color }}>{a.name}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

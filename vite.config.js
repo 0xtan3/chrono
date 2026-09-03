@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import sendVerificationHandler from './api/send-verification.js';
 import verifyHandler from './api/verify.js';
 import cronHandler from './api/cron.js';
+import leaderboardHandler from './api/leaderboard.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -78,6 +79,8 @@ function devApiPlugin() {
             return await verifyHandler(adaptedReq, adaptedRes);
           } else if (urlObj.pathname === '/api/cron') {
             return await cronHandler(adaptedReq, adaptedRes);
+          } else if (urlObj.pathname === '/api/leaderboard') {
+            return await leaderboardHandler(adaptedReq, adaptedRes);
           }
         } catch (err) {
           console.error('Dev API Error:', err);

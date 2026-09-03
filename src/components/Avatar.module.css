@@ -1,0 +1,33 @@
+.avatarContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--avatar-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 0 0 15px var(--avatar-glow);
+  transition: all 0.3s ease;
+}
+
+.avatarContainer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at center, var(--avatar-glow) 0%, transparent 70%);
+  opacity: 0.8;
+}
+
+.emoji {
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  user-select: none;
+}
+
+/* Sizes */
+.sm { width: 32px; height: 32px; font-size: 16px; }
+.md { width: 48px; height: 48px; font-size: 24px; }
+.lg { width: 64px; height: 64px; font-size: 32px; }
+.xl { width: 96px; height: 96px; font-size: 48px; }
