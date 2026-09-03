@@ -299,7 +299,7 @@ export const useStore = create((set, get) => ({
   warmupEnabled: true,   // Visual Primer 60s
   toggleWarmup: () => set((s) => ({ warmupEnabled: !s.warmupEnabled })),
   
-  soundscapeType: '40hz', // 'none' | '40hz' | 'pink'
+  soundscapeType: 'none', // 'none' | '40hz' | 'pink'
   setSoundscape: (type) => set({ soundscapeType: type }),
 
   soundEnabled: true,

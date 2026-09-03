@@ -88,9 +88,20 @@ export default function AuthPage() {
       }
     } catch (err) {
       if (err.message === 'EMAIL_NOT_VERIFIED') {
-        setResendEmail(err.email || email);
+        const targetEmail = err.email || email;
+        setResendEmail(targetEmail);
         setShowResend(true);
-        setError('Your email is not verified yet. Please check your inbox and click the verification link.');
+        setError('Your email is not verified yet. We just sent a new verification link to your inbox. Please check your spam folder too.');
+        
+        // Auto-resend in background
+        resendVerificationEmail(targetEmail).then(() => {
+          startCooldown(60);
+        }).catch((e) => {
+          if (e.retryAfter) {
+            setCooldown(e.retryAfter);
+            setResendDone(true);
+          }
+        });
       } else {
         setError(err.message || 'Authentication failed. Please check your credentials.');
       }

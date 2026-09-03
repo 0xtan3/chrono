@@ -99,44 +99,44 @@ export default async function handler(req, res) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Verify your CHRONO Account</title>
 </head>
-<body style="margin:0;padding:0;background-color:#080b12;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e8ecff;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#080b12;padding:40px 20px;">
+<body style="margin:0;padding:0;background-color:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#111827;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;padding:40px 20px;">
     <tr>
       <td align="center">
-        <table width="100%" style="max-width:520px;background:linear-gradient(145deg, #101424, #0d101d);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px 32px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.6);">
+        <table width="100%" style="max-width:520px;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:40px 32px;text-align:left;">
           <tr>
-            <td align="center">
-              <div style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#8b5cf6;margin-right:8px;box-shadow:0 0 12px #8b5cf6;"></div>
-              <span style="font-size:22px;font-weight:900;letter-spacing:0.25em;color:#ffffff;text-transform:uppercase;">CHRONO</span>
+            <td style="padding-bottom:24px;border-bottom:1px solid #f3f4f6;">
+              <span style="font-size:18px;font-weight:800;letter-spacing:0.1em;color:#111827;">CHRONO</span>
             </td>
           </tr>
           <tr>
-            <td align="center" style="padding-top:24px;">
-              <h1 style="font-size:24px;font-weight:800;color:#ffffff;margin:0 0 12px 0;">Verify Your Email</h1>
-              <p style="font-size:15px;line-height:1.6;color:rgba(232,236,255,0.7);margin:0 0 28px 0;">
-                Welcome${targetName ? `, <strong>${targetName}</strong>` : ''}! You are one step away from unlocking your Deep Work protocols, study streaks, and XP progression.
+            <td style="padding-top:32px;">
+              <h1 style="font-size:20px;font-weight:700;color:#111827;margin:0 0 16px 0;">Verify your email address</h1>
+              <p style="font-size:15px;line-height:1.6;color:#4b5563;margin:0 0 32px 0;">
+                Hi${targetName ? ` ${targetName}` : ''},<br><br>
+                Welcome to Chrono. To complete your registration and secure your account, please verify your email address.
               </p>
             </td>
           </tr>
           <tr>
-            <td align="center">
-              <a href="${cleanVerifyUrl}" style="display:inline-block;background:linear-gradient(135deg, #7c3aed, #4f46e5);color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 34px;border-radius:999px;box-shadow:0 4px 20px rgba(124,58,237,0.4);">
-                Verify Email Address ⚡
+            <td>
+              <a href="${cleanVerifyUrl}" style="display:inline-block;background-color:#111827;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;padding:12px 24px;border-radius:6px;">
+                Verify Email
               </a>
             </td>
           </tr>
           <tr>
-            <td align="center" style="padding-top:28px;">
-              <p style="font-size:12px;color:rgba(232,236,255,0.4);line-height:1.5;margin:0;">
-                Or copy and paste this link in your browser:<br>
-                <a href="${cleanVerifyUrl}" style="color:#a78bfa;word-break:break-all;font-size:11px;">${cleanVerifyUrl}</a>
+            <td style="padding-top:32px;">
+              <p style="font-size:13px;color:#6b7280;line-height:1.5;margin:0;">
+                Or copy and paste this link into your browser:<br>
+                <a href="${cleanVerifyUrl}" style="color:#2563eb;word-break:break-all;">${cleanVerifyUrl}</a>
               </p>
             </td>
           </tr>
           <tr>
-            <td align="center" style="padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);margin-top:24px;">
-              <p style="font-size:11px;color:rgba(232,236,255,0.3);margin:0;">
-                This link expires in 24 hours. If you did not create a CHRONO account, you can safely ignore this email.
+            <td style="padding-top:32px;margin-top:32px;border-top:1px solid #f3f4f6;">
+              <p style="font-size:12px;color:#9ca3af;margin:0;">
+                If you didn't request this email, you can safely ignore it. This link will expire in 24 hours.
               </p>
             </td>
           </tr>
