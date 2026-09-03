@@ -133,34 +133,9 @@ export default async function handler(req, res) {
         const { userId, streak, lastActiveDate, timezone, streakFreezes } = stat;
         
         if (!lastActiveDate) return;
-
-        const userTz = timezone || 'UTC';
-        let userFreezes = streakFreezes !== undefined ? streakFreezes : 1;
         
-        let userTodayStr = today;
-        let localHour = 0;
-        try {
-          const formatter = new Intl.DateTimeFormat('en-CA', {
-            timeZone: userTz,
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            hourCycle: 'h23'
-          });
-          const parts = formatter.formatToParts(new Date());
-          let y, m, d;
-          for (const part of parts) {
-            if (part.type === 'year') y = part.value;
-            if (part.type === 'month') m = part.value;
-            if (part.type === 'day') d = part.value;
-            if (part.type === 'hour') localHour = parseInt(part.value, 10);
-          }
-          userTodayStr = `${y}-${m}-${d}`;
-        } catch (e) {
-          userTodayStr = today;
-          localHour = new Date().getUTCHours();
-        }
+        // Standardize globally on UTC for the daily run
+        const userTodayStr = today;
         
         if (lastActiveDate !== userTodayStr) {
           const lastActiveTime = new Date(lastActiveDate).getTime();
@@ -170,23 +145,24 @@ export default async function handler(req, res) {
           let subject = null;
           let bodyHtml = null;
           let shouldSend = false;
+          let userFreezes = streakFreezes !== undefined ? streakFreezes : 1;
 
           if (streak > 0) {
-            if (daysSinceActive === 1 && localHour === 20) {
-              // About to lose streak
+            if (daysSinceActive === 1) {
+              // Warning - sent at 20:00 UTC, they still have time depending on timezone
               subject = `Keep your ${streak}-day streak alive`;
               bodyHtml = `
-                <h1 style="font-size:20px;font-weight:700;color:#111827;margin:0 0 16px 0;">Your streak is at risk</h1>
-                <p style="font-size:15px;line-height:1.6;color:#4b5563;margin:0 0 16px 0;">
+                <h1 style="font-size:20px;font-weight:700;color:#ffffff;margin:0 0 16px 0;">Your streak is at risk</h1>
+                <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0 0 16px 0;">
                   You are about to lose your <strong>${streak}-day</strong> focus streak on Chrono.
                 </p>
-                <p style="font-size:15px;line-height:1.6;color:#4b5563;margin:0;">
+                <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0;">
                   Complete a quick session today to keep your momentum going.
                 </p>
               `;
               shouldSend = true;
-            } else if (daysSinceActive === 2 && localHour === 1) {
-              // Lost (Check freezes first)
+            } else if (daysSinceActive === 2) {
+              // Missed a whole day - Apply Freeze or Reset
               if (userFreezes > 0) {
                 try {
                   const userYesterdayTime = userTodayTime - msPerDay;
@@ -197,11 +173,11 @@ export default async function handler(req, res) {
                   });
                   subject = `Streak Freeze activated`;
                   bodyHtml = `
-                    <h1 style="font-size:20px;font-weight:700;color:#111827;margin:0 0 16px 0;">Streak Freeze activated</h1>
-                    <p style="font-size:15px;line-height:1.6;color:#4b5563;margin:0 0 16px 0;">
+                    <h1 style="font-size:20px;font-weight:700;color:#ffffff;margin:0 0 16px 0;">Streak Freeze activated</h1>
+                    <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0 0 16px 0;">
                       You missed a session yesterday, but your Streak Freeze was automatically applied.
                     </p>
-                    <p style="font-size:15px;line-height:1.6;color:#4b5563;margin:0;">
+                    <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0;">
                       Your <strong>${streak}-day streak</strong> has been protected. Log a session today to keep it going.
                     </p>
                   `;
@@ -213,11 +189,11 @@ export default async function handler(req, res) {
                   streaksReset++;
                   subject = `Your ${streak}-day streak was reset`;
                   bodyHtml = `
-                    <h1 style="font-size:20px;font-weight:700;color:#111827;margin:0 0 16px 0;">Streak reset</h1>
-                    <p style="font-size:15px;line-height:1.6;color:#4b5563;margin:0 0 16px 0;">
+                    <h1 style="font-size:20px;font-weight:700;color:#ffffff;margin:0 0 16px 0;">Streak reset</h1>
+                    <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0 0 16px 0;">
                       You missed a session yesterday and your <strong>${streak}-day streak</strong> has been reset.
                     </p>
-                    <p style="font-size:15px;line-height:1.6;color:#4b5563;margin:0;">
+                    <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0;">
                       Consistency is key. Start a new streak today.
                     </p>
                   `;
@@ -232,11 +208,11 @@ export default async function handler(req, res) {
               if (isPowerOfTwo) {
                 subject = `Ready to get back to it?`;
                 bodyHtml = `
-                  <h1 style="font-size:20px;font-weight:700;color:#111827;margin:0 0 16px 0;">It's been a while</h1>
-                  <p style="font-size:15px;line-height:1.6;color:#4b5563;margin:0 0 16px 0;">
+                  <h1 style="font-size:20px;font-weight:700;color:#ffffff;margin:0 0 16px 0;">It's been a while</h1>
+                  <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0 0 16px 0;">
                     It has been <strong>${daysSinceActive} days</strong> since your last focus session.
                   </p>
-                  <p style="font-size:15px;line-height:1.6;color:#4b5563;margin:0;">
+                  <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0;">
                     Whenever you are ready, jump back in and start building a new habit.
                   </p>
                 `;
