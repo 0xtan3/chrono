@@ -119,7 +119,7 @@ export default function LandingPage() {
             <span className={styles.advisoryTitle}>BEST EXPERIENCED ON DESKTOP</span>
           </div>
           <p className={styles.advisoryText}>
-            For 3D liquid focus visualizers, stereo binaural entrainment, and keyboard shortcuts, switch to your laptop or desktop browser.
+            For 3D plasma energy core visualizers, stereo binaural entrainment, and keyboard shortcuts, switch to your laptop or desktop browser.
           </p>
         </div>
       </div>
@@ -205,7 +205,7 @@ export default function LandingPage() {
                 <div className={styles.phaseContentArea}>
                   <div className={styles.phaseVisualCol}>
                     <div 
-                      className={styles.liquidOrbPreview} 
+                      className={styles.plasmaOrbPreview} 
                       style={{ 
                         borderColor: `${phase.color}40`,
                         boxShadow: `0 0 50px ${phase.glow}` 
