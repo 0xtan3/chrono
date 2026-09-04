@@ -11,40 +11,31 @@ async function run() {
   const dbId = 'focus_timer_db';
   const colId = 'user_stats';
 
-  try {
-    console.log('Adding timezone attribute...');
-    await databases.createStringAttribute(dbId, colId, 'timezone', 255, false);
-    console.log('timezone created.');
-  } catch (e) {
-    if (e.code === 409) console.log('timezone already exists.');
-    else console.error('Error creating timezone:', e.message);
+  const stringAttrs = ['timezone', 'avatarId', 'roadmapData', 'daysData', 'tasksData', 'shownMs', 'displayName', 'lastActiveDate', 'userId'];
+  const intAttrs = ['streakFreezes', 'dailyGoalMinutes', 'streak', 'bestStreak', 'totalXP'];
+
+  for (const attr of stringAttrs) {
+    try {
+      console.log(`Adding ${attr} attribute...`);
+      // Use 1000000 for JSON strings to avoid limit issues, 255 for normal strings
+      const size = ['roadmapData', 'daysData', 'tasksData', 'shownMs'].includes(attr) ? 1000000 : 255;
+      await databases.createStringAttribute(dbId, colId, attr, size, false);
+      console.log(`${attr} created.`);
+    } catch (e) {
+      if (e.code === 409) console.log(`${attr} already exists.`);
+      else console.error(`Error creating ${attr}:`, e.message);
+    }
   }
 
-  try {
-    console.log('Adding streakFreezes attribute...');
-    await databases.createIntegerAttribute(dbId, colId, 'streakFreezes', false, 0, 1000, 1);
-    console.log('streakFreezes created.');
-  } catch (e) {
-    if (e.code === 409) console.log('streakFreezes already exists.');
-    else console.error('Error creating streakFreezes:', e.message);
-  }
-
-  try {
-    console.log('Adding dailyGoalMinutes attribute...');
-    await databases.createIntegerAttribute(dbId, colId, 'dailyGoalMinutes', false, 15, 720, 120);
-    console.log('dailyGoalMinutes created.');
-  } catch (e) {
-    if (e.code === 409) console.log('dailyGoalMinutes already exists.');
-    else console.error('Error creating dailyGoalMinutes:', e.message);
-  }
-
-  try {
-    console.log('Adding avatarId attribute...');
-    await databases.createStringAttribute(dbId, colId, 'avatarId', 255, false, 'avatar-1');
-    console.log('avatarId created.');
-  } catch (e) {
-    if (e.code === 409) console.log('avatarId already exists.');
-    else console.error('Error creating avatarId:', e.message);
+  for (const attr of intAttrs) {
+    try {
+      console.log(`Adding ${attr} attribute...`);
+      await databases.createIntegerAttribute(dbId, colId, attr, false);
+      console.log(`${attr} created.`);
+    } catch (e) {
+      if (e.code === 409) console.log(`${attr} already exists.`);
+      else console.error(`Error creating ${attr}:`, e.message);
+    }
   }
 }
 
