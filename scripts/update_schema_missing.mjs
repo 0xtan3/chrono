@@ -37,6 +37,15 @@ async function run() {
     if (e.code === 409) console.log('dailyGoalMinutes already exists.');
     else console.error('Error creating dailyGoalMinutes:', e.message);
   }
+
+  try {
+    console.log('Adding avatarId attribute...');
+    await databases.createStringAttribute(dbId, colId, 'avatarId', 255, false, 'avatar-1');
+    console.log('avatarId created.');
+  } catch (e) {
+    if (e.code === 409) console.log('avatarId already exists.');
+    else console.error('Error creating avatarId:', e.message);
+  }
 }
 
 run();
