@@ -175,7 +175,11 @@ export async function fetchUserStats(userId) {
     const response = await databases.listDocuments(
       APPWRITE_CONFIG.DATABASE_ID,
       APPWRITE_CONFIG.COLLECTION_ID,
-      [Query.equal('userId', userId)]
+      [
+        Query.equal('userId', userId),
+        Query.orderDesc('$updatedAt'),
+        Query.limit(1)
+      ]
     );
     if (response.documents.length > 0) {
       const doc = response.documents[0];
@@ -197,7 +201,7 @@ export async function fetchUserStats(userId) {
       };
     }
   } catch (e) {
-    console.warn('fetchUserStats error:', e);
+    console.error('fetchUserStats error:', e);
   }
   return null;
 }
@@ -222,11 +226,27 @@ export async function saveUserStats(userId, statsData, docId = null) {
   };
 
   try {
-    if (docId) {
+    let targetDocId = docId;
+    if (!targetDocId) {
+      const existing = await databases.listDocuments(
+        APPWRITE_CONFIG.DATABASE_ID,
+        APPWRITE_CONFIG.COLLECTION_ID,
+        [
+          Query.equal('userId', userId),
+          Query.orderDesc('$updatedAt'),
+          Query.limit(1)
+        ]
+      );
+      if (existing.documents.length > 0) {
+        targetDocId = existing.documents[0].$id;
+      }
+    }
+
+    if (targetDocId) {
       return await databases.updateDocument(
         APPWRITE_CONFIG.DATABASE_ID,
         APPWRITE_CONFIG.COLLECTION_ID,
-        docId,
+        targetDocId,
         payload
       );
     } else {
@@ -243,7 +263,7 @@ export async function saveUserStats(userId, statsData, docId = null) {
       );
     }
   } catch (e) {
-    console.warn('saveUserStats error:', e);
+    console.error('saveUserStats error:', e);
     return null;
   }
 }

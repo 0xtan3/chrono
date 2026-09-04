@@ -119,6 +119,7 @@ const DEFAULT_STATE = {
   focusLog: [],
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   streakFreezes: 1,
+  avatarId: 'avatar-1',
 };
 
 function loadState() {
@@ -174,17 +175,20 @@ export const useStore = create((set, get) => ({
         const cloudStats = await fetchUserStats(u.$id);
         if (cloudStats) {
           const localS = get();
+          // Always preserve cloud avatar if present; fallback to local or default
+          const chosenAvatar = cloudStats.avatarId || localS.avatarId || 'avatar-1';
+
           const loadedData = {
             userDocId: cloudStats.docId,
             streak: cloudStats.streak,
             bestStreak: cloudStats.bestStreak,
-            totalXP: cloudStats.totalXP || localS.totalXP || 0,
+            totalXP: cloudStats.totalXP !== undefined ? cloudStats.totalXP : (localS.totalXP || 0),
             lastActiveDate: cloudStats.lastActiveDate,
             days: cloudStats.days || {},
             shownMs: cloudStats.shownMs || [],
             focusLog: cloudStats.focusLog || [],
             dailyGoalMinutes: cloudStats.dailyGoalMinutes || localS.dailyGoalMinutes || 120,
-            avatarId: cloudStats.avatarId || 'avatar-1',
+            avatarId: chosenAvatar,
           };
 
           let finalData = loadedData;
@@ -195,7 +199,7 @@ export const useStore = create((set, get) => ({
             localS.totalXP > (cloudStats.totalXP || 0) ||
             (localS.lastActiveDate && cloudStats.lastActiveDate && localS.lastActiveDate > cloudStats.lastActiveDate)
           ) {
-            finalData = { ...localS, userDocId: cloudStats.docId };
+            finalData = { ...localS, userDocId: cloudStats.docId, avatarId: chosenAvatar };
             needsSyncUp = true;
           } else {
             finalData = recalcStreak(loadedData);
@@ -205,7 +209,7 @@ export const useStore = create((set, get) => ({
           set(finalData);
           persist(finalData);
           if (needsSyncUp) {
-            get().syncCloudStats();
+            await get().syncCloudStats();
           }
         } else {
           // Fresh user account setup
@@ -213,16 +217,16 @@ export const useStore = create((set, get) => ({
         }
       }
     } catch (e) {
-      console.warn('initAuth error:', e);
+      console.error('initAuth error:', e);
     } finally {
       set({ authLoading: false });
     }
   },
 
-  setAvatar: (avatarId) => {
+  setAvatar: async (avatarId) => {
     set({ avatarId });
     persist(get());
-    get().syncCloudStats();
+    return await get().syncCloudStats();
   },
 
   setUser(user) {
@@ -231,6 +235,14 @@ export const useStore = create((set, get) => ({
   },
 
   async logout() {
+    const s = get();
+    if (s.user) {
+      try {
+        await s.syncCloudStats();
+      } catch (e) {
+        console.warn('Pre-logout sync warning:', e);
+      }
+    }
     await logoutUser();
     const clearedState = {
       user: null,
@@ -251,7 +263,7 @@ export const useStore = create((set, get) => ({
 
   async syncCloudStats() {
     const s = get();
-    if (!s.user) return;
+    if (!s.user) return null;
     const statsData = {
       streak: s.streak,
       bestStreak: s.bestStreak,
@@ -271,6 +283,7 @@ export const useStore = create((set, get) => ({
     if (res && res.$id) {
       set({ userDocId: res.$id });
     }
+    return res;
   },
 
   // ── Gamification State ──────────────────────────────────────
