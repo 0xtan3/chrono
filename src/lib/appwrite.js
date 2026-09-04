@@ -191,6 +191,7 @@ export async function fetchUserStats(userId) {
         customRoadmap: doc.roadmapData ? JSON.parse(doc.roadmapData) : null,
         timezone: doc.timezone || '',
         streakFreezes: doc.streakFreezes !== undefined ? doc.streakFreezes : 1,
+        dailyGoalMinutes: doc.dailyGoalMinutes || 120,
         displayName: doc.displayName || '',
         avatarId: doc.avatarId || 'avatar-1',
       };
@@ -215,6 +216,7 @@ export async function saveUserStats(userId, statsData, docId = null) {
     roadmapData: JSON.stringify(statsData.customRoadmap || null),
     timezone: statsData.timezone || '',
     streakFreezes: statsData.streakFreezes !== undefined ? statsData.streakFreezes : 1,
+    dailyGoalMinutes: statsData.dailyGoalMinutes || 120,
     displayName: statsData.displayName || '',
     avatarId: statsData.avatarId || 'avatar-1',
   };

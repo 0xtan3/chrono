@@ -28,6 +28,15 @@ async function run() {
     if (e.code === 409) console.log('streakFreezes already exists.');
     else console.error('Error creating streakFreezes:', e.message);
   }
+
+  try {
+    console.log('Adding dailyGoalMinutes attribute...');
+    await databases.createIntegerAttribute(dbId, colId, 'dailyGoalMinutes', false, 15, 720, 120);
+    console.log('dailyGoalMinutes created.');
+  } catch (e) {
+    if (e.code === 409) console.log('dailyGoalMinutes already exists.');
+    else console.error('Error creating dailyGoalMinutes:', e.message);
+  }
 }
 
 run();

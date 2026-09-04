@@ -183,7 +183,7 @@ export const useStore = create((set, get) => ({
             days: cloudStats.days || {},
             shownMs: cloudStats.shownMs || [],
             focusLog: cloudStats.focusLog || [],
-            dailyGoalMinutes: localS.dailyGoalMinutes || 120,
+            dailyGoalMinutes: cloudStats.dailyGoalMinutes || localS.dailyGoalMinutes || 120,
             avatarId: cloudStats.avatarId || 'avatar-1',
           };
 
@@ -262,6 +262,7 @@ export const useStore = create((set, get) => ({
       customRoadmap: null,
       timezone: s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : 1,
+      dailyGoalMinutes: s.dailyGoalMinutes || 120,
       focusLog: s.focusLog || [],
       displayName: s.user?.name || '',
       avatarId: s.avatarId || 'avatar-1',
@@ -291,6 +292,7 @@ export const useStore = create((set, get) => ({
   setDailyGoalMinutes: (mins) => {
     set({ dailyGoalMinutes: Math.max(15, Math.min(720, mins)) });
     persist(get());
+    get().syncCloudStats();
   },
 
   // ── Timer & Protocol State ──────────────────────────────────
