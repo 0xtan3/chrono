@@ -59,3 +59,30 @@ export function sendInactivityWarningNotification(daysInactive) {
     tag: 'inactivity-warning'
   });
 }
+
+export function sendSiteSwitchedNotification(onClick) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  const now = Date.now();
+  const lastSent = sessionStorage.getItem('chrono_site_switch_notif');
+  // Debounce: don't fire more than once every 60 seconds
+  if (lastSent && now - parseInt(lastSent, 10) < 60 * 1000) {
+    return;
+  }
+  sessionStorage.setItem('chrono_site_switch_notif', String(now));
+
+  const notif = new Notification('⏱️ Chrono Session Active', {
+    body: 'You switched away while focusing. Click to use the Mini Player on your screen!',
+    icon: '/favicon.svg',
+    tag: 'chrono-site-switch',
+    requireInteraction: true,
+  });
+
+  notif.onclick = () => {
+    window.focus();
+    if (typeof onClick === 'function') {
+      onClick();
+    }
+  };
+}
+

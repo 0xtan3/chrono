@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore, MODES, todayStr } from '../store';
 import BlobScene from '../components/BlobScene';
@@ -12,7 +12,10 @@ import DurationPicker from '../components/DurationPicker';
 import FocusLogModal from '../components/FocusLogModal';
 import XPToast from '../components/XPToast';
 import Avatar from '../components/Avatar';
+import MiniPlayer from '../components/MiniPlayer';
+import miniPlayerStyles from '../components/MiniPlayer.module.css';
 import { startBinauralBeats, startPinkNoise, stopSoundscape } from '../utils/audio';
+import { requestNotificationPermission, sendSiteSwitchedNotification } from '../utils/notifications';
 import styles from './TimerPage.module.css';
 
 // ── Formatted time ─────────────────────────────────────────────────────────────
@@ -67,6 +70,8 @@ function CompletionChoiceModal() {
 // ── Main Unified Timer Page ───────────────────────────────────────────────────
 export default function TimerPage() {
   const [showCommandCenter, setShowCommandCenter] = useState(false);
+  const [showSiteSwitchPrompt, setShowSiteSwitchPrompt] = useState(false);
+  const miniPlayerRef = useRef(null);
 
   const mode            = useStore((s) => s.mode);
   const protocolPhase   = useStore((s) => s.protocolPhase);
@@ -90,6 +95,9 @@ export default function TimerPage() {
   const skip            = useStore((s) => s.skip);
   const completedPrompt = useStore((s) => s.completedPrompt);
   const dismissPrompt   = useStore((s) => s.dismissCompletedPrompt);
+  const miniPlayerOpen  = useStore((s) => s.miniPlayerOpen);
+  const toggleMiniPlayer = useStore((s) => s.toggleMiniPlayer);
+  const setMiniPlayerOpen = useStore((s) => s.setMiniPlayerOpen);
 
   const streak          = useStore((s) => s.streak);
   const lastActiveDate  = useStore((s) => s.lastActiveDate);
@@ -152,6 +160,23 @@ export default function TimerPage() {
     document.title = 'CHRONO';
   }, []);
 
+  const handleToggleMiniPlayer = useCallback(async () => {
+    if (miniPlayerRef.current?.isPipOpen()) {
+      miniPlayerRef.current.closePip();
+    } else if (miniPlayerOpen) {
+      setMiniPlayerOpen(false);
+    } else {
+      if (miniPlayerRef.current?.openPip) {
+        const opened = await miniPlayerRef.current.openPip();
+        if (!opened && !('documentPictureInPicture' in window)) {
+          setMiniPlayerOpen(true);
+        }
+      } else {
+        setMiniPlayerOpen(true);
+      }
+    }
+  }, [miniPlayerOpen, setMiniPlayerOpen]);
+
   // 4. Keyboard Shortcuts
   useEffect(() => {
     const handleKey = (e) => {
@@ -172,6 +197,9 @@ export default function TimerPage() {
         case 'KeyM':
           if (!e.ctrlKey && !e.metaKey) toggleSound();
           break;
+        case 'KeyP':
+          if (!e.ctrlKey && !e.metaKey) handleToggleMiniPlayer();
+          break;
         case 'Escape':
           if (completedPrompt) dismissPrompt();
           break;
@@ -179,7 +207,32 @@ export default function TimerPage() {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [running, play, pause, reset, skip, toggleSound, completedPrompt, dismissPrompt]);
+  }, [running, play, pause, reset, skip, toggleSound, handleToggleMiniPlayer, completedPrompt, dismissPrompt]);
+
+  // 5. Site Switched Detection & Notification
+  useEffect(() => {
+    if (running && 'Notification' in window && Notification.permission === 'default') {
+      requestNotificationPermission();
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        if (running && !miniPlayerOpen) {
+          sendSiteSwitchedNotification(() => {
+            setShowSiteSwitchPrompt(true);
+            setMiniPlayerOpen(true);
+            miniPlayerRef.current?.openPip();
+          });
+          setShowSiteSwitchPrompt(true);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [running, miniPlayerOpen, setMiniPlayerOpen]);
 
   const today = todayStr(timezone);
   const hasCompletedToday = lastActiveDate === today;
@@ -197,6 +250,44 @@ export default function TimerPage() {
       <CompletionChoiceModal />
       <FocusLogModal isOpen={showCommandCenter} onClose={() => setShowCommandCenter(false)} />
       <XPToast />
+      <MiniPlayer ref={miniPlayerRef} />
+
+      {/* Site Switched Notification Banner */}
+      {showSiteSwitchPrompt && (
+        <aside className={miniPlayerStyles.switchPrompt} role="alert">
+          <span className={miniPlayerStyles.switchPromptIcon}>⏱️</span>
+          <span className={miniPlayerStyles.switchPromptText}>
+            Switched away while focusing? Use Mini Player on your screen.
+          </span>
+          <button
+            className={miniPlayerStyles.switchPromptAcceptBtn}
+            onClick={async () => {
+              setShowSiteSwitchPrompt(false);
+              if (miniPlayerRef.current?.openPip) {
+                const opened = await miniPlayerRef.current.openPip();
+                if (!opened && !('documentPictureInPicture' in window)) {
+                  setMiniPlayerOpen(true);
+                }
+              } else {
+                setMiniPlayerOpen(true);
+              }
+            }}
+          >
+            <span>Yes, Use Mini Player</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="12" height="12">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+          <button
+            className={miniPlayerStyles.switchPromptDismissBtn}
+            onClick={() => setShowSiteSwitchPrompt(false)}
+            title="Dismiss"
+            aria-label="Dismiss prompt"
+          >
+            ✕
+          </button>
+        </aside>
+      )}
 
       {/* Top Header Bar */}
       <header className={styles.topHeader}>
@@ -325,6 +416,20 @@ export default function TimerPage() {
                 <line x1="17" y1="9" x2="23" y2="15" />
               </svg>
             )}
+          </button>
+
+          {/* Mini Player Direct 1-Click Launch */}
+          <button
+            className={`${styles.dockIconBtn} ${miniPlayerOpen ? styles.activeMiniPlayer : ''}`}
+            onClick={handleToggleMiniPlayer}
+            title={miniPlayerOpen ? 'Close Mini Player (P)' : 'Open Mini Player (P)'}
+            aria-label="Toggle Mini Player"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <rect x="12" y="9" width="8" height="6" rx="1" />
+              <circle cx="6" cy="10" r="1" fill="currentColor" />
+            </svg>
           </button>
 
         </div>

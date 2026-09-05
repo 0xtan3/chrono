@@ -306,6 +306,13 @@
   box-shadow: 0 0 15px hsla(var(--ah), var(--as), var(--al), 0.25);
 }
 
+.activeMiniPlayer {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(56, 189, 248, 0.15);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+}
+
 .loginBtn {
   font-size: 0.76rem;
   font-weight: 700;

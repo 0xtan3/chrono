@@ -339,6 +339,10 @@ export const useStore = create((set, get) => ({
   setSoundscape: (type) => set({ soundscapeType: type }),
 
   soundEnabled: true,
+  miniPlayerOpen: false,
+  toggleMiniPlayer: () => set((s) => ({ miniPlayerOpen: !s.miniPlayerOpen })),
+  setMiniPlayerOpen: (open) => set({ miniPlayerOpen: open }),
+
   targetIntent: '',
   setTargetIntent: (intent) => set({ targetIntent: intent }),
 
