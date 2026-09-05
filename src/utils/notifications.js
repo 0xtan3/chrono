@@ -34,3 +34,28 @@ export function sendStreakWarningNotification(streakDays, isNotLoggedIn) {
     tag: 'streak-warning'
   });
 }
+
+export function sendInactivityWarningNotification(daysInactive) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  const today = new Date().toISOString().split('T')[0];
+  const storageKey = `chrono_inactivity_notif_${today}`;
+  const lastSent = sessionStorage.getItem(storageKey);
+  const now = Date.now();
+
+  // Deduplicate: Don't send more than once every 4 hours in the same session
+  if (lastSent && now - parseInt(lastSent, 10) < 4 * 60 * 60 * 1000) {
+    return;
+  }
+
+  sessionStorage.setItem(storageKey, String(now));
+
+  const title = `⚡ ${daysInactive} Days Without Focus!`;
+  const body = `You haven't logged a study session in ${daysInactive} days. Lock in a quick session today to break the standstill!`;
+
+  new Notification(title, {
+    body,
+    icon: '/favicon.svg',
+    tag: 'inactivity-warning'
+  });
+}

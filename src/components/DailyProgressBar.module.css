@@ -63,6 +63,25 @@
   color: var(--text-muted);
 }
 
+.goalBtn {
+  background: none;
+  border: none;
+  padding: 0 0.15rem;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+  transition: all 0.15s ease;
+}
+
+.goalBtn:hover {
+  color: #fff;
+  border-bottom-color: var(--accent);
+}
+
 .percentTag {
   font-size: 0.62rem;
   font-weight: 800;

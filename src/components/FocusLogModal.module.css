@@ -261,6 +261,34 @@
   text-align: center;
 }
 
+.targetSelectMini {
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a855f7;
+  cursor: pointer;
+  outline: none;
+  margin-top: 0.1rem;
+  padding: 0;
+  text-align: center;
+  border-bottom: 1px dashed rgba(168, 85, 247, 0.4);
+  transition: all 0.15s ease;
+}
+
+.targetSelectMini:hover {
+  color: #c084fc;
+  border-bottom-color: #c084fc;
+}
+
+.targetSelectMini option {
+  background: #101424;
+  color: #fff;
+}
+
 /* ── View Switcher Tabs ────────────────────────────────────────────────────── */
 .viewTabs {
   display: flex;

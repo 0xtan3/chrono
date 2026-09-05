@@ -78,7 +78,7 @@ export default function LeaderboardPage() {
                 const levelInfo = calculateLevel(leader.totalXP);
                 
                 return (
-                  <div key={leader.$id} className={`${styles.row} ${isMe ? styles.isMe : ''}`}>
+                  <div key={leader.id || leader.userId || index} className={`${styles.row} ${isMe ? styles.isMe : ''}`}>
                     <div className={styles.rankCol}>
                       {index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
                     </div>

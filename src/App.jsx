@@ -8,7 +8,11 @@ import AuthPage from './pages/AuthPage';
 import VerifyPage from './pages/VerifyPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import { useStore } from './store';
-import { requestNotificationPermission, sendStreakWarningNotification } from './utils/notifications';
+import { 
+  requestNotificationPermission, 
+  sendStreakWarningNotification,
+  sendInactivityWarningNotification 
+} from './utils/notifications';
 
 export default function App() {
   const initAuth      = useStore(s => s.initAuth);
@@ -25,16 +29,22 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', 'midnight');
   }, []);
 
-  // Streak warning notification check
+  // Streak & Inactivity warning notification check
   useEffect(() => {
-    // If user has an active streak but has not focused on any tasks today
-    if (streak > 0) {
-      const today = new Date().toISOString().split('T')[0];
-      const hasCompletedToday = lastActiveDate === today;
+    const today = new Date().toISOString().split('T')[0];
+    const hasCompletedToday = lastActiveDate === today;
 
-      if (!hasCompletedToday) {
+    if (!hasCompletedToday) {
+      if (streak > 0) {
         const isNotLoggedIn = !user;
         sendStreakWarningNotification(streak, isNotLoggedIn);
+      } else if (lastActiveDate) {
+        const lastActiveTime = new Date(lastActiveDate).getTime();
+        const todayTime = new Date(today).getTime();
+        const daysSince = Math.round((todayTime - lastActiveTime) / (1000 * 60 * 60 * 24));
+        if (daysSince >= 2) {
+          sendInactivityWarningNotification(daysSince);
+        }
       }
     }
   }, [streak, lastActiveDate, user]);

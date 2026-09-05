@@ -189,6 +189,8 @@ export const useStore = create((set, get) => ({
             focusLog: cloudStats.focusLog || [],
             dailyGoalMinutes: cloudStats.dailyGoalMinutes || localS.dailyGoalMinutes || 120,
             avatarId: chosenAvatar,
+            streakFreezes: cloudStats.streakFreezes !== undefined ? cloudStats.streakFreezes : (localS.streakFreezes ?? 1),
+            timezone: cloudStats.timezone || localS.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
           };
 
           let finalData = loadedData;
@@ -199,7 +201,13 @@ export const useStore = create((set, get) => ({
             localS.totalXP > (cloudStats.totalXP || 0) ||
             (localS.lastActiveDate && cloudStats.lastActiveDate && localS.lastActiveDate > cloudStats.lastActiveDate)
           ) {
-            finalData = { ...localS, userDocId: cloudStats.docId, avatarId: chosenAvatar };
+            finalData = {
+              ...localS,
+              userDocId: cloudStats.docId,
+              avatarId: chosenAvatar,
+              streakFreezes: cloudStats.streakFreezes !== undefined ? cloudStats.streakFreezes : (localS.streakFreezes ?? 1),
+              timezone: cloudStats.timezone || localS.timezone,
+            };
             needsSyncUp = true;
           } else {
             finalData = recalcStreak(loadedData);
@@ -256,6 +264,7 @@ export const useStore = create((set, get) => ({
       targetIntent: '',
       shownMs: [],
       avatarId: 'avatar-1',
+      streakFreezes: 1,
     };
     set(clearedState);
     persist(clearedState);
@@ -538,17 +547,7 @@ export const useStore = create((set, get) => ({
 
     const bestStreak = Math.max(streak, s.bestStreak);
 
-    // 4. Milestone Badges Checking
-    const unlocked = new Set(s.shownMs || []);
-    if (isDeep || isQuick) unlocked.add('first_spark');
-    if (isDeep) unlocked.add('deep_initiate');
-    if (isRecovery) unlocked.add('neural_reset');
-    if (streak >= 7) unlocked.add('flame_streak');
-    if (streak >= 30) unlocked.add('inferno_streak');
-    if (Object.values(days).reduce((a, b) => a + (b.sessions || 0), 0) >= 100) unlocked.add('century_mind');
-    if (days[today].mins >= s.dailyGoalMinutes) unlocked.add('goal_crusher');
-
-    // 5. Append to Focus Log
+    // 4. Append to Focus Log
     const logEntry = {
       id: 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
       intent: (s.targetIntent || '').trim() || (isDeep ? 'Deep Work Protocol' : isRecovery ? 'Neural Reset' : 'Focus Session'),
@@ -560,6 +559,20 @@ export const useStore = create((set, get) => ({
       wasSkipped,
     };
     const focusLog = [logEntry, ...(s.focusLog || [])].slice(0, 150);
+
+    // 5. Milestone Badges Checking
+    const unlocked = new Set(s.shownMs || []);
+    if (isDeep || isQuick) unlocked.add('first_spark');
+    if (isDeep) unlocked.add('deep_initiate');
+    if (isRecovery) unlocked.add('neural_reset');
+    if (streak >= 7) unlocked.add('flame_streak');
+    if (streak >= 30) unlocked.add('inferno_streak');
+    if (Object.values(days).reduce((a, b) => a + (b.sessions || 0), 0) >= 100) unlocked.add('century_mind');
+    if (days[today].mins >= s.dailyGoalMinutes) unlocked.add('goal_crusher');
+    const totalDeepMins = focusLog
+      .filter((e) => e.mode === 'deep')
+      .reduce((acc, e) => acc + (e.duration || 0), 0);
+    if (totalDeepMins >= 600) unlocked.add('deep_voyager');
 
     // 6. Set Next Stage / Completion Prompt
     let nextPrompt = null;

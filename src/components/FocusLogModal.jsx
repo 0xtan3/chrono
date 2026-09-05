@@ -20,12 +20,13 @@ export default function FocusLogModal({ isOpen, onClose }) {
   const shownMs          = useStore((s) => s.shownMs) || [];
   const days             = useStore((s) => s.days);
   const timezone         = useStore((s) => s.timezone);
-  const dailyGoalMinutes = useStore((s) => s.dailyGoalMinutes) || 120;
-  const rateSession      = useStore((s) => s.rateSession);
-  const avatarId         = useStore((s) => s.avatarId);
-  const setAvatar        = useStore((s) => s.setAvatar);
-  const user             = useStore((s) => s.user);
-  const logout           = useStore((s) => s.logout);
+  const dailyGoalMinutes    = useStore((s) => s.dailyGoalMinutes) || 120;
+  const setDailyGoalMinutes = useStore((s) => s.setDailyGoalMinutes);
+  const rateSession         = useStore((s) => s.rateSession);
+  const avatarId            = useStore((s) => s.avatarId);
+  const setAvatar           = useStore((s) => s.setAvatar);
+  const user                = useStore((s) => s.user);
+  const logout              = useStore((s) => s.logout);
 
   const levelInfo = calculateLevel(totalXP);
   const multiplier = getStreakMultiplier(streak);
@@ -149,7 +150,18 @@ export default function FocusLogModal({ isOpen, onClose }) {
             <span className={styles.metricVal} style={{ color: todayMins >= dailyGoalMinutes ? '#34d399' : '#fff' }}>
               {todayMins}/{dailyGoalMinutes}m
             </span>
-            <span className={styles.metricLbl}>Today's Target</span>
+            <select
+              className={styles.targetSelectMini}
+              value={dailyGoalMinutes}
+              onChange={(e) => setDailyGoalMinutes(Number(e.target.value))}
+              title="Change your daily study target"
+            >
+              {[30, 45, 60, 90, 120, 180, 240, 300, 360, 480].map((mins) => (
+                <option key={mins} value={mins}>
+                  Goal: {mins}m ▾
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

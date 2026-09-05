@@ -123,10 +123,16 @@ export default async function handler(req, res) {
     let emailsSent = 0;
     let streaksReset = 0;
     let emailsFailed = 0;
+    const MAX_DAILY_CRON_EMAILS = 60; // Preserves Resend 100/day & 3k/month free quota
 
     // Process users in chunks to respect rate limits and improve speed
     const chunkSize = 5;
     for (let i = 0; i < allStats.length; i += chunkSize) {
+      if (emailsSent >= MAX_DAILY_CRON_EMAILS) {
+        console.log(`Cron daily send cap (${MAX_DAILY_CRON_EMAILS}) reached. Conserving Resend free quota.`);
+        break;
+      }
+
       const chunk = allStats.slice(i, i + chunkSize);
       
       await Promise.allSettled(chunk.map(async (stat) => {
@@ -202,22 +208,27 @@ export default async function handler(req, res) {
               }
             }
           } else {
-            // Streak is 0. Check for 2^N days if they missed more than 2 days.
-            if (daysSinceActive > 2) {
-              const isPowerOfTwo = (Math.log2(daysSinceActive) % 1 === 0);
-              if (isPowerOfTwo) {
-                subject = `Ready to get back to it?`;
-                bodyHtml = `
-                  <h1 style="font-size:20px;font-weight:700;color:#ffffff;margin:0 0 16px 0;">It's been a while</h1>
-                  <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0 0 16px 0;">
-                    It has been <strong>${daysSinceActive} days</strong> since your last focus session.
-                  </p>
-                  <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0;">
-                    Whenever you are ready, jump back in and start building a new habit.
-                  </p>
-                `;
-                shouldSend = true;
-              }
+            // Streak is 0. User has missed >= 2 days of studying.
+            // Conserve quota: Send immediately at Day 2, follow up at Day 4, and final call at Day 7.
+            // This prevents inactive accounts from draining the 3k monthly cap.
+            const isTargetInactivityDay = daysSinceActive === 2 || daysSinceActive === 4 || daysSinceActive === 7;
+            if (isTargetInactivityDay) {
+              subject = daysSinceActive === 2
+                ? `Don't let 2 days slip by — lock in a session today`
+                : `⚡ ${daysSinceActive} days without study — reignite your focus`;
+              bodyHtml = `
+                <h1 style="font-size:20px;font-weight:700;color:#ffffff;margin:0 0 16px 0;">Don't let the standstill continue</h1>
+                <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0 0 16px 0;">
+                  You haven't logged a study session in <strong>${daysSinceActive} days</strong>.
+                </p>
+                <p style="font-size:15px;line-height:1.6;color:#a1a1aa;margin:0 0 16px 0;">
+                  The hardest part is crossing the threshold to start. Just a quick session today will break the inertia and get your momentum back.
+                </p>
+                <p style="font-size:14px;line-height:1.6;color:#71717a;margin:0;">
+                  Willpower is a myth. Protocol is a weapon.
+                </p>
+              `;
+              shouldSend = true;
             }
           }
 
@@ -249,131 +260,10 @@ export default async function handler(req, res) {
       await new Promise(r => setTimeout(r, 600));
     }
 
-    // ── 2. UNVERIFIED USER REMINDERS ──────────────────────────────────────
-    let unverifiedRemindersSent = 0;
-    
-    try {
-      let usersOffset = 0;
-      const usersLimit = 100;
-      let allUsers = [];
+    // Note: Unverified users receive their verification email once upon registration
+    // and can re-request on demand via /api/send-verification. We do NOT spam them daily.
 
-      while (true) {
-        const userList = await users.list([
-          Query.limit(usersLimit),
-          Query.offset(usersOffset)
-        ]);
-        allUsers.push(...userList.users);
-        if (userList.users.length < usersLimit) break;
-        usersOffset += usersLimit;
-      }
-
-      const unverifiedUsers = allUsers.filter(u => !u.emailVerification);
-
-      for (let i = 0; i < unverifiedUsers.length; i += chunkSize) {
-        const chunk = unverifiedUsers.slice(i, i + chunkSize);
-
-        await Promise.allSettled(chunk.map(async (u) => {
-          try {
-            const prefs = await users.getPrefs(u.$id);
-            const lastSent = prefs.lastVerificationSent || 0;
-            const now = Date.now();
-            const oneDayMs = 24 * 60 * 60 * 1000;
-
-            // If we haven't sent a verification email in the last 24 hours
-            if (now - lastSent > oneDayMs) {
-              // Generate token
-              const tokenObj = await users.createToken(u.$id, 64, 86400);
-              const secret = tokenObj.secret;
-              if (!secret) return;
-
-              // Build URL
-              const baseUrl = process.env.VITE_APP_URL
-                ? `${process.env.VITE_APP_URL.replace(/\/$/, '')}/verify`
-                : 'https://chrono.tenazity.com/verify';
-              const cleanVerifyUrl = `${baseUrl}?userId=${encodeURIComponent(u.$id)}&secret=${encodeURIComponent(secret)}`;
-
-              // Clean verification template
-              const emailHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verify your CHRONO Account</title>
-</head>
-<body style="margin:0;padding:0;background-color:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#111827;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;padding:40px 20px;">
-    <tr>
-      <td align="center">
-        <table width="100%" style="max-width:520px;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:40px 32px;text-align:left;">
-          <tr>
-            <td style="padding-bottom:24px;border-bottom:1px solid #f3f4f6;">
-              <span style="font-size:18px;font-weight:800;letter-spacing:0.1em;color:#111827;">CHRONO</span>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding-top:32px;">
-              <h1 style="font-size:20px;font-weight:700;color:#111827;margin:0 0 16px 0;">Verify your email address</h1>
-              <p style="font-size:15px;line-height:1.6;color:#4b5563;margin:0 0 32px 0;">
-                Hi${u.name ? ` ${u.name}` : ''},<br><br>
-                Welcome to Chrono. We noticed you haven't verified your email yet. Please verify your email address to secure your account.
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <a href="${cleanVerifyUrl}" style="display:inline-block;background-color:#111827;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;padding:12px 24px;border-radius:6px;">
-                Verify Email
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding-top:32px;">
-              <p style="font-size:13px;color:#6b7280;line-height:1.5;margin:0;">
-                Or copy and paste this link into your browser:<br>
-                <a href="${cleanVerifyUrl}" style="color:#2563eb;word-break:break-all;">${cleanVerifyUrl}</a>
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding-top:32px;margin-top:32px;border-top:1px solid #f3f4f6;">
-              <p style="font-size:12px;color:#9ca3af;margin:0;">
-                If you didn't request this email, you can safely ignore it. This link will expire in 24 hours.
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
-
-              const sent = await sendEmailWithFallback(resend, {
-                to: u.email,
-                subject: 'Verify your email for CHRONO',
-                html: emailHtml,
-              });
-
-              if (sent) {
-                unverifiedRemindersSent++;
-                console.log(`Unverified reminder sent to ${u.email}`);
-                await users.updatePrefs(u.$id, {
-                  ...prefs,
-                  lastVerificationSent: now,
-                });
-              }
-            }
-          } catch (e) {
-            console.error(`Failed to process unverified user ${u.$id}`, e);
-          }
-        }));
-        await new Promise(r => setTimeout(r, 600));
-      }
-    } catch (e) {
-      console.error('Error processing unverified users:', e);
-    }
-
-    res.status(200).json({ success: true, emailsSent, emailsFailed, streaksReset, unverifiedRemindersSent });
+    res.status(200).json({ success: true, emailsSent, emailsFailed, streaksReset });
   } catch (error) {
     console.error('Cron job error:', error);
     res.status(500).json({ error: error.message });
