@@ -385,10 +385,10 @@ export default function FocusLogModal({ isOpen, onClose }) {
                     </div>
                   </div>
                   <button
-                    className={`${styles.toggle} ${emailNotifications ? styles.toggleOn : ''}`}
-                    onClick={() => setEmailNotifications(!emailNotifications)}
+                    className={`${styles.toggle} ${emailNotifications !== false ? styles.toggleOn : ''}`}
+                    onClick={() => setEmailNotifications(emailNotifications === false)}
                     role="switch"
-                    aria-checked={emailNotifications}
+                    aria-checked={emailNotifications !== false}
                     aria-label="Toggle email notifications"
                   >
                     <span className={styles.toggleThumb} />

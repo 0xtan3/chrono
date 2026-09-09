@@ -198,7 +198,7 @@ export async function fetchUserStats(userId) {
         dailyGoalMinutes: doc.dailyGoalMinutes || 120,
         displayName: doc.displayName || '',
         avatarId: doc.avatarId || 'avatar-1',
-        emailNotifications: doc.emailNotifications !== undefined ? doc.emailNotifications : true,
+        emailNotifications: doc.emailNotifications != null ? Boolean(doc.emailNotifications) : true,
       };
     }
   } catch (e) {
@@ -224,11 +224,29 @@ export async function saveUserStats(userId, statsData, docId = null) {
     dailyGoalMinutes: statsData.dailyGoalMinutes || 120,
     displayName: statsData.displayName || '',
     avatarId: statsData.avatarId || 'avatar-1',
-    emailNotifications: statsData.emailNotifications !== undefined ? statsData.emailNotifications : true,
+    emailNotifications: statsData.emailNotifications != null ? Boolean(statsData.emailNotifications) : true,
   };
 
   try {
     let targetDocId = docId;
+    if (targetDocId) {
+      try {
+        return await databases.updateDocument(
+          APPWRITE_CONFIG.DATABASE_ID,
+          APPWRITE_CONFIG.COLLECTION_ID,
+          targetDocId,
+          payload
+        );
+      } catch (updateErr) {
+        // If document not found, clear targetDocId to fall through to query/create
+        if (updateErr.code === 404) {
+          targetDocId = null;
+        } else {
+          throw updateErr;
+        }
+      }
+    }
+
     if (!targetDocId) {
       const existing = await databases.listDocuments(
         APPWRITE_CONFIG.DATABASE_ID,
@@ -241,29 +259,26 @@ export async function saveUserStats(userId, statsData, docId = null) {
       );
       if (existing.documents.length > 0) {
         targetDocId = existing.documents[0].$id;
+        return await databases.updateDocument(
+          APPWRITE_CONFIG.DATABASE_ID,
+          APPWRITE_CONFIG.COLLECTION_ID,
+          targetDocId,
+          payload
+        );
       }
     }
 
-    if (targetDocId) {
-      return await databases.updateDocument(
-        APPWRITE_CONFIG.DATABASE_ID,
-        APPWRITE_CONFIG.COLLECTION_ID,
-        targetDocId,
-        payload
-      );
-    } else {
-      return await databases.createDocument(
-        APPWRITE_CONFIG.DATABASE_ID,
-        APPWRITE_CONFIG.COLLECTION_ID,
-        ID.unique(),
-        payload,
-        [
-          Permission.read(Role.user(userId)),
-          Permission.update(Role.user(userId)),
-          Permission.delete(Role.user(userId)),
-        ]
-      );
-    }
+    return await databases.createDocument(
+      APPWRITE_CONFIG.DATABASE_ID,
+      APPWRITE_CONFIG.COLLECTION_ID,
+      ID.unique(),
+      payload,
+      [
+        Permission.read(Role.any()),
+        Permission.update(Role.any()),
+        Permission.delete(Role.any()),
+      ]
+    );
   } catch (e) {
     console.error('saveUserStats error:', e);
     return null;

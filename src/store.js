@@ -147,7 +147,7 @@ function persist(s) {
       streakFreezes: s.streakFreezes !== undefined ? s.streakFreezes : (current.streakFreezes ?? 1),
       focusLog: s.focusLog || current.focusLog || [],
       avatarId: s.avatarId || current.avatarId || 'avatar-1',
-      emailNotifications: s.emailNotifications !== undefined ? s.emailNotifications : (current.emailNotifications ?? true),
+      emailNotifications: s.emailNotifications != null ? Boolean(s.emailNotifications) : (current.emailNotifications ?? true),
     }));
   } catch { }
 }
@@ -193,7 +193,7 @@ export const useStore = create((set, get) => ({
             avatarId: chosenAvatar,
             streakFreezes: cloudStats.streakFreezes !== undefined ? cloudStats.streakFreezes : (localS.streakFreezes ?? 1),
             timezone: cloudStats.timezone || localS.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-            emailNotifications: cloudStats.emailNotifications !== undefined ? cloudStats.emailNotifications : true,
+            emailNotifications: cloudStats.emailNotifications != null ? Boolean(cloudStats.emailNotifications) : true,
           };
 
           let finalData = loadedData;
@@ -210,7 +210,7 @@ export const useStore = create((set, get) => ({
               avatarId: chosenAvatar,
               streakFreezes: cloudStats.streakFreezes !== undefined ? cloudStats.streakFreezes : (localS.streakFreezes ?? 1),
               timezone: cloudStats.timezone || localS.timezone,
-              emailNotifications: cloudStats.emailNotifications !== undefined ? cloudStats.emailNotifications : true,
+              emailNotifications: cloudStats.emailNotifications != null ? Boolean(cloudStats.emailNotifications) : true,
             };
             needsSyncUp = true;
           } else {
@@ -250,7 +250,7 @@ export const useStore = create((set, get) => ({
     const s = get();
     if (s.user) {
       try {
-        await s.syncCloudStats();
+        await get().syncCloudStats();
       } catch (e) {
         console.warn('Pre-logout sync warning:', e);
       }
@@ -292,7 +292,7 @@ export const useStore = create((set, get) => ({
       focusLog: s.focusLog || [],
       displayName: s.user?.name || '',
       avatarId: s.avatarId || 'avatar-1',
-      emailNotifications: s.emailNotifications !== undefined ? s.emailNotifications : true,
+      emailNotifications: s.emailNotifications != null ? Boolean(s.emailNotifications) : true,
     };
     const res = await saveUserStats(s.user.$id, statsData, s.userDocId);
     if (res && res.$id) {
@@ -313,7 +313,7 @@ export const useStore = create((set, get) => ({
   timezone: initialData.timezone,
   streakFreezes: initialData.streakFreezes ?? 1,
   avatarId: initialData.avatarId || 'avatar-1',
-  emailNotifications: initialData.emailNotifications !== undefined ? initialData.emailNotifications : true,
+  emailNotifications: initialData.emailNotifications != null ? Boolean(initialData.emailNotifications) : true,
 
   activeToastReward: null, // { tier, xp, label, isLevelUp, newLevel }
   clearToastReward: () => set({ activeToastReward: null }),
@@ -325,7 +325,8 @@ export const useStore = create((set, get) => ({
   },
 
   setEmailNotifications: async (val) => {
-    set({ emailNotifications: !!val });
+    const nextVal = Boolean(val);
+    set({ emailNotifications: nextVal });
     persist(get());
     return await get().syncCloudStats();
   },
