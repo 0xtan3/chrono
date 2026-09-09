@@ -29,6 +29,15 @@ async function run() {
     else console.error('Error creating avatarId:', e.message);
   }
 
+  try {
+    console.log('Adding emailNotifications attribute...');
+    await databases.createBooleanAttribute(dbId, colId, 'emailNotifications', false, true);
+    console.log('emailNotifications created (default: true).');
+  } catch (e) {
+    if (e.code === 409) console.log('emailNotifications already exists.');
+    else console.error('Error creating emailNotifications:', e.message);
+  }
+
   // Update collection permissions to allow users to read (for the leaderboard)
   try {
     console.log('Updating collection permissions...');

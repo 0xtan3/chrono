@@ -27,6 +27,8 @@ export default function FocusLogModal({ isOpen, onClose }) {
   const setAvatar           = useStore((s) => s.setAvatar);
   const user                = useStore((s) => s.user);
   const logout              = useStore((s) => s.logout);
+  const emailNotifications  = useStore((s) => s.emailNotifications);
+  const setEmailNotifications = useStore((s) => s.setEmailNotifications);
 
   const levelInfo = calculateLevel(totalXP);
   const multiplier = getStreakMultiplier(streak);
@@ -285,6 +287,30 @@ export default function FocusLogModal({ isOpen, onClose }) {
                     <span className={styles.avatarName} style={{ color: a.color }}>{a.name}</span>
                   </button>
                 ))}
+              </div>
+
+              {/* Notification Preferences */}
+              <div className={styles.notifSection}>
+                <h3 className={styles.sectionTitle}>Notification Preferences</h3>
+                <div className={styles.notifRow}>
+                  <div className={styles.notifInfo}>
+                    <span className={styles.notifIcon}>📧</span>
+                    <div className={styles.notifText}>
+                      <span className={styles.notifLabel}>Email Reminders</span>
+                      <span className={styles.notifDesc}>Streak warnings, inactivity nudges, and freeze alerts</span>
+                    </div>
+                  </div>
+                  <button
+                    className={`${styles.toggleSwitch} ${emailNotifications ? styles.toggleOn : styles.toggleOff}`}
+                    onClick={() => setEmailNotifications(!emailNotifications)}
+                    role="switch"
+                    aria-checked={emailNotifications}
+                    aria-label="Toggle email notifications"
+                    title={emailNotifications ? 'Email reminders: ON' : 'Email reminders: OFF'}
+                  >
+                    <span className={styles.toggleThumb} />
+                  </button>
+                </div>
               </div>
             </div>
           )}

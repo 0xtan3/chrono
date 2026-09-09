@@ -139,6 +139,12 @@ export default async function handler(req, res) {
         const { userId, streak, lastActiveDate, timezone, streakFreezes } = stat;
         
         if (!lastActiveDate) return;
+
+        // Respect user's email notification preference
+        if (stat.emailNotifications === false) {
+          console.log(`User ${userId} has email notifications disabled. Skipping.`);
+          return;
+        }
         
         // Standardize globally on UTC for the daily run
         const userTodayStr = today;

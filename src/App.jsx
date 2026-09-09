@@ -38,7 +38,7 @@ export default function App() {
       if (streak > 0) {
         const isNotLoggedIn = !user;
         sendStreakWarningNotification(streak, isNotLoggedIn);
-      } else if (lastActiveDate) {
+      } else if (lastActiveDate && lastActiveDate !== today) {
         const lastActiveTime = new Date(lastActiveDate).getTime();
         const todayTime = new Date(today).getTime();
         const daysSince = Math.round((todayTime - lastActiveTime) / (1000 * 60 * 60 * 24));

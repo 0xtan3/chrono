@@ -198,6 +198,7 @@ export async function fetchUserStats(userId) {
         dailyGoalMinutes: doc.dailyGoalMinutes || 120,
         displayName: doc.displayName || '',
         avatarId: doc.avatarId || 'avatar-1',
+        emailNotifications: doc.emailNotifications !== undefined ? doc.emailNotifications : true,
       };
     }
   } catch (e) {
@@ -223,6 +224,7 @@ export async function saveUserStats(userId, statsData, docId = null) {
     dailyGoalMinutes: statsData.dailyGoalMinutes || 120,
     displayName: statsData.displayName || '',
     avatarId: statsData.avatarId || 'avatar-1',
+    emailNotifications: statsData.emailNotifications !== undefined ? statsData.emailNotifications : true,
   };
 
   try {
