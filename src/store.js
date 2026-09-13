@@ -121,12 +121,27 @@ const DEFAULT_STATE = {
   streakFreezes: 1,
   avatarId: 'avatar-1',
   emailNotifications: true,
+  backgroundId: 'orb',
+  backgroundQuality: 'high',
 };
+
+function sanitizeBackgroundId(id) {
+  if (id === 'ghibliSummer' || id === 'summerCoast' || id === 'summerNight' || id === 'summerMeadow' || id === 'summerVibes') return 'ghibliSummer';
+  if (id === 'lofiCity') return id;
+  return 'orb';
+}
 
 function loadState() {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    if (raw) return { ...DEFAULT_STATE, ...JSON.parse(raw) };
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        ...DEFAULT_STATE,
+        ...parsed,
+        backgroundId: sanitizeBackgroundId(parsed.backgroundId),
+      };
+    }
   } catch { }
   return { ...DEFAULT_STATE };
 }
@@ -148,6 +163,8 @@ function persist(s) {
       focusLog: s.focusLog || current.focusLog || [],
       avatarId: s.avatarId || current.avatarId || 'avatar-1',
       emailNotifications: s.emailNotifications != null ? Boolean(s.emailNotifications) : (current.emailNotifications ?? true),
+      backgroundId: sanitizeBackgroundId(s.backgroundId || current.backgroundId),
+      backgroundQuality: s.backgroundQuality || current.backgroundQuality || 'high',
     }));
   } catch { }
 }
@@ -314,6 +331,8 @@ export const useStore = create((set, get) => ({
   streakFreezes: initialData.streakFreezes ?? 1,
   avatarId: initialData.avatarId || 'avatar-1',
   emailNotifications: initialData.emailNotifications != null ? Boolean(initialData.emailNotifications) : true,
+  backgroundId: sanitizeBackgroundId(initialData.backgroundId),
+  backgroundQuality: initialData.backgroundQuality || 'high',
 
   activeToastReward: null, // { tier, xp, label, isLevelUp, newLevel }
   clearToastReward: () => set({ activeToastReward: null }),
@@ -329,6 +348,16 @@ export const useStore = create((set, get) => ({
     set({ emailNotifications: nextVal });
     persist(get());
     return await get().syncCloudStats();
+  },
+
+  setBackground: (id) => {
+    set({ backgroundId: sanitizeBackgroundId(id) });
+    persist(get());
+  },
+
+  setBackgroundQuality: (q) => {
+    set({ backgroundQuality: q });
+    persist(get());
   },
 
   // ── Timer & Protocol State ──────────────────────────────────

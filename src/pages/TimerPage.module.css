@@ -223,6 +223,29 @@
   to { opacity: 1; }
 }
 
+/* ── Immersive Mode (Live Background Active — No Orb) ──────────────────────── */
+.immersiveWrap {
+  width: clamp(280px, 50vmin, 520px);
+  height: clamp(280px, 50vmin, 520px);
+  background: radial-gradient(ellipse at center, rgba(8, 11, 18, 0.35) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.immersiveTime {
+  font-size: clamp(3.2rem, 11vw, 5.5rem);
+  letter-spacing: 0.08em;
+  text-shadow:
+    0 0 60px hsla(var(--ah), 90%, 70%, 0.5),
+    0 0 120px hsla(var(--ah), 80%, 60%, 0.2),
+    0 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+.immersiveWrap .modeLabel {
+  font-size: clamp(0.7rem, 2.2vw, 0.88rem);
+  letter-spacing: 0.35em;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.6);
+}
+
 /* ── Bottom Dock Bar ────────────────────────────────────────────────────────── */
 .bottomDock {
   display: flex;
@@ -521,6 +544,15 @@
     width: clamp(230px, 34vmin, 310px);
     height: clamp(230px, 34vmin, 310px);
     margin: -0.2rem 0;
+  }
+
+  .immersiveWrap {
+    width: clamp(250px, 42vmin, 360px);
+    height: clamp(250px, 42vmin, 360px);
+  }
+
+  .immersiveTime {
+    font-size: clamp(2.6rem, 9vw, 4rem);
   }
 
   .bottomDock {

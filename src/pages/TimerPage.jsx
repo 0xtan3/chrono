@@ -13,6 +13,8 @@ import FocusLogModal from '../components/FocusLogModal';
 import XPToast from '../components/XPToast';
 import Avatar from '../components/Avatar';
 import MiniPlayer from '../components/MiniPlayer';
+import LiveBackground from '../components/LiveBackground';
+import BackgroundPicker from '../components/BackgroundPicker';
 import miniPlayerStyles from '../components/MiniPlayer.module.css';
 import { startBinauralBeats, startPinkNoise, stopSoundscape } from '../utils/audio';
 import { requestNotificationPermission, sendSiteSwitchedNotification } from '../utils/notifications';
@@ -102,6 +104,9 @@ export default function TimerPage() {
   const streak          = useStore((s) => s.streak);
   const lastActiveDate  = useStore((s) => s.lastActiveDate);
   const timezone        = useStore((s) => s.timezone);
+  const backgroundId    = useStore((s) => s.backgroundId);
+
+  const hasLiveBackground = Boolean(backgroundId && backgroundId !== 'none' && backgroundId !== 'orb');
 
   const isWarmup = mode === 'deep' && protocolPhase === 'warmup';
   const dur = isWarmup ? durations.warmup : (durations[mode] || 1);
@@ -247,6 +252,7 @@ export default function TimerPage() {
 
   return (
     <div className={styles.pageViewport}>
+      <LiveBackground />
       <CompletionChoiceModal />
       <FocusLogModal isOpen={showCommandCenter} onClose={() => setShowCommandCenter(false)} />
       <XPToast />
@@ -347,10 +353,10 @@ export default function TimerPage() {
         )}
 
         {/* 3D Liquid Scene & Countdown Display */}
-        <div className={styles.blobWrap}>
-          <BlobScene />
+        <div className={`${styles.blobWrap} ${hasLiveBackground ? styles.immersiveWrap : ''}`}>
+          {!hasLiveBackground && <BlobScene />}
           <div className={styles.timeOverlay}>
-            <span className={styles.time}>{fmt(remaining)}</span>
+            <span className={`${styles.time} ${hasLiveBackground ? styles.immersiveTime : ''}`}>{fmt(remaining)}</span>
             <span className={`${styles.modeLabel} ${isWarmup ? styles.warmupText : ''}`}>
               {getBlobSublabel()}
             </span>
@@ -417,6 +423,9 @@ export default function TimerPage() {
               </svg>
             )}
           </button>
+
+          {/* Live Background Picker */}
+          <BackgroundPicker />
 
           {/* Mini Player Direct 1-Click Launch */}
           <button
